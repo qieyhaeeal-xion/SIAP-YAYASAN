@@ -19,8 +19,10 @@ import {
   ShieldAlert, 
   ChevronDown, 
   ChevronRight,
-  UserCheck2
+  UserCheck2,
+  Lock
 } from 'lucide-react';
+import { hasPermission } from '../../utils/rbac';
 
 interface SidebarProps {
   activeTab: string;
@@ -36,12 +38,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpe
     setOpenSubmenu(prev => prev === menu ? null : menu);
   };
 
-  const navItemClass = (tabId: string) => `
-    flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-lg transition-all duration-150 cursor-pointer
-    ${activeTab === tabId 
-      ? 'bg-[#2E86C1] text-white shadow-sm border-l-4 border-[#1ABC9C]' 
-      : 'text-sky-100 hover:bg-[#2E86C1]/50 hover:text-white'}
-  `;
+  const navItemClass = (tabId: string) => {
+    const isAllowed = hasPermission(currentUser.role, tabId);
+    if (!isAllowed) {
+      return `flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-lg opacity-50 cursor-not-allowed text-sky-200/60 hover:bg-white/5`;
+    }
+    return `
+      flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-lg transition-all duration-150 cursor-pointer
+      ${activeTab === tabId 
+        ? 'bg-[#2E86C1] text-white shadow-sm border-l-4 border-[#1ABC9C]' 
+        : 'text-sky-100 hover:bg-[#2E86C1]/50 hover:text-white'}
+    `;
+  };
+
+  const handleTabClick = (tabId: string) => {
+    setActiveTab(tabId);
+  };
 
   if (!isOpen) return null;
 
@@ -63,11 +75,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpe
         
         {/* Dashboard */}
         <div
-          onClick={() => setActiveTab('dashboard')}
+          onClick={() => handleTabClick('dashboard')}
           className={navItemClass('dashboard')}
         >
-          <LayoutDashboard className="w-4 h-4 text-[#1ABC9C]" />
-          <span>Dashboard SIM</span>
+          <div className="flex items-center gap-3">
+            <LayoutDashboard className="w-4 h-4 text-[#1ABC9C]" />
+            <span>Dashboard SIM</span>
+          </div>
+          {!hasPermission(currentUser.role, 'dashboard') && <Lock className="w-3 h-3 text-amber-300" />}
         </div>
 
         {/* MODUL KESANTRIAN */}
@@ -90,59 +105,80 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpe
           {openSubmenu === 'kesantrian' && (
             <div className="ml-3 pl-3 border-l-2 border-[#2E86C1] my-1 space-y-1 text-xs">
               <div
-                onClick={() => setActiveTab('sub-pesantren')}
+                onClick={() => handleTabClick('sub-pesantren')}
                 className={navItemClass('sub-pesantren')}
               >
-                <Building2 className="w-3.5 h-3.5" />
-                <span>Sub Pesantren & Asrama</span>
+                <div className="flex items-center gap-2.5">
+                  <Building2 className="w-3.5 h-3.5" />
+                  <span>Sub Pesantren & Asrama</span>
+                </div>
+                {!hasPermission(currentUser.role, 'sub-pesantren') && <Lock className="w-3 h-3 text-amber-300" />}
               </div>
 
               <div
-                onClick={() => setActiveTab('sub-madin')}
+                onClick={() => handleTabClick('sub-madin')}
                 className={navItemClass('sub-madin')}
               >
-                <GraduationCap className="w-3.5 h-3.5" />
-                <span>Sub Madin & Kitab</span>
+                <div className="flex items-center gap-2.5">
+                  <GraduationCap className="w-3.5 h-3.5" />
+                  <span>Sub Madin & Kitab</span>
+                </div>
+                {!hasPermission(currentUser.role, 'sub-madin') && <Lock className="w-3 h-3 text-amber-300" />}
               </div>
 
               <div
-                onClick={() => setActiveTab('sub-sekolah')}
+                onClick={() => handleTabClick('sub-sekolah')}
                 className={navItemClass('sub-sekolah')}
               >
-                <School className="w-3.5 h-3.5" />
-                <span>Sub Sekolah Formal</span>
+                <div className="flex items-center gap-2.5">
+                  <School className="w-3.5 h-3.5" />
+                  <span>Sub Sekolah Formal</span>
+                </div>
+                {!hasPermission(currentUser.role, 'sub-sekolah') && <Lock className="w-3 h-3 text-amber-300" />}
               </div>
 
               <div
-                onClick={() => setActiveTab('data-santri')}
+                onClick={() => handleTabClick('data-santri')}
                 className={navItemClass('data-santri')}
               >
-                <Users className="w-3.5 h-3.5 text-emerald-300" />
-                <span>Data Santri (8 Form)</span>
+                <div className="flex items-center gap-2.5">
+                  <Users className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>Data Santri (8 Form)</span>
+                </div>
+                {!hasPermission(currentUser.role, 'data-santri') && <Lock className="w-3 h-3 text-amber-300" />}
               </div>
 
               <div
-                onClick={() => setActiveTab('tahfidz')}
+                onClick={() => handleTabClick('tahfidz')}
                 className={navItemClass('tahfidz')}
               >
-                <BookOpenCheck className="w-3.5 h-3.5 text-amber-300" />
-                <span>Sub Tahfidz Quran</span>
+                <div className="flex items-center gap-2.5">
+                  <BookOpenCheck className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Sub Tahfidz Quran</span>
+                </div>
+                {!hasPermission(currentUser.role, 'tahfidz') && <Lock className="w-3 h-3 text-amber-300" />}
               </div>
 
               <div
-                onClick={() => setActiveTab('nadhoman')}
+                onClick={() => handleTabClick('nadhoman')}
                 className={navItemClass('nadhoman')}
               >
-                <BookMarked className="w-3.5 h-3.5 text-cyan-300" />
-                <span>Sub Setoran Nadhoman</span>
+                <div className="flex items-center gap-2.5">
+                  <BookMarked className="w-3.5 h-3.5 text-cyan-300" />
+                  <span>Sub Setoran Nadhoman</span>
+                </div>
+                {!hasPermission(currentUser.role, 'nadhoman') && <Lock className="w-3 h-3 text-amber-300" />}
               </div>
 
               <div
-                onClick={() => setActiveTab('alumni')}
+                onClick={() => handleTabClick('alumni')}
                 className={navItemClass('alumni')}
               >
-                <UserCheck className="w-3.5 h-3.5" />
-                <span>Sub Data Alumni</span>
+                <div className="flex items-center gap-2.5">
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span>Sub Data Alumni</span>
+                </div>
+                {!hasPermission(currentUser.role, 'alumni') && <Lock className="w-3 h-3 text-amber-300" />}
               </div>
             </div>
           )}
@@ -168,27 +204,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpe
           {openSubmenu === 'kepengasuhan' && (
             <div className="ml-3 pl-3 border-l-2 border-[#2E86C1] my-1 space-y-1 text-xs">
               <div
-                onClick={() => setActiveTab('kesehatan')}
+                onClick={() => handleTabClick('kesehatan')}
                 className={navItemClass('kesehatan')}
               >
-                <HeartPulse className="w-3.5 h-3.5 text-rose-300" />
-                <span>Kesehatan (UKS)</span>
+                <div className="flex items-center gap-2.5">
+                  <HeartPulse className="w-3.5 h-3.5 text-rose-300" />
+                  <span>Kesehatan (UKS)</span>
+                </div>
+                {!hasPermission(currentUser.role, 'kesehatan') && <Lock className="w-3 h-3 text-amber-300" />}
               </div>
 
               <div
-                onClick={() => setActiveTab('perizinan')}
+                onClick={() => handleTabClick('perizinan')}
                 className={navItemClass('perizinan')}
               >
-                <FileCheck2 className="w-3.5 h-3.5 text-amber-300" />
-                <span>Perizinan Santri</span>
+                <div className="flex items-center gap-2.5">
+                  <FileCheck2 className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Perizinan Santri</span>
+                </div>
+                {!hasPermission(currentUser.role, 'perizinan') && <Lock className="w-3 h-3 text-amber-300" />}
               </div>
 
               <div
-                onClick={() => setActiveTab('konseling')}
+                onClick={() => handleTabClick('konseling')}
                 className={navItemClass('konseling')}
               >
-                <MessageSquare className="w-3.5 h-3.5" />
-                <span>Konseling & Kunjungan</span>
+                <div className="flex items-center gap-2.5">
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>Konseling & Kunjungan</span>
+                </div>
+                {!hasPermission(currentUser.role, 'konseling') && <Lock className="w-3 h-3 text-amber-300" />}
               </div>
             </div>
           )}
@@ -196,56 +241,74 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpe
 
         {/* MODUL KEPEGAWAIAN */}
         <div
-          onClick={() => setActiveTab('kepegawaian')}
+          onClick={() => handleTabClick('kepegawaian')}
           className={navItemClass('kepegawaian')}
         >
-          <Briefcase className="w-4 h-4 text-[#1ABC9C]" />
-          <span>3. Modul Kepegawaian</span>
+          <div className="flex items-center gap-3">
+            <Briefcase className="w-4 h-4 text-[#1ABC9C]" />
+            <span>3. Modul Kepegawaian</span>
+          </div>
+          {!hasPermission(currentUser.role, 'kepegawaian') && <Lock className="w-3 h-3 text-amber-300" />}
         </div>
 
         {/* MODUL AKADEMIK */}
         <div
-          onClick={() => setActiveTab('akademik')}
+          onClick={() => handleTabClick('akademik')}
           className={navItemClass('akademik')}
         >
-          <CalendarCheck className="w-4 h-4 text-[#1ABC9C]" />
-          <span>4. Modul Akademik / Presensi</span>
+          <div className="flex items-center gap-3">
+            <CalendarCheck className="w-4 h-4 text-[#1ABC9C]" />
+            <span>4. Modul Akademik / Presensi</span>
+          </div>
+          {!hasPermission(currentUser.role, 'akademik') && <Lock className="w-3 h-3 text-amber-300" />}
         </div>
 
         {/* MODUL KEUANGAN */}
         <div
-          onClick={() => setActiveTab('keuangan')}
+          onClick={() => handleTabClick('keuangan')}
           className={navItemClass('keuangan')}
         >
-          <Wallet className="w-4 h-4 text-[#1ABC9C]" />
-          <span>5. Modul Keuangan & Syahriyah</span>
+          <div className="flex items-center gap-3">
+            <Wallet className="w-4 h-4 text-[#1ABC9C]" />
+            <span>5. Modul Keuangan & Syahriyah</span>
+          </div>
+          {!hasPermission(currentUser.role, 'keuangan') && <Lock className="w-3 h-3 text-amber-300" />}
         </div>
 
         {/* MODUL PPDB */}
         <div
-          onClick={() => setActiveTab('ppdb')}
+          onClick={() => handleTabClick('ppdb')}
           className={navItemClass('ppdb')}
         >
-          <UserPlus className="w-4 h-4 text-[#1ABC9C]" />
-          <span>6. Modul PPDB (Mutasi NIS)</span>
+          <div className="flex items-center gap-3">
+            <UserPlus className="w-4 h-4 text-[#1ABC9C]" />
+            <span>6. Modul PPDB (Mutasi NIS)</span>
+          </div>
+          {!hasPermission(currentUser.role, 'ppdb') && <Lock className="w-3 h-3 text-amber-300" />}
         </div>
 
         {/* PORTAL WALI SANTRI */}
         <div
-          onClick={() => setActiveTab('portal-wali')}
+          onClick={() => handleTabClick('portal-wali')}
           className={navItemClass('portal-wali')}
         >
-          <UserCheck2 className="w-4 h-4 text-emerald-300" />
-          <span>7. Portal Wali Santri</span>
+          <div className="flex items-center gap-3">
+            <UserCheck2 className="w-4 h-4 text-emerald-300" />
+            <span>7. Portal Wali Santri</span>
+          </div>
+          {!hasPermission(currentUser.role, 'portal-wali') && <Lock className="w-3 h-3 text-amber-300" />}
         </div>
 
         {/* MODUL PENGATURAN & RBAC */}
         <div
-          onClick={() => setActiveTab('pengaturan')}
+          onClick={() => handleTabClick('pengaturan')}
           className={navItemClass('pengaturan')}
         >
-          <ShieldAlert className="w-4 h-4 text-[#1ABC9C]" />
-          <span>8. Pengaturan & RBAC</span>
+          <div className="flex items-center gap-3">
+            <ShieldAlert className="w-4 h-4 text-[#1ABC9C]" />
+            <span>8. Pengaturan & RBAC</span>
+          </div>
+          {!hasPermission(currentUser.role, 'pengaturan') && <Lock className="w-3 h-3 text-amber-300" />}
         </div>
 
       </div>
