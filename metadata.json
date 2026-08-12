@@ -1,0 +1,6 @@
+{
+  "name": "SiSantri - SIM Pesantren Mukhtar Syafaat",
+  "description": "Sistem Informasi Manajemen Pesantren terpadu untuk Pondok Pesantren Mukhtar Syafaat dengan fitur Kesantrian, Tahfidz, Nadhoman, Kepengasuhan, Akademik, Keuangan, PPDB, dan Portal Wali Santri.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
