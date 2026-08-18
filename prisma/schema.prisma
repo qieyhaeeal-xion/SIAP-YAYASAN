@@ -1,0 +1,492 @@
+// SIAP - Sistem Informasi Administrasi Pesantren
+// Prisma Schema v1.0
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- TAHUN AJARAN -------------------------------------
+model TahunAjaran {
+  id              String   @id @default(cuid())
+  kodeTahunAjaran String   @unique
+  tanggalMulai    String
+  tanggalSelesai  String
+  isAktif         Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  santri          Santri[]
+  setoranTahfidz  SetoranTahfidz[]
+  setoranNadhoman SetoranNadhoman[]
+  pesertaTahfidz  PesertaTahfidz[]
+  presensi        Presensi[]
+  tagihan         TagihanKeuangan[]
+  pendaftarPpdb   PendaftarPpdb[]
+}
+
+// --- MASTER KESANTRIAN --------------------------------
+model UnitPesantren {
+  id        String  @id @default(cuid())
+  kodeUnit  String  @unique
+  namaUnit  String
+  deskripsi String?
+
+  asrama    Asrama[]
+  santri    Santri[]
+  pendaftar PendaftarPpdb[]
+}
+
+model Asrama {
+  id              String        @id @default(cuid())
+  unitPesantrenId String
+  kodeAsrama      String        @unique
+  namaAsrama      String
+  pembina         String?
+  kapasitas       Int           @default(0)
+
+  unitPesantren UnitPesantren @relation(fields: [unitPesantrenId], references: [id], onDelete: Cascade)
+  kamar         Kamar[]
+  santri        Santri[]
+}
+
+model Kamar {
+  id        String @id @default(cuid())
+  asramaId  String
+  kodeKamar String
+  namaKamar String
+  kapasitas Int    @default(0)
+  terisi    Int    @default(0)
+
+  asrama Asrama   @relation(fields: [asramaId], references: [id], onDelete: Cascade)
+  santri Santri[]
+}
+
+model MarhalahMadin {
+  id           String @id @default(cuid())
+  kodeMarhalah String @unique
+  namaMarhalah String
+  tingkat      Int
+
+  kelasMadin KelasMadin[]
+  kitab      KitabHafalan[]
+  santri     Santri[]
+  pendaftar  PendaftarPpdb[]
+}
+
+model KelasMadin {
+  id         String @id @default(cuid())
+  marhalahId String
+  namaKelas  String
+  waliKelas  String?
+
+  marhalah MarhalahMadin @relation(fields: [marhalahId], references: [id], onDelete: Cascade)
+  santri   Santri[]
+  presensi Presensi[]
+}
+
+model KitabHafalan {
+  id         String @id @default(cuid())
+  marhalahId String
+  namaKitab  String
+  totalBait  Int
+  pengampu   String?
+
+  marhalah MarhalahMadin @relation(fields: [marhalahId], references: [id], onDelete: Cascade)
+}
+
+model UnitSekolah {
+  id            String @id @default(cuid())
+  kodeSekolah   String @unique
+  namaSekolah   String
+  kepalaSekolah String?
+
+  jurusan   JurusanSekolah[]
+  kelas     KelasSekolah[]
+  santri    Santri[]
+  pendaftar PendaftarPpdb[]
+}
+
+model JurusanSekolah {
+  id          String @id @default(cuid())
+  sekolahId   String
+  kodeJurusan String
+  namaJurusan String
+
+  sekolah UnitSekolah    @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  kelas   KelasSekolah[]
+  santri  Santri[]
+}
+
+model KelasSekolah {
+  id        String  @id @default(cuid())
+  sekolahId String
+  jurusanId String?
+  kodeKelas String
+  namaKelas String
+  waliKelas String?
+
+  sekolah  UnitSekolah     @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
+  jurusan  JurusanSekolah? @relation(fields: [jurusanId], references: [id])
+  santri   Santri[]
+  presensi Presensi[]
+}
+
+// --- SANTRI (TABEL UTAMA) -----------------------------
+model Santri {
+  id     String @id @default(cuid())
+  nis    String @unique
+  status String @default("Aktif")
+
+  nik           String?
+  nisn          String?
+  namaLengkap   String
+  namaPanggilan String?
+  jenisKelamin  String
+  tempatLahir   String?
+  tanggalLahir  String?
+  anakKe        Int?
+  jumlahSaudara Int?
+  hobi          String?
+  citaCita      String?
+  fotoUrl       String?
+
+  alamat    String?
+  rt        String?
+  rw        String?
+  dusun     String?
+  desa      String?
+  kecamatan String?
+  kabupaten String?
+  provinsi  String?
+  kodePos   String?
+
+  golonganDarah     String?
+  riwayatPenyakit   String?
+  tindakanKesehatan String?
+  kondisiSaatIni    String?
+
+  unitPesantrenId String?
+  asramaId        String?
+  kamarId         String?
+  unitSekolahId   String?
+  jurusanId       String?
+  kelasSekolahId  String?
+  marhalahMadinId String?
+  kelasMadinId    String?
+
+  sekolahAsal           String?
+  alamatSekolahAsal     String?
+  tahunLulusSekolahAsal String?
+  noKip                 String?
+
+  namaAyah        String?
+  nikAyah         String?
+  pekerjaanAyah   String?
+  penghasilanAyah String?
+  namaIbu         String?
+  nikIbu          String?
+  pekerjaanIbu    String?
+  penghasilanIbu  String?
+  namaWali        String?
+  hubunganWali    String?
+  noHpOrtu        String?
+
+  jenisSantriAsuh    String @default("Bukan Asuh")
+  alasanAsuh         String?
+
+  alasanKeluar       String?
+  tahunKeluar        String?
+  noHpAlumni         String?
+  statusAlumniDetail String?
+
+  tanggalDaftar String
+  tahunAjaranId String
+
+  tahunAjaran  TahunAjaran     @relation(fields: [tahunAjaranId], references: [id])
+  unitPesantren UnitPesantren? @relation(fields: [unitPesantrenId], references: [id])
+  asrama        Asrama?        @relation(fields: [asramaId], references: [id])
+  kamar         Kamar?         @relation(fields: [kamarId], references: [id])
+  unitSekolah   UnitSekolah?   @relation(fields: [unitSekolahId], references: [id])
+  jurusan       JurusanSekolah? @relation(fields: [jurusanId], references: [id])
+  kelasSekolah  KelasSekolah?  @relation(fields: [kelasSekolahId], references: [id])
+  marhalahMadin MarhalahMadin? @relation(fields: [marhalahMadinId], references: [id])
+  kelasMadin    KelasMadin?    @relation(fields: [kelasMadinId], references: [id])
+
+  setoranTahfidz  SetoranTahfidz[]
+  setoranNadhoman SetoranNadhoman[]
+  pesertaTahfidz  PesertaTahfidz[]
+  kesehatan       KesehatanUks[]
+  perizinan       Perizinan[]
+  konseling       LogKonseling[]
+  kunjungan       KunjunganSantri[]
+  tagihan         TagihanKeuangan[]
+  transaksi       TransaksiPembayaran[]
+  presensi        Presensi[]
+  user            User?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// --- TAHFIDZ & NADHOMAN -------------------------------
+model PesertaTahfidz {
+  id            String @id @default(cuid())
+  santriId      String
+  tahunAjaranId String
+  tanggalDaftar String
+  status        String @default("Aktif")
+
+  santri      Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [id])
+
+  @@unique([santriId, tahunAjaranId])
+}
+
+model SetoranTahfidz {
+  id            String @id @default(cuid())
+  santriId      String
+  tanggal       String
+  juz           Int
+  surah         String?
+  ayatMulai     Int?
+  ayatSelesai   Int?
+  jenisSetoran  String
+  nilai         String
+  pengampu      String?
+  catatan       String?
+  tahunAjaranId String
+
+  santri      Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model SetoranNadhoman {
+  id                  String @id @default(cuid())
+  santriId            String
+  tanggal             String
+  namaKitab           String
+  jumlahBaitBaru      Int
+  totalHafalanSelesai Int
+  penguji             String?
+  keterangan          String?
+  tahunAjaranId       String
+
+  santri      Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+// --- KEPENGASUHAN -------------------------------------
+model KesehatanUks {
+  id            String @id @default(cuid())
+  santriId      String
+  tanggalSakit  String
+  keluhan       String?
+  diagnosa      String?
+  tindakanUks   String?
+  obatDiberikan String?
+  status        String  @default("Dalam Perawatan UKS")
+  petugasUks    String?
+
+  santri    Santri   @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Perizinan {
+  id                  String  @id @default(cuid())
+  santriId            String
+  jenisIzin           String
+  alasan              String?
+  tanggalKeluar       String
+  tanggalKembaliPlan  String
+  tanggalKembaliReal  String?
+  penjemput           String?
+  statusApproval      String  @default("Menunggu Persetujuan")
+  disetujuiOleh       String?
+  catatanKepengasuhan String?
+
+  santri    Santri   @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model LogKonseling {
+  id               String @id @default(cuid())
+  santriId         String
+  tanggal          String
+  kategori         String
+  deskripsi        String?
+  sanksiAtauSolusi String?
+  konselor         String?
+
+  santri    Santri   @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model KunjunganSantri {
+  id        String @id @default(cuid())
+  santriId  String
+  tanggal   String
+  namaTamu  String
+  hubungan  String?
+  noHpTamu  String?
+  keperluan String?
+  jamMasuk  String?
+  jamKeluar String?
+
+  santri    Santri   @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+// --- KEPEGAWAIAN --------------------------------------
+model Jabatan {
+  id          String @id @default(cuid())
+  namaJabatan String @unique
+  tunjangan   Int    @default(0)
+
+  pegawai Pegawai[]
+}
+
+model Pegawai {
+  id            String @id @default(cuid())
+  nip           String @unique
+  nama          String
+  jenisKelamin  String
+  jabatanId     String
+  satminkal     String?
+  statusPegawai String  @default("Aktif")
+  noHp          String?
+  email         String?
+  tanggalMasuk  String
+
+  jabatan   Jabatan  @relation(fields: [jabatanId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+// --- AKADEMIK -----------------------------------------
+model Presensi {
+  id             String  @id @default(cuid())
+  tanggal        String
+  tipe           String
+  kelasSekolahId String?
+  kelasMadinId   String?
+  santriId       String
+  status         String
+  keterangan     String?
+  tahunAjaranId  String
+
+  santri       Santri        @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  tahunAjaran  TahunAjaran   @relation(fields: [tahunAjaranId], references: [id])
+  kelasSekolah KelasSekolah? @relation(fields: [kelasSekolahId], references: [id])
+  kelasMadin   KelasMadin?   @relation(fields: [kelasMadinId], references: [id])
+}
+
+// --- KEUANGAN -----------------------------------------
+model BiayaMaster {
+  id         String @id @default(cuid())
+  namaBiaya  String
+  jenis      String
+  nominal    Int
+  keterangan String?
+
+  tagihan TagihanKeuangan[]
+}
+
+model TagihanKeuangan {
+  id               String @id @default(cuid())
+  santriId         String
+  biayaMasterId    String
+  bulanTahun       String
+  nominalTagihan   Int
+  nominalTerbayar  Int    @default(0)
+  status           String @default("Belum Lunas")
+  tanggalJatuhTempo String?
+  tahunAjaranId    String
+
+  santri      Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  biayaMaster BiayaMaster @relation(fields: [biayaMasterId], references: [id])
+  tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [id])
+  transaksi   TransaksiPembayaran[]
+
+  createdAt DateTime @default(now())
+}
+
+model TransaksiPembayaran {
+  id               String @id @default(cuid())
+  tagihanId        String
+  santriId         String
+  noKuitansi       String @unique
+  tanggal          String
+  nominal          Int
+  metodePembayaran String
+  penerima         String?
+  catatan          String?
+
+  tagihan TagihanKeuangan @relation(fields: [tagihanId], references: [id])
+  santri  Santri          @relation(fields: [santriId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+// --- PPDB ---------------------------------------------
+model PendaftarPpdb {
+  id                     String  @id @default(cuid())
+  noPendaftaran          String  @unique
+  namaLengkap            String
+  jenisKelamin           String
+  tempatLahir            String?
+  tanggalLahir           String?
+  namaOrtu               String?
+  noHpOrtu               String?
+  alamat                 String?
+  sekolahAsal            String?
+  unitPesantrenPilihanId String?
+  unitSekolahPilihanId   String?
+  marhalahPilihanId      String?
+  statusSeleksi          String  @default("Pendaftaran Baru")
+  tanggalDaftar          String
+  tahunAjaranId          String?
+
+  unitPesantren UnitPesantren? @relation(fields: [unitPesantrenPilihanId], references: [id])
+  unitSekolah   UnitSekolah?   @relation(fields: [unitSekolahPilihanId], references: [id])
+  marhalah      MarhalahMadin? @relation(fields: [marhalahPilihanId], references: [id])
+  tahunAjaran   TahunAjaran?   @relation(fields: [tahunAjaranId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+// --- USERS & AUTH -------------------------------------
+model User {
+  id                 String  @id @default(cuid())
+  username           String  @unique
+  nama               String
+  email              String? @unique
+  passwordHash       String
+  role               String
+  noHp               String?
+  avatar             String?
+  santriIdAssociated String? @unique
+  isActive           Boolean @default(true)
+
+  santri        Santri?        @relation(fields: [santriIdAssociated], references: [id])
+  refreshTokens RefreshToken[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

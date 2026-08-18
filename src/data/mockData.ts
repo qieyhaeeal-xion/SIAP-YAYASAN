@@ -617,15 +617,10 @@ export const INITIAL_PENDAFTAR_PPDB: PendaftarPPDB[] = [
 ];
 
 export const INITIAL_USERS: UserProfile[] = [
-  { id: 'usr-1', username: 'admin', nama: 'Administrator Utama', role: 'admin_sistem', email: 'admin@mukhtarsyafaat.ac.id' },
-  { id: 'usr-2', username: 'admin_pesantren', nama: 'Ust. Ahmad Fauzi (Admin Pesantren)', role: 'admin_pesantren' },
-  { id: 'usr-3', username: 'admin_madin', nama: 'Ust. Hasan Basri (Admin Madin)', role: 'admin_madin' },
-  { id: 'usr-4', username: 'admin_sekolah', nama: 'Drs. H. Mabroer (Admin Sekolah)', role: 'admin_sekolah' },
-  { id: 'usr-5', username: 'admin_pengasuhan', nama: 'Ustadzah Nurul Latifah (Kepengasuhan)', role: 'admin_kepengasuhan' },
-  { id: 'usr-6', username: 'bendahara', nama: 'H. Ahmad Rifa\'i (Bendahara)', role: 'bendahara' },
-  { id: 'usr-7', username: 'guru_halim', nama: 'Ust. Abdul Halim, S.Pd.I (Guru / Ustadz)', role: 'guru' },
-  { id: 'usr-8', username: 'pimpinan', nama: 'Kiai M. Syafaat (Pengasuh Utama)', role: 'pimpinan' },
-  { id: 'usr-9', username: 'walisyafiq', nama: 'H. Abdullah Mahmud (Wali Santri Farhan)', role: 'wali_santri', santriIdAssociated: 'snt-1' }
+  { id: 'usr-1', username: 'admin', nama: 'K.H. Mukhtar Syafaat (Admin Yayasan)', role: 'admin_yayasan', email: 'yayasan@mukhtarsyafaat.ac.id' },
+  { id: 'usr-2', username: 'pengurus', nama: 'Ust. Ahmad Fauzi (Pengurus Pesantren)', role: 'pengurus', email: 'pengurus@mukhtarsyafaat.ac.id' },
+  { id: 'usr-3', username: 'guru_halim', nama: 'Ust. Abdul Halim, S.Pd.I (Guru / Ustadz)', role: 'guru', email: 'guru@mukhtarsyafaat.ac.id' },
+  { id: 'usr-4', username: 'walisyafiq', nama: 'H. Abdullah Mahmud (Wali Santri Farhan)', role: 'wali_santri', email: 'wali@gmail.com', santriIdAssociated: 'snt-1' }
 ];
 
 export const INITIAL_PRESENSI: PresensiRecord[] = [

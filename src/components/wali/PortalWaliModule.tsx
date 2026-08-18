@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserCheck2, BookOpenCheck, Wallet, FileCheck2, HeartPulse, GraduationCap, Building2 } from 'lucide-react';
 
@@ -60,7 +60,7 @@ export const PortalWaliModule: React.FC = () => {
       {activeSantri && (
         <>
           {/* Santri Profile Card */}
-          <div className="bg-gradient-to-r from-[#1A5276] to-[#2E86C1] text-white p-5 rounded-2xl shadow-md flex flex-col sm:flex-row items-center gap-5">
+          <div className="bg-linear-to-r from-[#1A5276] to-[#2E86C1] text-white p-5 rounded-2xl shadow-md flex flex-col sm:flex-row items-center gap-5">
             <img
               src={activeSantri.fotoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
               alt={activeSantri.namaLengkap}
@@ -68,7 +68,7 @@ export const PortalWaliModule: React.FC = () => {
             />
             <div className="space-y-1 text-center sm:text-left">
               <h3 className="text-xl font-black">{activeSantri.namaLengkap}</h3>
-              <p className="text-xs text-sky-200 font-mono">NIS: {activeSantri.nis} • Status: {activeSantri.status}</p>
+              <p className="text-xs text-sky-200 font-mono">NIS: {activeSantri.nis} â€¢ Status: {activeSantri.status}</p>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-2 text-[11px] font-bold">
                 <span className="bg-white/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                   <Building2 className="w-3.5 h-3.5 text-[#1ABC9C]" /> {asrama?.namaAsrama || 'Asrama'}
@@ -149,3 +149,4 @@ export const PortalWaliModule: React.FC = () => {
     </div>
   );
 };
+

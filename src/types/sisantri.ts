@@ -1,15 +1,11 @@
 // Type definitions for SiSantri - SIM Pesantren Mukhtar Syafaat
 
 export type UserRole = 
-  | 'admin_sistem'
-  | 'admin_pesantren'
-  | 'admin_madin'
-  | 'admin_sekolah'
-  | 'admin_kepengasuhan'
-  | 'bendahara'
-  | 'pimpinan'
+  | 'admin_yayasan'
+  | 'pengurus'
   | 'guru'
-  | 'wali_santri';
+  | 'wali_santri'
+  | 'admin_sistem'; // alias backward-compatibility untuk admin_yayasan
 
 export interface UserProfile {
   id: string;
@@ -126,6 +122,7 @@ export interface Santri {
 
   // Section B: Keterangan Tempat Tinggal
   alamat: string;
+  alamatLengkap?: string;
   rt: string;
   rw: string;
   dusun: string;
@@ -136,7 +133,7 @@ export interface Santri {
   kodePos?: string;
 
   // Section C: Keterangan Kesehatan
-  golonganDarah: 'A' | 'B' | 'AB' | 'O' | '-';
+  golonganDarah: 'A' | 'B' | 'AB' | 'O' | '-' | string;
   riwayatPenyakit: string;
   tindakanKesehatan: string;
   kondisiSaatIni: 'Sehat' | 'Dalam Perawatan' | 'Pemulihan';
@@ -169,6 +166,7 @@ export interface Santri {
   namaWali?: string;
   hubunganWali?: string;
   noHpOrtu: string;
+  noHp?: string;
 
   // Section G: Keterangan Santri Asuh
   jenisSantriAsuh: 'Bukan Asuh' | 'ASUH 1' | 'ASUH 2' | 'ASUH 3';
@@ -179,6 +177,14 @@ export interface Santri {
   tahunKeluar?: string;
   noHpAlumni?: string;
   statusAlumniDetail?: string;
+
+  // Progress & Berkas Tambahan
+  targetJuz?: number;
+  capaianJuz?: number;
+  capaianNadhoman?: string | number;
+  statusBerkasKK?: boolean | string;
+  statusBerkasAkta?: boolean | string;
+  statusBerkasIjazah?: boolean | string;
 
   tanggalDaftar: string;
   tahunAjaranId: string;
@@ -198,19 +204,24 @@ export interface SetoranTahfidz {
   nilai: 'A' | 'B' | 'C';
   pengampu: string;
   catatan: string;
-  tahunAjaranId: string;
+  tahunAjaranId?: string;
 }
 
 export interface SetoranNadhoman {
   id: string;
   santriId: string;
   tanggal: string;
-  namaKitab: string; // e.g. Imriti, Alfiyah, Aqidatul Awam
-  jumlahBaitBaru: number;
+  namaKitab?: string; // e.g. Imriti, Alfiyah, Aqidatul Awam
+  kitabId?: string;
+  baitAwal?: number;
+  baitAkhir?: number;
+  jumlahBaitBaru?: number;
   totalHafalanSelesai: number; // Cumulative total
-  penguji: string;
-  keterangan: string;
-  tahunAjaranId: string;
+  penguji?: string;
+  pengampu?: string;
+  keterangan?: string;
+  catatan?: string;
+  tahunAjaranId?: string;
 }
 
 // ---------------- KEPENGASUHAN TYPES ---------------- //
@@ -218,26 +229,33 @@ export interface SetoranNadhoman {
 export interface CatatanKesehatanUKS {
   id: string;
   santriId: string;
-  tanggalSakit: string;
+  tanggalSakit?: string;
+  tanggalMasuk?: string;
   keluhan: string;
-  diagnosa: string;
-  tindakanUks: string;
-  obatDiberikan: string;
-  status: 'Dalam Perawatan UKS' | 'Sembuh' | 'Dirujuk Rumah Sakit';
-  petugasUks: string;
+  diagnosa?: string;
+  tindakanUks?: string;
+  tindakan?: string;
+  obatDiberikan?: string;
+  status: 'Dalam Perawatan UKS' | 'Sembuh' | 'Dirujuk Rumah Sakit' | string;
+  petugasUks?: string;
 }
 
 export interface PerizinanSantri {
   id: string;
   santriId: string;
-  jenisIzin: 'Izin Pulang' | 'Izin Keluar Komplek' | 'Izin Sakit/Berobat';
-  alasan: string;
-  tanggalKeluar: string;
-  tanggalKembaliPlan: string;
+  jenisIzin?: 'Izin Pulang' | 'Izin Keluar Komplek' | 'Izin Sakit/Berobat' | string;
+  jenisPerizinan?: string;
+  alasan?: string;
+  alasanIzin?: string;
+  tanggalKeluar?: string;
+  tanggalIzin?: string;
+  tanggalKembali?: string;
+  tanggalKembaliPlan?: string;
   tanggalKembaliReal?: string;
   penjemput?: string;
-  statusApproval: 'Menunggu Persetujuan' | 'Disetujui' | 'Ditolak';
+  statusApproval: 'Menunggu Persetujuan' | 'Disetujui' | 'Ditolak' | string;
   disetujuiOleh?: string;
+  approver?: string;
   catatanKepengasuhan?: string;
 }
 
@@ -245,10 +263,12 @@ export interface LogKonseling {
   id: string;
   santriId: string;
   tanggal: string;
-  kategori: 'Bimbingan Konseling' | 'Pelanggaran Disiplin' | 'Prestasi / Apresiasi';
-  deskripsi: string;
-  sanksiAtauSolusi: string;
-  konselor: string;
+  topik?: string;
+  kategori?: 'Bimbingan Konseling' | 'Pelanggaran Disiplin' | 'Prestasi / Apresiasi' | string;
+  deskripsi?: string;
+  solusiPoin?: string;
+  sanksiAtauSolusi?: string;
+  konselor?: string;
 }
 
 export interface KunjunganSantri {
@@ -275,13 +295,15 @@ export interface Pegawai {
   id: string;
   nip: string;
   nama: string;
-  jenisKelamin: 'L' | 'P';
+  jenisKelamin?: 'L' | 'P';
   jabatanId: string;
-  satminkal: string; // e.g. Pesantren Mukhtar Syafaat, MTs, MA, SMK, Madin
-  statusPegawai: 'Aktif' | 'Non-Aktif';
+  satminkal?: string; // e.g. Pesantren Mukhtar Syafaat, MTs, MA, SMK, Madin
+  statusPegawai?: 'Aktif' | 'Non-Aktif';
+  statusKepegawaian?: string;
+  pendidikanTerakhir?: string;
   noHp: string;
-  email: string;
-  tanggalMasuk: string;
+  email?: string;
+  tanggalMasuk?: string;
 }
 
 // ---------------- AKADEMIK TYPES ---------------- //
@@ -289,12 +311,13 @@ export interface Pegawai {
 export interface PresensiRecord {
   id: string;
   tanggal: string;
-  tipe: 'Formal' | 'Madin';
-  kelasId: string; // Kelas Sekolah or Kelas Madin
+  tipe?: 'Formal' | 'Madin' | string;
+  kategori?: 'KBM_Madin' | 'KBM_Sekolah' | 'Sholat_Jamaah' | string;
+  kelasId?: string; // Kelas Sekolah or Kelas Madin
   santriId: string;
   status: 'Hadir' | 'Izin' | 'Sakit' | 'Alpha';
   keterangan?: string;
-  tahunAjaranId: string;
+  tahunAjaranId?: string;
 }
 
 // ---------------- KEUANGAN TYPES ---------------- //
@@ -302,21 +325,27 @@ export interface PresensiRecord {
 export interface BiayaMaster {
   id: string;
   namaBiaya: string;
-  jenis: 'Tahunan' | 'Syahriyah' | 'Non-Syahriyah';
-  nominal: number;
-  keterangan: string;
+  kodeBiaya?: string;
+  jenis?: 'Tahunan' | 'Syahriyah' | 'Non-Syahriyah';
+  tipeFrekuensi?: string;
+  nominal?: number;
+  nominalStandard?: number;
+  keterangan?: string;
 }
 
 export interface TagihanKeuangan {
   id: string;
   santriId: string;
   biayaMasterId: string;
-  bulanTahun: string; // e.g. "Agustus 2026"
+  noTagihan?: string;
+  bulanTahun?: string; // e.g. "Agustus 2026"
+  bulanPeriode?: string;
+  tahunPeriode?: number | string;
   nominalTagihan: number;
   nominalTerbayar: number;
   status: 'Lunas' | 'Sebagian' | 'Belum Lunas';
-  tanggalJatuhTempo: string;
-  tahunAjaranId: string;
+  tanggalJatuhTempo?: string;
+  tahunAjaranId?: string;
 }
 
 export interface TransaksiPembayaran {
@@ -324,10 +353,13 @@ export interface TransaksiPembayaran {
   tagihanId: string;
   santriId: string;
   noKuitansi: string;
-  tanggal: string;
-  nominal: number;
-  metodePembayaran: 'Tunai' | 'Transfer Bank' | 'E-Wallet';
-  penerima: string;
+  tanggal?: string;
+  tanggalBayar?: string;
+  nominal?: number;
+  nominalDibayar?: number;
+  metodePembayaran: 'Tunai' | 'Transfer Bank' | 'E-Wallet' | 'Cash' | 'Transfer' | 'VA_Bank' | 'E_Wallet' | string;
+  penerima?: string;
+  penerimaBendahara?: string;
   catatan?: string;
 }
 
@@ -337,17 +369,17 @@ export interface PendaftarPPDB {
   id: string;
   noPendaftaran: string;
   namaLengkap: string;
-  jenisKelamin: 'L' | 'P';
-  tempatLahir: string;
-  tanggalLahir: string;
-  namaOrtu: string;
+  jenisKelamin?: 'L' | 'P';
+  tempatLahir?: string;
+  tanggalLahir?: string;
+  namaOrtu?: string;
   noHpOrtu: string;
-  alamat: string;
+  alamat?: string;
   sekolahAsal: string;
   unitPesantrenPilihanId: string;
   unitSekolahPilihanId: string;
   marhalahPilihanId: string;
-  statusSeleksi: 'Pendaftaran Baru' | 'Lulus Seleksi' | 'Ditolak' | 'Telah Dimutasi';
+  statusSeleksi: 'Pendaftaran Baru' | 'Lulus Seleksi' | 'Ditolak' | 'Telah Dimutasi' | 'Dimutasi ke Santri' | 'Pending' | string;
   tanggalDaftar: string;
 }
 

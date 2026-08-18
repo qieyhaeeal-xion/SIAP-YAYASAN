@@ -12,13 +12,8 @@ export const SettingsModule: React.FC = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('rbac');
 
   const allRoles: UserRole[] = [
-    'admin_sistem',
-    'admin_pesantren',
-    'admin_madin',
-    'admin_sekolah',
-    'admin_kepengasuhan',
-    'bendahara',
-    'pimpinan',
+    'admin_yayasan',
+    'pengurus',
     'guru',
     'wali_santri'
   ];

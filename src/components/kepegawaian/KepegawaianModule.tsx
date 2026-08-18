@@ -84,8 +84,8 @@ export const KepegawaianModule: React.FC = () => {
                           setNama(pg.nama);
                           setJabatanId(pg.jabatanId);
                           setNoHp(pg.noHp);
-                          setStatusKepegawaian(pg.statusKepegawaian);
-                          setPendidikanTerakhir(pg.pendidikanTerakhir);
+                          setStatusKepegawaian((pg.statusKepegawaian || 'Tetap') as any);
+                          setPendidikanTerakhir(pg.pendidikanTerakhir || '');
                           setShowModal(true);
                         }}
                         className="p-1 text-[#2E86C1] hover:bg-sky-100 rounded"

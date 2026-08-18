@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Santri } from '../../types/sisantri';
+import {
+  dataWilayahIndonesia,
+  getKabupatenByProvinsi,
+  getKecamatanByKabupaten,
+} from '../../data/wilayahIndonesia';
 import {
   Users,
   Plus,
@@ -53,6 +58,15 @@ export const DataSantriModule: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editSantriId, setEditSantriId] = useState<string | null>(null);
   const [formTab, setFormTab] = useState<number>(1); // 1-8 form
+
+  // State untuk dropdown wilayah bertingkat
+  const [selectedProvinsiId, setSelectedProvinsiId] = useState<string>('');
+  const [selectedKabupatenId, setSelectedKabupatenId] = useState<string>('');
+  const [selectedKecamatanId, setSelectedKecamatanId] = useState<string>('');
+
+  // Computed list berdasarkan pilihan
+  const availableKabupaten = useMemo(() => getKabupatenByProvinsi(selectedProvinsiId), [selectedProvinsiId]);
+  const availableKecamatan = useMemo(() => getKecamatanByKabupaten(selectedProvinsiId, selectedKabupatenId), [selectedProvinsiId, selectedKabupatenId]);
 
   // Form State for 8 Sub-Forms
   const [formData, setFormData] = useState<Partial<Santri>>({
@@ -150,6 +164,10 @@ export const DataSantriModule: React.FC = () => {
   const handleOpenAdd = () => {
     setEditSantriId(null);
     setFormTab(1);
+    // Reset wilayah dropdowns
+    setSelectedProvinsiId('');
+    setSelectedKabupatenId('');
+    setSelectedKecamatanId('');
     setFormData({
       nik: '35100' + Math.floor(100000 + Math.random() * 900000),
       namaLengkap: '',
@@ -158,7 +176,15 @@ export const DataSantriModule: React.FC = () => {
       jenisKelamin: 'L',
       status: 'Aktif',
       noHp: '08123456789',
-      alamatLengkap: 'Jl. Raya Pesantren Mukhtar Syafaat, Blokagung',
+      alamat: 'Jl. Raya Pesantren Mukhtar Syafaat',
+      dusun: 'Blokagung',
+      rt: '001',
+      rw: '001',
+      desa: 'Karangdoro',
+      kecamatan: '',
+      kabupaten: '',
+      provinsi: '',
+      kodePos: '',
       nikAyah: '35100' + Math.floor(100000 + Math.random() * 900000),
       namaAyah: '',
       pekerjaanAyah: 'Wiraswasta',
@@ -191,6 +217,13 @@ export const DataSantriModule: React.FC = () => {
     setEditSantriId(s.id);
     setFormTab(1);
     setFormData({ ...s });
+    // Cari provinsi & kabupaten yang sesuai untuk dropdown
+    const matchedProvinsi = dataWilayahIndonesia.find(p => p.nama === s.provinsi);
+    const matchedKab = matchedProvinsi?.kabupatenKota.find(k => k.nama === s.kabupaten || `${k.tipe} ${k.nama}` === s.kabupaten);
+    const matchedKec = matchedKab?.kecamatan.find(kc => kc.nama === s.kecamatan);
+    setSelectedProvinsiId(matchedProvinsi?.id || '');
+    setSelectedKabupatenId(matchedKab?.id || '');
+    setSelectedKecamatanId(matchedKec?.id || '');
     setShowModal(true);
   };
 
@@ -558,9 +591,163 @@ export const DataSantriModule: React.FC = () => {
                     <label className="block font-bold text-gray-700 mb-1">No HP / WhatsApp Santri *</label>
                     <input type="text" value={formData.noHp || ''} onChange={e => setFormData({ ...formData, noHp: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
                   </div>
+                  {/* DROPDOWN BERTINGKAT WILAYAH */}
                   <div className="col-span-2">
-                    <label className="block font-bold text-gray-700 mb-1">Alamat Lengkap *</label>
-                    <textarea value={formData.alamatLengkap || ''} onChange={e => setFormData({ ...formData, alamatLengkap: e.target.value })} rows={2} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2.5">
+                      <p className="text-[10px] font-extrabold text-[#1A5276] uppercase tracking-wider flex items-center gap-1">
+                        <span>📍</span> Alamat Tempat Tinggal
+                      </p>
+
+                      {/* Row 1: Provinsi, Kabupaten, Kecamatan */}
+                      <div className="grid grid-cols-3 gap-2">
+                        {/* Provinsi */}
+                        <div>
+                          <label className="block font-bold text-gray-700 mb-1 text-[11px]">Provinsi *</label>
+                          <select
+                            required
+                            value={selectedProvinsiId}
+                            onChange={e => {
+                              const newProvinsiId = e.target.value;
+                              const namaProvinsi = dataWilayahIndonesia.find(p => p.id === newProvinsiId)?.nama || '';
+                              setSelectedProvinsiId(newProvinsiId);
+                              setSelectedKabupatenId('');
+                              setSelectedKecamatanId('');
+                              setFormData({ ...formData, provinsi: namaProvinsi, kabupaten: '', kecamatan: '' });
+                            }}
+                            className="w-full px-2 py-1.5 border border-blue-300 rounded-lg bg-white text-[11px] font-semibold text-gray-700 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none"
+                          >
+                            <option value="">-- Pilih Provinsi --</option>
+                            {dataWilayahIndonesia.map(p => (
+                              <option key={p.id} value={p.id}>{p.nama}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Kabupaten / Kota */}
+                        <div>
+                          <label className="block font-bold text-gray-700 mb-1 text-[11px]">Kabupaten / Kota *</label>
+                          <select
+                            required
+                            value={selectedKabupatenId}
+                            disabled={!selectedProvinsiId}
+                            onChange={e => {
+                              const newKabId = e.target.value;
+                              const kab = availableKabupaten.find(k => k.id === newKabId);
+                              const namaKab = kab ? `${kab.tipe} ${kab.nama}` : '';
+                              setSelectedKabupatenId(newKabId);
+                              setSelectedKecamatanId('');
+                              setFormData({ ...formData, kabupaten: namaKab, kecamatan: '' });
+                            }}
+                            className="w-full px-2 py-1.5 border border-blue-300 rounded-lg bg-white text-[11px] font-semibold text-gray-700 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none disabled:bg-gray-100 disabled:text-gray-400"
+                          >
+                            <option value="">-- Pilih Kab/Kota --</option>
+                            {availableKabupaten.map(k => (
+                              <option key={k.id} value={k.id}>{k.tipe} {k.nama}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Kecamatan */}
+                        <div>
+                          <label className="block font-bold text-gray-700 mb-1 text-[11px]">Kecamatan *</label>
+                          <select
+                            required
+                            value={selectedKecamatanId}
+                            disabled={!selectedKabupatenId}
+                            onChange={e => {
+                              const newKecId = e.target.value;
+                              const namaKec = availableKecamatan.find(kc => kc.id === newKecId)?.nama || '';
+                              setSelectedKecamatanId(newKecId);
+                              setFormData({ ...formData, kecamatan: namaKec });
+                            }}
+                            className="w-full px-2 py-1.5 border border-blue-300 rounded-lg bg-white text-[11px] font-semibold text-gray-700 focus:ring-2 focus:ring-blue-300 focus:border-blue-400 outline-none disabled:bg-gray-100 disabled:text-gray-400"
+                          >
+                            <option value="">-- Pilih Kecamatan --</option>
+                            {availableKecamatan.map(kc => (
+                              <option key={kc.id} value={kc.id}>{kc.nama}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Row 2: Desa, Dusun, Kode Pos */}
+                      <div className="grid grid-cols-3 gap-2">
+                        <div>
+                          <label className="block font-bold text-gray-700 mb-1 text-[11px]">Desa / Kelurahan</label>
+                          <input
+                            type="text"
+                            value={formData.desa || ''}
+                            onChange={e => setFormData({ ...formData, desa: e.target.value })}
+                            placeholder="Nama Desa/Kel."
+                            className="w-full px-2 py-1.5 border border-blue-300 rounded-lg text-[11px] focus:ring-2 focus:ring-blue-300 outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-bold text-gray-700 mb-1 text-[11px]">Dusun</label>
+                          <input
+                            type="text"
+                            value={formData.dusun || ''}
+                            onChange={e => setFormData({ ...formData, dusun: e.target.value })}
+                            placeholder="Nama Dusun"
+                            className="w-full px-2 py-1.5 border border-blue-300 rounded-lg text-[11px] focus:ring-2 focus:ring-blue-300 outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-bold text-gray-700 mb-1 text-[11px]">Kode Pos</label>
+                          <input
+                            type="text"
+                            value={formData.kodePos || ''}
+                            onChange={e => setFormData({ ...formData, kodePos: e.target.value })}
+                            placeholder="68464"
+                            className="w-full px-2 py-1.5 border border-blue-300 rounded-lg text-[11px] focus:ring-2 focus:ring-blue-300 outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Row 3: Jalan, RT, RW */}
+                      <div className="grid grid-cols-5 gap-2">
+                        <div className="col-span-3">
+                          <label className="block font-bold text-gray-700 mb-1 text-[11px]">Jalan / Alamat Detail</label>
+                          <input
+                            type="text"
+                            value={formData.alamat || ''}
+                            onChange={e => setFormData({ ...formData, alamat: e.target.value })}
+                            placeholder="Jl. Raya Pesantren No. 1"
+                            className="w-full px-2 py-1.5 border border-blue-300 rounded-lg text-[11px] focus:ring-2 focus:ring-blue-300 outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-bold text-gray-700 mb-1 text-[11px]">RT</label>
+                          <input
+                            type="text"
+                            value={formData.rt || ''}
+                            onChange={e => setFormData({ ...formData, rt: e.target.value })}
+                            placeholder="001"
+                            className="w-full px-2 py-1.5 border border-blue-300 rounded-lg text-[11px] focus:ring-2 focus:ring-blue-300 outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-bold text-gray-700 mb-1 text-[11px]">RW</label>
+                          <input
+                            type="text"
+                            value={formData.rw || ''}
+                            onChange={e => setFormData({ ...formData, rw: e.target.value })}
+                            placeholder="001"
+                            className="w-full px-2 py-1.5 border border-blue-300 rounded-lg text-[11px] focus:ring-2 focus:ring-blue-300 outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Preview Alamat Lengkap */}
+                      {(formData.provinsi || formData.kabupaten || formData.kecamatan) && (
+                        <div className="bg-white border border-blue-200 rounded-lg px-3 py-2">
+                          <p className="text-[10px] font-bold text-blue-600 mb-0.5">📋 Preview Alamat:</p>
+                          <p className="text-[11px] text-gray-700">
+                            {[formData.alamat, formData.dusun && `Dusun ${formData.dusun}`, formData.rt && `RT ${formData.rt}`, formData.rw && `RW ${formData.rw}`, formData.desa, formData.kecamatan && `Kec. ${formData.kecamatan}`, formData.kabupaten, formData.provinsi, formData.kodePos].filter(Boolean).join(', ')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
@@ -695,15 +882,15 @@ export const DataSantriModule: React.FC = () => {
                     <p className="font-bold text-gray-800">Status Verifikasi Berkas Fisik / Digital:</p>
                     <div className="flex items-center gap-4">
                       <label className="flex items-center gap-1.5 font-semibold text-gray-700">
-                        <input type="checkbox" checked={formData.statusBerkasKK || false} onChange={e => setFormData({ ...formData, statusBerkasKK: e.target.checked })} />
+                        <input type="checkbox" checked={Boolean(formData.statusBerkasKK)} onChange={e => setFormData({ ...formData, statusBerkasKK: e.target.checked })} />
                         <span>Fotokopi KK</span>
                       </label>
                       <label className="flex items-center gap-1.5 font-semibold text-gray-700">
-                        <input type="checkbox" checked={formData.statusBerkasAkta || false} onChange={e => setFormData({ ...formData, statusBerkasAkta: e.target.checked })} />
+                        <input type="checkbox" checked={Boolean(formData.statusBerkasAkta)} onChange={e => setFormData({ ...formData, statusBerkasAkta: e.target.checked })} />
                         <span>Akta Kelahiran</span>
                       </label>
                       <label className="flex items-center gap-1.5 font-semibold text-gray-700">
-                        <input type="checkbox" checked={formData.statusBerkasIjazah || false} onChange={e => setFormData({ ...formData, statusBerkasIjazah: e.target.checked })} />
+                        <input type="checkbox" checked={Boolean(formData.statusBerkasIjazah)} onChange={e => setFormData({ ...formData, statusBerkasIjazah: e.target.checked })} />
                         <span>Ijazah Terakhir</span>
                       </label>
                     </div>

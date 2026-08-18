@@ -27,14 +27,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
   const pendingPermitsCount = perizinanList.filter(p => p.statusApproval === 'Menunggu Persetujuan').length;
 
   const rolesList: { role: UserRole; label: string }[] = [
-    { role: 'admin_sistem', label: 'Admin Sistem' },
-    { role: 'admin_pesantren', label: 'Admin Pesantren' },
-    { role: 'admin_madin', label: 'Admin Madin' },
-    { role: 'admin_sekolah', label: 'Admin Sekolah' },
-    { role: 'admin_kepengasuhan', label: 'Admin Kepengasuhan' },
-    { role: 'bendahara', label: 'Bendahara Keuangan' },
-    { role: 'pimpinan', label: 'Pengasuh / Pimpinan' },
-    { role: 'wali_santri', label: 'Portal Wali Santri' },
+    { role: 'admin_yayasan', label: 'Admin Yayasan (Utama)' },
+    { role: 'pengurus', label: 'Pengurus Pesantren' },
+    { role: 'guru', label: 'Guru / Ustadz' },
+    { role: 'wali_santri', label: 'Wali Santri' },
   ];
 
   return (

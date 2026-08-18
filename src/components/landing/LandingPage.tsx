@@ -27,7 +27,12 @@ import {
   X
 } from 'lucide-react';
 
-export const LandingPage: React.FC = () => {
+interface LandingPageProps {
+  onOpenDashboard?: () => void;
+  onOpenLogin?: () => void;
+}
+
+export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpenLogin }) => {
   const { setIsLandingPage, addPPDB, unitsPesantren, unitSekolahList, marhalahList } = useApp();
 
   // Login Modal state
