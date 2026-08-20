@@ -238,51 +238,51 @@ export const DataSantriModule: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-8 animate-in fade-in duration-200">
       
       {/* Header Title */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-extrabold text-[#1A5276] flex items-center gap-2">
-            <Users className="w-5 h-5 text-[#1ABC9C]" />
+          <h2 className="text-xl font-extrabold text-[#1A5276] flex items-center gap-3">
+            <Users className="w-7 h-7 text-[#1ABC9C]" />
             Data Induk Santri (8 Sub-Form Integrasi)
           </h2>
-          <p className="text-xs text-[#566573]">
+          <p className="text-sm text-[#566573] mt-1">
             Sistem Satu Atap Data Santri, Wali, Sekolah, Madin, Asrama, Hafalan, Kesehatan & Berkas Digital
           </p>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="px-4 py-2 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-xs rounded-lg shadow flex items-center gap-2 transition-all shrink-0"
+          className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-sm rounded-lg shadow flex items-center gap-2.5 transition-all shrink-0 animate-pulse hover:animate-none"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
           <span>Tambah Santri Baru</span>
         </button>
       </div>
 
       {/* FILTER BERTINGKAT SECTION */}
-      <div className="bg-sky-50 border border-sky-200 p-4 rounded-xl space-y-3">
+      <div className="bg-sky-50 border border-sky-200 p-6 rounded-xl space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-extrabold text-[#1A5276]">
-            <Filter className="w-4 h-4 text-[#1ABC9C]" />
+          <div className="flex items-center gap-2.5 text-sm font-extrabold text-[#1A5276]">
+            <Filter className="w-5 h-5 text-[#1ABC9C]" />
             <span>FILTER BERTINGKAT SIAP (ASRAMA, MADIN, SEKOLAH)</span>
           </div>
-          <span className="text-[11px] font-bold text-[#1A5276] bg-white px-2 py-0.5 rounded border border-sky-200">
+          <span className="text-xs font-bold text-[#1A5276] bg-white px-3 py-1 rounded border border-sky-200">
             Ditemukan: {filteredSantri.length} Santri
           </span>
         </div>
 
         {/* 3 Step Filters Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           
           {/* Step 1: Filter Pesantren & Asrama */}
-          <div className="bg-white p-2.5 rounded-lg border border-sky-200 space-y-1.5">
-            <span className="text-[10px] font-extrabold text-[#1A5276] uppercase tracking-wider flex items-center gap-1">
-              <Building2 className="w-3.5 h-3.5 text-[#1ABC9C]" />
+          <div className="bg-white p-4 rounded-lg border border-sky-200 space-y-2.5">
+            <span className="text-xs font-extrabold text-[#1A5276] uppercase tracking-wider flex items-center gap-1.5">
+              <Building2 className="w-4 h-4 text-[#1ABC9C]" />
               1. Asrama & Kamar
             </span>
-            <div className="grid grid-cols-3 gap-1">
+            <div className="grid grid-cols-3 gap-2">
               <select
                 value={filterUnitPesantren}
                 onChange={e => {
@@ -290,7 +290,7 @@ export const DataSantriModule: React.FC = () => {
                   setFilterAsrama('ALL');
                   setFilterKamar('ALL');
                 }}
-                className="col-span-1 px-1.5 py-1 text-[11px] bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700"
+                className="col-span-1 px-2 py-1.5 text-xs bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700 outline-none"
               >
                 <option value="ALL">All Unit</option>
                 {unitsPesantren.map(u => (<option key={u.id} value={u.id}>{u.namaUnit}</option>))}
@@ -302,7 +302,7 @@ export const DataSantriModule: React.FC = () => {
                   setFilterAsrama(e.target.value);
                   setFilterKamar('ALL');
                 }}
-                className="col-span-1 px-1.5 py-1 text-[11px] bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700"
+                className="col-span-1 px-2 py-1.5 text-xs bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700 outline-none"
               >
                 <option value="ALL">All Asrama</option>
                 {availableAsramaFilter.map(a => (<option key={a.id} value={a.id}>{a.namaAsrama}</option>))}
@@ -311,7 +311,7 @@ export const DataSantriModule: React.FC = () => {
               <select
                 value={filterKamar}
                 onChange={e => setFilterKamar(e.target.value)}
-                className="col-span-1 px-1.5 py-1 text-[11px] bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700"
+                className="col-span-1 px-2 py-1.5 text-xs bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700 outline-none"
               >
                 <option value="ALL">All Kamar</option>
                 {availableKamarFilter.map(k => (<option key={k.id} value={k.id}>{k.namaKamar}</option>))}
@@ -320,19 +320,19 @@ export const DataSantriModule: React.FC = () => {
           </div>
 
           {/* Step 2: Filter Madin */}
-          <div className="bg-white p-2.5 rounded-lg border border-sky-200 space-y-1.5">
-            <span className="text-[10px] font-extrabold text-[#1A5276] uppercase tracking-wider flex items-center gap-1">
-              <GraduationCap className="w-3.5 h-3.5 text-[#1ABC9C]" />
+          <div className="bg-white p-4 rounded-lg border border-sky-200 space-y-2.5">
+            <span className="text-xs font-extrabold text-[#1A5276] uppercase tracking-wider flex items-center gap-1.5">
+              <GraduationCap className="w-4 h-4 text-[#1ABC9C]" />
               2. Marhalah & Kelas Madin
             </span>
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-2">
               <select
                 value={filterMarhalah}
                 onChange={e => {
                   setFilterMarhalah(e.target.value);
                   setFilterKelasMadin('ALL');
                 }}
-                className="px-1.5 py-1 text-[11px] bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700"
+                className="px-2 py-1.5 text-xs bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700 outline-none"
               >
                 <option value="ALL">All Marhalah</option>
                 {marhalahList.map(m => (<option key={m.id} value={m.id}>{m.namaMarhalah}</option>))}
@@ -341,28 +341,28 @@ export const DataSantriModule: React.FC = () => {
               <select
                 value={filterKelasMadin}
                 onChange={e => setFilterKelasMadin(e.target.value)}
-                className="px-1.5 py-1 text-[11px] bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700"
+                className="px-2 py-1.5 text-xs bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700 outline-none"
               >
-                <option value="ALL">All Kelas Madin</option>
+                <option value="ALL">All Kelas</option>
                 {availableKelasMadinFilter.map(km => (<option key={km.id} value={km.id}>{km.namaKelas}</option>))}
               </select>
             </div>
           </div>
 
           {/* Step 3: Filter Sekolah Formal */}
-          <div className="bg-white p-2.5 rounded-lg border border-sky-200 space-y-1.5">
-            <span className="text-[10px] font-extrabold text-[#1A5276] uppercase tracking-wider flex items-center gap-1">
-              <School className="w-3.5 h-3.5 text-[#1ABC9C]" />
+          <div className="bg-white p-4 rounded-lg border border-sky-200 space-y-2.5">
+            <span className="text-xs font-extrabold text-[#1A5276] uppercase tracking-wider flex items-center gap-1.5">
+              <School className="w-4 h-4 text-[#1ABC9C]" />
               3. Unit Formal & Kelas Formal
             </span>
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-2">
               <select
                 value={filterSekolah}
                 onChange={e => {
                   setFilterSekolah(e.target.value);
                   setFilterKelasSekolah('ALL');
                 }}
-                className="px-1.5 py-1 text-[11px] bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700"
+                className="px-2 py-1.5 text-xs bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700 outline-none"
               >
                 <option value="ALL">All Sekolah</option>
                 {unitSekolahList.map(s => (<option key={s.id} value={s.id}>{s.namaSekolah}</option>))}
@@ -371,9 +371,9 @@ export const DataSantriModule: React.FC = () => {
               <select
                 value={filterKelasSekolah}
                 onChange={e => setFilterKelasSekolah(e.target.value)}
-                className="px-1.5 py-1 text-[11px] bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700"
+                className="px-2 py-1.5 text-xs bg-sky-50/50 border border-gray-300 rounded font-semibold text-gray-700 outline-none"
               >
-                <option value="ALL">All Kelas Formal</option>
+                <option value="ALL">All Kelas</option>
                 {availableKelasSekolahFilter.map(ks => (<option key={ks.id} value={ks.id}>{ks.namaKelas}</option>))}
               </select>
             </div>
@@ -382,31 +382,31 @@ export const DataSantriModule: React.FC = () => {
         </div>
 
         {/* Quick Search Input */}
-        <div className="relative pt-1">
+        <div className="relative pt-2">
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Ketik Nama Santri, NIS, NIK, atau Alamat..."
-            className="w-full pl-9 pr-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#1ABC9C]"
           />
-          <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400 pointer-events-none" />
+          <Search className="w-5 h-5 absolute left-3.5 top-3.5 text-gray-400 pointer-events-none" />
         </div>
       </div>
 
       {/* SANTRI DATA TABLE */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                <th className="p-3">NIS / Santri</th>
-                <th className="p-3">Asrama & Kamar</th>
-                <th className="p-3">Madin</th>
-                <th className="p-3">Sekolah Formal</th>
-                <th className="p-3">Capaian Hafalan</th>
-                <th className="p-3">Status</th>
-                <th className="p-3 text-center">Aksi (8 Form)</th>
+              <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                <th className="p-4">NIS / Santri</th>
+                <th className="p-4">Asrama & Kamar</th>
+                <th className="p-4">Madin</th>
+                <th className="p-4">Sekolah Formal</th>
+                <th className="p-4">Capaian Hafalan</th>
+                <th className="p-4">Status</th>
+                <th className="p-4 text-center">Aksi (8 Form)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -420,64 +420,64 @@ export const DataSantriModule: React.FC = () => {
 
                 return (
                   <tr key={s.id} className="hover:bg-sky-50/70 transition-colors">
-                    <td className="p-3">
-                      <div className="flex items-center gap-2.5">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
                         <img
                           src={s.fotoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}
                           alt={s.namaLengkap}
-                          className="w-8 h-8 rounded-full object-cover border border-sky-300"
+                          className="w-10 h-10 rounded-full object-cover border border-sky-300"
                         />
                         <div>
-                          <p className="font-extrabold text-[#1A5276]">{s.namaLengkap}</p>
-                          <p className="text-[10px] text-gray-500 font-mono">NIS: {s.nis} • NIK: {s.nik}</p>
+                          <p className="font-extrabold text-[#1A5276] text-base">{s.namaLengkap}</p>
+                          <p className="text-xs text-gray-500 font-mono mt-0.5">NIS: {s.nis} • NIK: {s.nik}</p>
                         </div>
                       </div>
                     </td>
 
-                    <td className="p-3">
-                      <p className="font-semibold text-gray-800">{asrama?.namaAsrama || '-'}</p>
-                      <p className="text-[10px] text-gray-500">{kamar?.namaKamar || '-'}</p>
+                    <td className="p-4">
+                      <p className="font-semibold text-gray-800 text-base">{asrama?.namaAsrama || '-'}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{kamar?.namaKamar || '-'}</p>
                     </td>
 
-                    <td className="p-3">
-                      <p className="font-semibold text-[#1A5276]">{marhalah?.namaMarhalah || '-'}</p>
-                      <p className="text-[10px] text-gray-500">{kelasMadin?.namaKelas || '-'}</p>
+                    <td className="p-4">
+                      <p className="font-semibold text-[#1A5276] text-base">{marhalah?.namaMarhalah || '-'}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{kelasMadin?.namaKelas || '-'}</p>
                     </td>
 
-                    <td className="p-3">
-                      <p className="font-semibold text-gray-800">{sekolah?.namaSekolah || '-'}</p>
-                      <p className="text-[10px] text-gray-500">{kelasSekolah?.namaKelas || '-'}</p>
+                    <td className="p-4">
+                      <p className="font-semibold text-gray-800 text-base">{sekolah?.namaSekolah || '-'}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{kelasSekolah?.namaKelas || '-'}</p>
                     </td>
 
-                    <td className="p-3">
-                      <p className="font-bold text-amber-700">{s.capaianJuz} / {s.targetJuz} Juz</p>
-                      <p className="text-[10px] text-cyan-800">{s.capaianNadhoman || 'Setoran Nadhoman'}</p>
+                    <td className="p-4">
+                      <p className="font-bold text-amber-700 text-base">{s.capaianJuz} / {s.targetJuz} Juz</p>
+                      <p className="text-xs text-cyan-800 mt-0.5 font-semibold">{s.capaianNadhoman || 'Setoran Nadhoman'}</p>
                     </td>
 
-                    <td className="p-3">
-                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                    <td className="p-4">
+                      <span className={`text-xs font-extrabold px-3 py-1 rounded-full ${
                         s.status === 'Aktif' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-700'
                       }`}>
                         {s.status}
                       </span>
                     </td>
 
-                    <td className="p-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
+                    <td className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => handleOpenEdit(s)}
-                          className="px-2 py-1 bg-[#1A5276] text-white hover:bg-[#2E86C1] rounded text-[10px] font-bold flex items-center gap-1 shadow-sm"
+                          className="px-3.5 py-1.5 bg-[#1A5276] text-white hover:bg-[#2E86C1] rounded text-xs font-bold flex items-center gap-1.5 shadow-sm"
                           title="Buka 8 Sub-Form Edit Detail"
                         >
-                          <Edit2 className="w-3 h-3" />
+                          <Edit2 className="w-4 h-4" />
                           <span>Detail Form</span>
                         </button>
                         <button
                           onClick={() => { if (confirm(`Hapus santri ${s.namaLengkap}?`)) deleteSantri(s.id); }}
-                          className="p-1 text-rose-600 hover:bg-rose-100 rounded"
+                          className="p-1.5 text-rose-600 hover:bg-rose-100 rounded"
                           title="Hapus Santri"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4.5 h-4.5" />
                         </button>
                       </div>
                     </td>

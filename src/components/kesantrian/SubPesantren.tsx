@@ -94,23 +94,23 @@ export const SubPesantren: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-8 animate-in fade-in duration-200">
       
       {/* Module Title Header */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-extrabold text-[#1A5276] flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-[#1ABC9C]" />
+          <h2 className="text-xl font-extrabold text-[#1A5276] flex items-center gap-3">
+            <Building2 className="w-7 h-7 text-[#1ABC9C]" />
             Sub Pesantren: Unit, Asrama & Kamar
           </h2>
-          <p className="text-xs text-[#566573]">Pengelolaan master data struktur lokasi tempat tinggal santri</p>
+          <p className="text-sm text-[#566573] mt-1">Pengelolaan master data struktur lokasi tempat tinggal santri</p>
         </div>
 
         {/* Sub Navigation Pills */}
-        <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+        <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-lg">
           <button
             onClick={() => setActiveTabSub('unit')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
               activeTabSub === 'unit' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -118,7 +118,7 @@ export const SubPesantren: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTabSub('asrama')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
               activeTabSub === 'asrama' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -126,7 +126,7 @@ export const SubPesantren: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTabSub('kamar')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
               activeTabSub === 'kamar' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -137,36 +137,36 @@ export const SubPesantren: React.FC = () => {
 
       {/* 1. MASTER UNIT PESANTREN TAB */}
       {activeTabSub === 'unit' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-sm text-[#1A5276]">Daftar Unit Pesantren</h3>
+            <h3 className="font-extrabold text-lg text-[#1A5276]">Daftar Unit Pesantren</h3>
             <button
               onClick={() => { resetUnitForm(); setShowUnitModal(true); }}
-              className="px-3 py-1.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow"
+              className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-sm rounded-lg flex items-center gap-2 shadow"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-5 h-5" />
               <span>Tambah Unit Pesantren</span>
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                  <th className="p-3 rounded-tl-lg">Kode Unit</th>
-                  <th className="p-3">Nama Unit Pesantren</th>
-                  <th className="p-3">Deskripsi Kompleks</th>
-                  <th className="p-3 rounded-tr-lg text-center">Aksi</th>
+                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                  <th className="p-4 rounded-tl-lg">Kode Unit</th>
+                  <th className="p-4">Nama Unit Pesantren</th>
+                  <th className="p-4">Deskripsi Kompleks</th>
+                  <th className="p-4 rounded-tr-lg text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {unitsPesantren.map(u => (
                   <tr key={u.id} className="hover:bg-sky-50 transition-colors">
-                    <td className="p-3 font-bold text-[#1A5276]">{u.kodeUnit}</td>
-                    <td className="p-3 font-semibold">{u.namaUnit}</td>
-                    <td className="p-3 text-gray-600">{u.deskripsi}</td>
-                    <td className="p-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
+                    <td className="p-4 font-bold text-[#1A5276] text-base">{u.kodeUnit}</td>
+                    <td className="p-4 font-semibold text-base">{u.namaUnit}</td>
+                    <td className="p-4 text-gray-600 text-base">{u.deskripsi}</td>
+                    <td className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => {
                             setEditUnitId(u.id);
@@ -175,19 +175,19 @@ export const SubPesantren: React.FC = () => {
                             setDeskripsiUnit(u.deskripsi);
                             setShowUnitModal(true);
                           }}
-                          className="p-1 text-[#2E86C1] hover:bg-sky-100 rounded"
+                          className="p-1.5 text-[#2E86C1] hover:bg-sky-100 rounded"
                           title="Edit Unit"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Edit2 className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => {
                             if (confirm(`Hapus unit ${u.namaUnit}?`)) deleteUnitPesantren(u.id);
                           }}
-                          className="p-1 text-rose-600 hover:bg-rose-100 rounded"
+                          className="p-1.5 text-rose-600 hover:bg-rose-100 rounded"
                           title="Hapus Unit"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-5 h-5" />
                         </button>
                       </div>
                     </td>
@@ -201,28 +201,28 @@ export const SubPesantren: React.FC = () => {
 
       {/* 2. MASTER ASRAMA TAB */}
       {activeTabSub === 'asrama' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-sm text-[#1A5276]">Daftar Asrama Pesantren</h3>
+            <h3 className="font-extrabold text-lg text-[#1A5276]">Daftar Asrama Pesantren</h3>
             <button
               onClick={() => { resetAsramaForm(); setShowAsramaModal(true); }}
-              className="px-3 py-1.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow"
+              className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-sm rounded-lg flex items-center gap-2 shadow"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-5 h-5" />
               <span>Tambah Asrama</span>
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                  <th className="p-3 rounded-tl-lg">Kode Asrama</th>
-                  <th className="p-3">Nama Asrama</th>
-                  <th className="p-3">Unit Pesantren</th>
-                  <th className="p-3">Pembina Asrama</th>
-                  <th className="p-3">Kapasitas</th>
-                  <th className="p-3 rounded-tr-lg text-center">Aksi</th>
+                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                  <th className="p-4 rounded-tl-lg">Kode Asrama</th>
+                  <th className="p-4">Nama Asrama</th>
+                  <th className="p-4">Unit Pesantren</th>
+                  <th className="p-4">Pembina Asrama</th>
+                  <th className="p-4">Kapasitas</th>
+                  <th className="p-4 rounded-tr-lg text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -230,13 +230,13 @@ export const SubPesantren: React.FC = () => {
                   const unit = unitsPesantren.find(u => u.id === a.unitPesantrenId);
                   return (
                     <tr key={a.id} className="hover:bg-sky-50 transition-colors">
-                      <td className="p-3 font-bold text-[#1A5276]">{a.kodeAsrama}</td>
-                      <td className="p-3 font-semibold">{a.namaAsrama}</td>
-                      <td className="p-3 text-gray-600">{unit?.namaUnit || '-'}</td>
-                      <td className="p-3 text-gray-700">{a.pembina}</td>
-                      <td className="p-3 font-bold text-emerald-700">{a.kapasitas} Santri</td>
-                      <td className="p-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                      <td className="p-4 font-bold text-[#1A5276] text-base">{a.kodeAsrama}</td>
+                      <td className="p-4 font-semibold text-base">{a.namaAsrama}</td>
+                      <td className="p-4 text-gray-600 text-base">{unit?.namaUnit || '-'}</td>
+                      <td className="p-4 text-gray-700 text-base">{a.pembina}</td>
+                      <td className="p-4 font-bold text-emerald-700 text-base">{a.kapasitas} Santri</td>
+                      <td className="p-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => {
                               setEditAsramaId(a.id);
@@ -247,19 +247,19 @@ export const SubPesantren: React.FC = () => {
                               setKapasitasAsrama(a.kapasitas);
                               setShowAsramaModal(true);
                             }}
-                            className="p-1 text-[#2E86C1] hover:bg-sky-100 rounded"
+                            className="p-1.5 text-[#2E86C1] hover:bg-sky-100 rounded"
                             title="Edit Asrama"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <Edit2 className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => {
                               if (confirm(`Hapus asrama ${a.namaAsrama}?`)) deleteAsrama(a.id);
                             }}
-                            className="p-1 text-rose-600 hover:bg-rose-100 rounded"
+                            className="p-1.5 text-rose-600 hover:bg-rose-100 rounded"
                             title="Hapus Asrama"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
                       </td>
@@ -274,28 +274,28 @@ export const SubPesantren: React.FC = () => {
 
       {/* 3. MASTER KAMAR TAB */}
       {activeTabSub === 'kamar' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-sm text-[#1A5276]">Daftar Kamar Asrama</h3>
+            <h3 className="font-extrabold text-lg text-[#1A5276]">Daftar Kamar Asrama</h3>
             <button
               onClick={() => { resetKamarForm(); setShowKamarModal(true); }}
-              className="px-3 py-1.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow"
+              className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-sm rounded-lg flex items-center gap-2 shadow"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-5 h-5" />
               <span>Tambah Kamar</span>
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                  <th className="p-3 rounded-tl-lg">Kode Kamar</th>
-                  <th className="p-3">Nama Kamar</th>
-                  <th className="p-3">Asrama</th>
-                  <th className="p-3">Kapasitas</th>
-                  <th className="p-3">Terisi</th>
-                  <th className="p-3 rounded-tr-lg text-center">Aksi</th>
+                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                  <th className="p-4 rounded-tl-lg">Kode Kamar</th>
+                  <th className="p-4">Nama Kamar</th>
+                  <th className="p-4">Asrama</th>
+                  <th className="p-4">Kapasitas</th>
+                  <th className="p-4">Terisi</th>
+                  <th className="p-4 rounded-tr-lg text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -303,13 +303,13 @@ export const SubPesantren: React.FC = () => {
                   const asrama = asramaList.find(a => a.id === k.asramaId);
                   return (
                     <tr key={k.id} className="hover:bg-sky-50 transition-colors">
-                      <td className="p-3 font-bold text-[#1A5276]">{k.kodeKamar}</td>
-                      <td className="p-3 font-semibold">{k.namaKamar}</td>
-                      <td className="p-3 text-gray-600">{asrama?.namaAsrama || '-'}</td>
-                      <td className="p-3 font-bold text-[#1A5276]">{k.kapasitas}</td>
-                      <td className="p-3 font-bold text-emerald-700">{k.terisi} / {k.kapasitas}</td>
-                      <td className="p-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                      <td className="p-4 font-bold text-[#1A5276] text-base">{k.kodeKamar}</td>
+                      <td className="p-4 font-semibold text-base">{k.namaKamar}</td>
+                      <td className="p-4 text-gray-600 text-base">{asrama?.namaAsrama || '-'}</td>
+                      <td className="p-4 font-bold text-[#1A5276] text-base">{k.kapasitas}</td>
+                      <td className="p-4 font-bold text-emerald-700 text-base">{k.terisi} / {k.kapasitas}</td>
+                      <td className="p-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => {
                               setEditKamarId(k.id);
@@ -320,19 +320,19 @@ export const SubPesantren: React.FC = () => {
                               setTerisiKamar(k.terisi);
                               setShowKamarModal(true);
                             }}
-                            className="p-1 text-[#2E86C1] hover:bg-sky-100 rounded"
+                            className="p-1.5 text-[#2E86C1] hover:bg-sky-100 rounded"
                             title="Edit Kamar"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <Edit2 className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => {
                               if (confirm(`Hapus kamar ${k.namaKamar}?`)) deleteKamar(k.id);
                             }}
-                            className="p-1 text-rose-600 hover:bg-rose-100 rounded"
+                            className="p-1.5 text-rose-600 hover:bg-rose-100 rounded"
                             title="Hapus Kamar"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-5 h-5" />
                           </button>
                         </div>
                       </td>

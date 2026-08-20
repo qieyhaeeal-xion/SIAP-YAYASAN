@@ -88,22 +88,22 @@ export const KepengasuhanModule: React.FC<{ defaultSubTab?: string }> = ({ defau
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-8 animate-in fade-in duration-200">
       {/* Title Header */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-extrabold text-[#1A5276] flex items-center gap-2">
-            <HeartPulse className="w-5 h-5 text-[#1ABC9C]" />
+          <h2 className="text-xl font-extrabold text-[#1A5276] flex items-center gap-3">
+            <HeartPulse className="w-7 h-7 text-[#1ABC9C]" />
             Modul Kepengasuhan & Ketertiban Santri
           </h2>
-          <p className="text-xs text-[#566573]">Pengelolaan perizinan pulang/keluar, pelayanan UKS kesehatan, dan log konseling</p>
+          <p className="text-sm text-[#566573] mt-1">Pengelolaan perizinan pulang/keluar, pelayanan UKS kesehatan, dan log konseling</p>
         </div>
 
         {/* Sub Pills Navigation */}
-        <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+        <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-lg">
           <button
             onClick={() => setActiveTabSub('perizinan')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
               activeTabSub === 'perizinan' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -111,7 +111,7 @@ export const KepengasuhanModule: React.FC<{ defaultSubTab?: string }> = ({ defau
           </button>
           <button
             onClick={() => setActiveTabSub('kesehatan')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
               activeTabSub === 'kesehatan' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -119,7 +119,7 @@ export const KepengasuhanModule: React.FC<{ defaultSubTab?: string }> = ({ defau
           </button>
           <button
             onClick={() => setActiveTabSub('konseling')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
               activeTabSub === 'konseling' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -130,63 +130,63 @@ export const KepengasuhanModule: React.FC<{ defaultSubTab?: string }> = ({ defau
 
       {/* 1. PERIZINAN TAB */}
       {activeTabSub === 'perizinan' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-sm text-[#1A5276]">Daftar Pengajuan Perizinan Pulang & Keluar</h3>
+            <h3 className="font-extrabold text-lg text-[#1A5276]">Daftar Pengajuan Perizinan Pulang & Keluar</h3>
             <button
               onClick={() => setShowIzinModal(true)}
-              className="px-3.5 py-2 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-xs rounded-lg shadow flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-sm rounded-lg shadow flex items-center gap-2"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-5 h-5" />
               <span>Buat Surat Perizinan</span>
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                  <th className="p-3">Nama Santri</th>
-                  <th className="p-3">Tanggal Izin - Kembali</th>
-                  <th className="p-3">Alasan Izin</th>
-                  <th className="p-3">Penjemput</th>
-                  <th className="p-3">Status Approval</th>
-                  <th className="p-3 text-center">Aksi Verifikasi</th>
+                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                  <th className="p-4">Nama Santri</th>
+                  <th className="p-4">Tanggal Izin - Kembali</th>
+                  <th className="p-4">Alasan Izin</th>
+                  <th className="p-4">Penjemput</th>
+                  <th className="p-4">Status Approval</th>
+                  <th className="p-4 text-center">Aksi Verifikasi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {perizinanList.map(p => (
                   <tr key={p.id} className="hover:bg-sky-50 transition-colors">
-                    <td className="p-3 font-extrabold text-[#1A5276]">{getSantriNameById(p.santriId)}</td>
-                    <td className="p-3 font-semibold text-gray-700">{p.tanggalIzin} s/d {p.tanggalKembali}</td>
-                    <td className="p-3 text-gray-800">{p.alasanIzin}</td>
-                    <td className="p-3 text-gray-600">{p.penjemput}</td>
-                    <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                    <td className="p-4 font-extrabold text-[#1A5276] text-base">{getSantriNameById(p.santriId)}</td>
+                    <td className="p-4 font-semibold text-gray-700">{p.tanggalIzin} s/d {p.tanggalKembali}</td>
+                    <td className="p-4 text-gray-800">{p.alasanIzin}</td>
+                    <td className="p-4 text-gray-600">{p.penjemput}</td>
+                    <td className="p-4">
+                      <span className={`px-3 py-1 rounded text-xs font-extrabold ${
                         p.statusApproval === 'Disetujui' ? 'bg-emerald-100 text-emerald-800' :
                         p.statusApproval === 'Ditolak' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'
                       }`}>
                         {p.statusApproval}
                       </span>
                     </td>
-                    <td className="p-3 text-center">
+                    <td className="p-4 text-center">
                       {p.statusApproval === 'Menunggu Persetujuan' ? (
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => updatePerizinanStatus(p.id, 'Disetujui', currentUser.nama)}
-                            className="px-2 py-1 bg-emerald-600 text-white rounded text-[10px] font-bold flex items-center gap-1"
+                            className="px-3 py-1.5 bg-emerald-600 text-white rounded text-xs font-bold flex items-center gap-1.5"
                           >
-                            <CheckCircle className="w-3 h-3" /> Setujui
+                            <CheckCircle className="w-4 h-4" /> Setujui
                           </button>
                           <button
                             onClick={() => updatePerizinanStatus(p.id, 'Ditolak', currentUser.nama)}
-                            className="px-2 py-1 bg-rose-600 text-white rounded text-[10px] font-bold flex items-center gap-1"
+                            className="px-3 py-1.5 bg-rose-600 text-white rounded text-xs font-bold flex items-center gap-1.5"
                           >
-                            <XCircle className="w-3 h-3" /> Tolak
+                            <XCircle className="w-4 h-4" /> Tolak
                           </button>
                         </div>
                       ) : (
-                        <span className="text-[10px] text-gray-400 font-semibold">Oleh {p.approver || 'Pengasuh'}</span>
+                        <span className="text-xs text-gray-500 font-semibold">Oleh {p.approver || 'Pengasuh'}</span>
                       )}
                     </td>
                   </tr>
@@ -199,52 +199,52 @@ export const KepengasuhanModule: React.FC<{ defaultSubTab?: string }> = ({ defau
 
       {/* 2. KESEHATAN UKS TAB */}
       {activeTabSub === 'kesehatan' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-sm text-[#1A5276]">Catatan Santri Sakit / UKS</h3>
+            <h3 className="font-extrabold text-lg text-[#1A5276]">Catatan Santri Sakit / UKS</h3>
             <button
               onClick={() => setShowHealthModal(true)}
-              className="px-3.5 py-2 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-xs rounded-lg shadow flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-sm rounded-lg shadow flex items-center gap-2"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-5 h-5" />
               <span>Input Catatan Sakit</span>
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                  <th className="p-3">Tanggal Masuk</th>
-                  <th className="p-3">Nama Santri</th>
-                  <th className="p-3">Keluhan & Diagnosa</th>
-                  <th className="p-3">Tindakan Medis</th>
-                  <th className="p-3">Status Perawatan</th>
-                  <th className="p-3 text-center">Update</th>
+                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                  <th className="p-4">Tanggal Masuk</th>
+                  <th className="p-4">Nama Santri</th>
+                  <th className="p-4">Keluhan & Diagnosa</th>
+                  <th className="p-4">Tindakan Medis</th>
+                  <th className="p-4">Status Perawatan</th>
+                  <th className="p-4 text-center">Update</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {kesehatanList.map(k => (
                   <tr key={k.id} className="hover:bg-sky-50 transition-colors">
-                    <td className="p-3 font-mono text-gray-600">{k.tanggalMasuk}</td>
-                    <td className="p-3 font-extrabold text-[#1A5276]">{getSantriNameById(k.santriId)}</td>
-                    <td className="p-3">
-                      <p className="font-bold text-rose-700">{k.keluhan}</p>
-                      <p className="text-[10px] text-gray-500">{k.diagnosa}</p>
+                    <td className="p-4 font-mono text-gray-600">{k.tanggalMasuk}</td>
+                    <td className="p-4 font-extrabold text-[#1A5276] text-base">{getSantriNameById(k.santriId)}</td>
+                    <td className="p-4">
+                      <p className="font-bold text-rose-700 text-base">{k.keluhan}</p>
+                      <p className="text-xs text-gray-500 mt-1">{k.diagnosa}</p>
                     </td>
-                    <td className="p-3 text-gray-700">{k.tindakan}</td>
-                    <td className="p-3">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                    <td className="p-4 text-gray-700">{k.tindakan}</td>
+                    <td className="p-4">
+                      <span className={`px-3 py-1 rounded text-xs font-extrabold ${
                         k.status === 'Sembuh' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                       }`}>
                         {k.status}
                       </span>
                     </td>
-                    <td className="p-3 text-center">
+                    <td className="p-4 text-center">
                       {k.status !== 'Sembuh' && (
                         <button
                           onClick={() => updateKesehatanStatus(k.id, 'Sembuh')}
-                          className="px-2 py-1 bg-emerald-600 text-white font-bold text-[10px] rounded shadow"
+                          className="px-3 py-1.5 bg-emerald-600 text-white font-bold text-xs rounded shadow"
                         >
                           Tandai Sembuh
                         </button>
@@ -260,37 +260,37 @@ export const KepengasuhanModule: React.FC<{ defaultSubTab?: string }> = ({ defau
 
       {/* 3. KONSELING TAB */}
       {activeTabSub === 'konseling' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-sm text-[#1A5276]">Log Konseling & Bimbingan Pengasuhan</h3>
+            <h3 className="font-extrabold text-lg text-[#1A5276]">Log Konseling & Bimbingan Pengasuhan</h3>
             <button
               onClick={() => setShowKonselingModal(true)}
-              className="px-3.5 py-2 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-xs rounded-lg shadow flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-sm rounded-lg shadow flex items-center gap-2"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-5 h-5" />
               <span>Input Log Konseling</span>
             </button>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                  <th className="p-3">Tanggal</th>
-                  <th className="p-3">Nama Santri</th>
-                  <th className="p-3">Topik Pembimbingan</th>
-                  <th className="p-3">Solusi & Arahan</th>
-                  <th className="p-3">Konselor Ustaz</th>
+                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                  <th className="p-4">Tanggal</th>
+                  <th className="p-4">Nama Santri</th>
+                  <th className="p-4">Topik Pembimbingan</th>
+                  <th className="p-4">Solusi & Arahan</th>
+                  <th className="p-4">Konselor Ustaz</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {konselingList.map(ks => (
                   <tr key={ks.id} className="hover:bg-sky-50 transition-colors">
-                    <td className="p-3 font-mono text-gray-600">{ks.tanggal}</td>
-                    <td className="p-3 font-extrabold text-[#1A5276]">{getSantriNameById(ks.santriId)}</td>
-                    <td className="p-3 font-bold text-gray-800">{ks.topik}</td>
-                    <td className="p-3 text-gray-700">{ks.solusiPoin}</td>
-                    <td className="p-3 font-semibold text-[#1ABC9C]">{ks.konselor}</td>
+                    <td className="p-4 font-mono text-gray-600">{ks.tanggal}</td>
+                    <td className="p-4 font-extrabold text-[#1A5276] text-base">{getSantriNameById(ks.santriId)}</td>
+                    <td className="p-4 font-bold text-gray-800 text-base">{ks.topik}</td>
+                    <td className="p-4 text-gray-700">{ks.solusiPoin}</td>
+                    <td className="p-4 font-semibold text-[#1ABC9C]">{ks.konselor}</td>
                   </tr>
                 ))}
               </tbody>

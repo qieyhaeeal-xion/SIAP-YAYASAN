@@ -67,93 +67,93 @@ export const TahunAjaranModule: React.FC = () => {
   );
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div className="space-y-8 animate-in fade-in duration-200">
 
       {/* Header */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-base font-extrabold text-[#1A5276] flex items-center gap-2">
-            <CalendarDays className="w-5 h-5 text-[#1ABC9C]" />
+          <h3 className="text-xl font-extrabold text-[#1A5276] flex items-center gap-3">
+            <CalendarDays className="w-7 h-7 text-[#1ABC9C]" />
             Master Tahun Ajaran
           </h3>
-          <p className="text-xs text-[#566573] mt-0.5">
+          <p className="text-sm text-[#566573] mt-1">
             Kelola daftar tahun ajaran pesantren. Hanya satu tahun ajaran yang boleh aktif dalam satu waktu.
           </p>
         </div>
         <button
           onClick={handleOpenAdd}
-          className="px-3 py-1.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-xs rounded-lg flex items-center gap-1.5 shadow shrink-0 transition-all"
+          className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-sm rounded-lg flex items-center gap-2 shadow shrink-0 transition-all"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
           <span>Tambah Tahun Ajaran</span>
         </button>
       </div>
 
       {/* Search Bar */}
-      <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
+      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
         <input
           type="text"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           placeholder="Cari kode tahun ajaran... (contoh: 2025/2026)"
-          className="w-full max-w-sm px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+          className="w-full max-w-md px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#1ABC9C]"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                <th className="p-3 rounded-tl-lg">Kode Tahun Ajaran</th>
-                <th className="p-3">Tanggal Mulai</th>
-                <th className="p-3">Tanggal Selesai</th>
-                <th className="p-3 text-center">Status</th>
-                <th className="p-3 rounded-tr-lg text-center">Aksi</th>
+              <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                <th className="p-4 rounded-tl-lg">Kode Tahun Ajaran</th>
+                <th className="p-4">Tanggal Mulai</th>
+                <th className="p-4">Tanggal Selesai</th>
+                <th className="p-4 text-center">Status</th>
+                <th className="p-4 rounded-tr-lg text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-6 text-center text-gray-400 italic">
+                  <td colSpan={5} className="p-8 text-center text-gray-400 italic">
                     Tidak ada data tahun ajaran ditemukan.
                   </td>
                 </tr>
               ) : (
                 filtered.map(t => (
                   <tr key={t.id} className="hover:bg-sky-50 transition-colors">
-                    <td className="p-3 font-extrabold text-[#1A5276]">{t.kodeTahunAjaran}</td>
-                    <td className="p-3 font-mono text-gray-700">{t.tanggalMulai}</td>
-                    <td className="p-3 font-mono text-gray-700">{t.tanggalSelesai}</td>
-                    <td className="p-3 text-center">
+                    <td className="p-4 font-extrabold text-[#1A5276] text-base">{t.kodeTahunAjaran}</td>
+                    <td className="p-4 font-mono text-gray-700 text-base">{t.tanggalMulai}</td>
+                    <td className="p-4 font-mono text-gray-700 text-base">{t.tanggalSelesai}</td>
+                    <td className="p-4 text-center">
                       {t.isAktif ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-extrabold">
-                          <CheckCircle className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-extrabold">
+                          <CheckCircle className="w-4 h-4" />
                           Aktif
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-[10px] font-bold">
-                          <Circle className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-bold">
+                          <Circle className="w-4 h-4" />
                           Non-Aktif
                         </span>
                       )}
                     </td>
-                    <td className="p-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
+                    <td className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => handleOpenEdit(t.id)}
-                          className="p-1 text-[#2E86C1] hover:bg-sky-100 rounded"
+                          className="p-1.5 text-[#2E86C1] hover:bg-sky-100 rounded"
                           title="Edit Tahun Ajaran"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Edit2 className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => handleDelete(t.id, t.kodeTahunAjaran)}
-                          className="p-1 text-rose-600 hover:bg-rose-100 rounded"
+                          className="p-1.5 text-rose-600 hover:bg-rose-100 rounded"
                           title="Hapus Tahun Ajaran"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-5 h-5" />
                         </button>
                       </div>
                     </td>

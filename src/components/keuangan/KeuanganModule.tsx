@@ -55,23 +55,23 @@ export const KeuanganModule: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-8 animate-in fade-in duration-200">
       
       {/* Header Title */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-extrabold text-[#1A5276] flex items-center gap-2">
-            <Wallet className="w-5 h-5 text-[#1ABC9C]" />
+          <h2 className="text-xl font-extrabold text-[#1A5276] flex items-center gap-3">
+            <Wallet className="w-7 h-7 text-[#1ABC9C]" />
             Modul Keuangan & Syahriyah Pesantren
           </h2>
-          <p className="text-xs text-[#566573]">Pengelolaan tagihan bulanan santri, entri pembayaran, dan cetak kuitansi resmi</p>
+          <p className="text-sm text-[#566573] mt-1">Pengelolaan tagihan bulanan santri, entri pembayaran, dan cetak kuitansi resmi</p>
         </div>
 
         {/* Sub Navigation Pills */}
-        <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+        <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-lg">
           <button
             onClick={() => setActiveTabSub('tagihan')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
               activeTabSub === 'tagihan' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -79,7 +79,7 @@ export const KeuanganModule: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTabSub('transaksi')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
               activeTabSub === 'transaksi' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -87,7 +87,7 @@ export const KeuanganModule: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTabSub('master')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
               activeTabSub === 'master' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -98,32 +98,32 @@ export const KeuanganModule: React.FC = () => {
 
       {/* 1. TAGIHAN SANTRI TAB */}
       {activeTabSub === 'tagihan' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="relative w-full max-w-md">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Cari Tagihan / Nama Santri..."
-                className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#1ABC9C]"
               />
-              <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+              <Search className="w-5 h-5 absolute left-3.5 top-3 text-gray-400" />
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                  <th className="p-3">No Tagihan</th>
-                  <th className="p-3">Nama Santri</th>
-                  <th className="p-3">Bulan / Periode</th>
-                  <th className="p-3">Nominal Tagihan</th>
-                  <th className="p-3">Terbayar</th>
-                  <th className="p-3">Sisa Tunggakan</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3 text-center">Aksi Bayar</th>
+                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                  <th className="p-4">No Tagihan</th>
+                  <th className="p-4">Nama Santri</th>
+                  <th className="p-4">Bulan / Periode</th>
+                  <th className="p-4">Nominal Tagihan</th>
+                  <th className="p-4">Terbayar</th>
+                  <th className="p-4">Sisa Tunggakan</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4 text-center">Aksi Bayar</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -131,31 +131,31 @@ export const KeuanganModule: React.FC = () => {
                   const sisa = t.nominalTagihan - t.nominalTerbayar;
                   return (
                     <tr key={t.id} className="hover:bg-sky-50 transition-colors">
-                      <td className="p-3 font-mono font-bold text-[#1A5276]">{t.noTagihan}</td>
-                      <td className="p-3 font-extrabold text-gray-800">{getSantriNameById(t.santriId)}</td>
-                      <td className="p-3 text-gray-600">{t.bulanPeriode} {t.tahunPeriode}</td>
-                      <td className="p-3 font-bold text-gray-800">Rp {t.nominalTagihan.toLocaleString('id-ID')}</td>
-                      <td className="p-3 font-bold text-emerald-700">Rp {t.nominalTerbayar.toLocaleString('id-ID')}</td>
-                      <td className="p-3 font-bold text-rose-600">Rp {sisa.toLocaleString('id-ID')}</td>
-                      <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                      <td className="p-4 font-mono font-bold text-[#1A5276] text-base">{t.noTagihan}</td>
+                      <td className="p-4 font-extrabold text-gray-800 text-base">{getSantriNameById(t.santriId)}</td>
+                      <td className="p-4 text-gray-600">{t.bulanPeriode} {t.tahunPeriode}</td>
+                      <td className="p-4 font-bold text-gray-800 text-base">Rp {t.nominalTagihan.toLocaleString('id-ID')}</td>
+                      <td className="p-4 font-bold text-emerald-700 text-base">Rp {t.nominalTerbayar.toLocaleString('id-ID')}</td>
+                      <td className="p-4 font-bold text-rose-600 text-base">Rp {sisa.toLocaleString('id-ID')}</td>
+                      <td className="p-4">
+                        <span className={`px-3 py-1 rounded text-xs font-extrabold ${
                           t.status === 'Lunas' ? 'bg-emerald-100 text-emerald-800' :
                           t.status === 'Sebagian' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'
                         }`}>
                           {t.status}
                         </span>
                       </td>
-                      <td className="p-3 text-center">
+                      <td className="p-4 text-center">
                         {t.status !== 'Lunas' ? (
                           <button
                             onClick={() => handleOpenBayar(t)}
-                            className="px-3 py-1 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-bold text-[10px] rounded shadow transition-all"
+                            className="px-4 py-2 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-bold text-xs rounded shadow transition-all"
                           >
                             Bayar Syahriyah
                           </button>
                         ) : (
-                          <span className="text-[10px] text-emerald-700 font-extrabold flex items-center justify-center gap-1">
-                            <CheckCircle className="w-3.5 h-3.5" /> Lunas
+                          <span className="text-xs text-emerald-700 font-extrabold flex items-center justify-center gap-1">
+                            <CheckCircle className="w-4 h-4" /> Lunas
                           </span>
                         )}
                       </td>
@@ -170,34 +170,34 @@ export const KeuanganModule: React.FC = () => {
 
       {/* 2. RIWAYAT TRANSAKSI TAB */}
       {activeTabSub === 'transaksi' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
-          <h3 className="font-extrabold text-sm text-[#1A5276]">Jurnal Transaksi Pembayaran Syahriyah</h3>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+          <h3 className="font-extrabold text-lg text-[#1A5276]">Jurnal Transaksi Pembayaran Syahriyah</h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                  <th className="p-3">No Kuitansi</th>
-                  <th className="p-3">Tanggal</th>
-                  <th className="p-3">Nama Santri</th>
-                  <th className="p-3">Nominal Terbayar</th>
-                  <th className="p-3">Metode</th>
-                  <th className="p-3 text-center">Cetak Nota</th>
+                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                  <th className="p-4">No Kuitansi</th>
+                  <th className="p-4">Tanggal</th>
+                  <th className="p-4">Nama Santri</th>
+                  <th className="p-4">Nominal Terbayar</th>
+                  <th className="p-4">Metode</th>
+                  <th className="p-4 text-center">Cetak Nota</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {transaksiList.map(tr => (
                   <tr key={tr.id} className="hover:bg-sky-50 transition-colors">
-                    <td className="p-3 font-mono font-bold text-[#1A5276]">{tr.noKuitansi}</td>
-                    <td className="p-3 font-mono text-gray-600">{tr.tanggalBayar}</td>
-                    <td className="p-3 font-extrabold text-gray-800">{getSantriNameById(tr.santriId)}</td>
-                    <td className="p-3 font-extrabold text-emerald-700">Rp {tr.nominalDibayar.toLocaleString('id-ID')}</td>
-                    <td className="p-3 font-semibold text-gray-700">{tr.metodePembayaran}</td>
-                    <td className="p-3 text-center">
+                    <td className="p-4 font-mono font-bold text-[#1A5276] text-base">{tr.noKuitansi}</td>
+                    <td className="p-4 font-mono text-gray-600">{tr.tanggalBayar}</td>
+                    <td className="p-4 font-extrabold text-gray-800 text-base">{getSantriNameById(tr.santriId)}</td>
+                    <td className="p-4 font-extrabold text-emerald-700 text-base">Rp {tr.nominalDibayar.toLocaleString('id-ID')}</td>
+                    <td className="p-4 font-semibold text-gray-700">{tr.metodePembayaran}</td>
+                    <td className="p-4 text-center">
                       <button
                         onClick={() => handleOpenReceipt(tr)}
-                        className="px-2.5 py-1 bg-sky-100 hover:bg-sky-200 text-[#1A5276] rounded text-[10px] font-bold flex items-center gap-1 mx-auto"
+                        className="px-3.5 py-1.5 bg-sky-100 hover:bg-sky-200 text-[#1A5276] rounded text-xs font-bold flex items-center gap-1.5 mx-auto"
                       >
-                        <Printer className="w-3 h-3" />
+                        <Printer className="w-4 h-4" />
                         <span>Kuitansi Resmi</span>
                       </button>
                     </td>
@@ -211,25 +211,25 @@ export const KeuanganModule: React.FC = () => {
 
       {/* 3. POS BIAYA MASTER TAB */}
       {activeTabSub === 'master' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
-          <h3 className="font-extrabold text-sm text-[#1A5276]">Master Pos Biaya Syahriyah & Administrasi</h3>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+          <h3 className="font-extrabold text-lg text-[#1A5276]">Master Pos Biaya Syahriyah & Administrasi</h3>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                  <th className="p-3">Kode Biaya</th>
-                  <th className="p-3">Nama Pos Biaya</th>
-                  <th className="p-3">Nominal Standar</th>
-                  <th className="p-3">Tipe Frekuensi</th>
+                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                  <th className="p-4">Kode Biaya</th>
+                  <th className="p-4">Nama Pos Biaya</th>
+                  <th className="p-4">Nominal Standar</th>
+                  <th className="p-4">Tipe Frekuensi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {biayaMasterList.map(b => (
                   <tr key={b.id} className="hover:bg-sky-50 transition-colors">
-                    <td className="p-3 font-mono font-bold text-[#1A5276]">{b.kodeBiaya}</td>
-                    <td className="p-3 font-extrabold text-gray-800">{b.namaBiaya}</td>
-                    <td className="p-3 font-bold text-emerald-700">Rp {b.nominalStandard.toLocaleString('id-ID')}</td>
-                    <td className="p-3 font-semibold text-gray-600">{b.tipeFrekuensi}</td>
+                    <td className="p-4 font-mono font-bold text-[#1A5276] text-base">{b.kodeBiaya}</td>
+                    <td className="p-4 font-extrabold text-gray-800 text-base">{b.namaBiaya}</td>
+                    <td className="p-4 font-bold text-emerald-700 text-base">Rp {b.nominalStandard.toLocaleString('id-ID')}</td>
+                    <td className="p-4 font-semibold text-gray-600">{b.tipeFrekuensi}</td>
                   </tr>
                 ))}
               </tbody>

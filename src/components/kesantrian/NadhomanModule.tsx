@@ -82,14 +82,14 @@ export const NadhomanModule: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="space-y-8 animate-in fade-in duration-200">
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-extrabold text-[#1A5276] flex items-center gap-2">
-            <BookMarked className="w-5 h-5 text-[#1ABC9C]" />
+          <h2 className="text-xl font-extrabold text-[#1A5276] flex items-center gap-3">
+            <BookMarked className="w-7 h-7 text-[#1ABC9C]" />
             Sub Setoran Nadhoman Kitab
           </h2>
-          <p className="text-xs text-[#566573]">Setoran hafalan bait kitab Aqidatul Awam, Imriti, Alfiyah Ibnu Malik</p>
+          <p className="text-sm text-[#566573] mt-1">Setoran hafalan bait kitab Aqidatul Awam, Imriti, Alfiyah Ibnu Malik</p>
         </div>
 
         <button
@@ -100,22 +100,22 @@ export const NadhomanModule: React.FC = () => {
             setSantriId('');
             setShowModal(true);
           }}
-          className="px-4 py-2 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-xs rounded-lg shadow flex items-center gap-1.5 transition-all shrink-0"
+          className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-sm rounded-lg shadow flex items-center gap-2 transition-all shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
           <span>Input Setoran Nadhoman</span>
         </button>
       </div>
 
       {/* Filter Bar: Tahun Ajaran + Search */}
-      <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4">
         {/* Dropdown Tahun Ajaran */}
-        <div className="flex items-center gap-2 shrink-0">
-          <CalendarDays className="w-4 h-4 text-[#1ABC9C]" />
+        <div className="flex items-center gap-2.5 shrink-0">
+          <CalendarDays className="w-5 h-5 text-[#1ABC9C]" />
           <select
             value={filterTahunAjaranId}
             onChange={e => setFilterTahunAjaranId(e.target.value)}
-            className="px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#1ABC9C] font-semibold"
+            className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#1ABC9C] font-semibold"
           >
             <option value="">Semua Tahun Ajaran</option>
             {tahunAjaranList.map(ta => (
@@ -133,23 +133,23 @@ export const NadhomanModule: React.FC = () => {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Cari Nama Santri / Kitab..."
-            className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#1ABC9C]"
           />
-          <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+          <Search className="w-5 h-5 absolute left-3.5 top-3 text-gray-400" />
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                <th className="p-3">Tanggal</th>
-                <th className="p-3">Nama Santri</th>
-                <th className="p-3">Kitab Nadhoman</th>
-                <th className="p-3">Bait Setoran</th>
-                <th className="p-3">Pengampu</th>
-                <th className="p-3">Catatan Ustadz</th>
+              <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                <th className="p-4">Tanggal</th>
+                <th className="p-4">Nama Santri</th>
+                <th className="p-4">Kitab Nadhoman</th>
+                <th className="p-4">Bait Setoran</th>
+                <th className="p-4">Pengampu</th>
+                <th className="p-4">Catatan Ustadz</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -157,12 +157,12 @@ export const NadhomanModule: React.FC = () => {
                 const kt = kitabList.find(k => k.id === sn.kitabId);
                 return (
                   <tr key={sn.id} className="hover:bg-sky-50 transition-colors">
-                    <td className="p-3 font-mono text-gray-600">{sn.tanggal}</td>
-                    <td className="p-3 font-extrabold text-[#1A5276]">{getSantriNameById(sn.santriId)}</td>
-                    <td className="p-3 font-bold text-cyan-800">{kt?.namaKitab || sn.namaKitab || 'Kitab'}</td>
-                    <td className="p-3 text-emerald-700 font-extrabold">Bait {sn.baitAwal} - {sn.baitAkhir}</td>
-                    <td className="p-3 text-gray-700">{sn.pengampu}</td>
-                    <td className="p-3 text-gray-500 italic">{sn.catatan || '-'}</td>
+                    <td className="p-4 font-mono text-gray-600 text-base">{sn.tanggal}</td>
+                    <td className="p-4 font-extrabold text-[#1A5276] text-base">{getSantriNameById(sn.santriId)}</td>
+                    <td className="p-4 font-bold text-cyan-800 text-base">{kt?.namaKitab || sn.namaKitab || 'Kitab'}</td>
+                    <td className="p-4 text-emerald-700 font-extrabold text-base">Bait {sn.baitAwal} - {sn.baitAkhir}</td>
+                    <td className="p-4 text-gray-700 text-base">{sn.pengampu}</td>
+                    <td className="p-4 text-gray-500 italic text-base">{sn.catatan || '-'}</td>
                   </tr>
                 );
               })}

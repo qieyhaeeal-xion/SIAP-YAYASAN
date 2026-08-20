@@ -25,14 +25,14 @@ export const KepegawaianModule: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between">
+    <div className="space-y-8 animate-in fade-in duration-200">
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-extrabold text-[#1A5276] flex items-center gap-2">
-            <Briefcase className="w-5 h-5 text-[#1ABC9C]" />
+          <h2 className="text-xl font-extrabold text-[#1A5276] flex items-center gap-3">
+            <Briefcase className="w-7 h-7 text-[#1ABC9C]" />
             Modul Kepegawaian (Ustaz, Guru, Pengasuh, Karyawan)
           </h2>
-          <p className="text-xs text-[#566573]">Master NIP, data jabatan struktural, status kepegawaian pesantren & sekolah</p>
+          <p className="text-sm text-[#566573] mt-1">Master NIP, data jabatan struktural, status kepegawaian pesantren & sekolah</p>
         </div>
 
         <button
@@ -41,25 +41,25 @@ export const KepegawaianModule: React.FC = () => {
             setNama('');
             setShowModal(true);
           }}
-          className="px-4 py-2 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-xs rounded-lg shadow flex items-center gap-1.5"
+          className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-sm rounded-lg shadow flex items-center gap-2"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
           <span>Tambah Pegawai / Ustaz</span>
         </button>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                <th className="p-3">NIP Pegawai</th>
-                <th className="p-3">Nama Pegawai / Ustadz</th>
-                <th className="p-3">Jabatan Struktural</th>
-                <th className="p-3">Status Pegawai</th>
-                <th className="p-3">Pendidikan Terakhir</th>
-                <th className="p-3">No HP / WA</th>
-                <th className="p-3 text-center">Aksi</th>
+              <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                <th className="p-4">NIP Pegawai</th>
+                <th className="p-4">Nama Pegawai / Ustadz</th>
+                <th className="p-4">Jabatan Struktural</th>
+                <th className="p-4">Status Pegawai</th>
+                <th className="p-4">Pendidikan Terakhir</th>
+                <th className="p-4">No HP / WA</th>
+                <th className="p-4 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -67,17 +67,17 @@ export const KepegawaianModule: React.FC = () => {
                 const jb = jabatanList.find(j => j.id === pg.jabatanId);
                 return (
                   <tr key={pg.id} className="hover:bg-sky-50 transition-colors">
-                    <td className="p-3 font-mono font-bold text-[#1A5276]">{pg.nip}</td>
-                    <td className="p-3 font-extrabold text-gray-800">{pg.nama}</td>
-                    <td className="p-3 font-bold text-[#1ABC9C]">{jb?.namaJabatan || '-'}</td>
-                    <td className="p-3">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-[#1A5276]">
+                    <td className="p-4 font-mono font-bold text-[#1A5276] text-base">{pg.nip}</td>
+                    <td className="p-4 font-extrabold text-gray-800 text-base">{pg.nama}</td>
+                    <td className="p-4 font-bold text-[#1ABC9C] text-base">{jb?.namaJabatan || '-'}</td>
+                    <td className="p-4">
+                      <span className="px-3 py-1 rounded text-xs font-bold bg-sky-100 text-[#1A5276]">
                         {pg.statusKepegawaian}
                       </span>
                     </td>
-                    <td className="p-3 text-gray-600">{pg.pendidikanTerakhir}</td>
-                    <td className="p-3 text-gray-700">{pg.noHp}</td>
-                    <td className="p-3 text-center">
+                    <td className="p-4 text-gray-600 text-base">{pg.pendidikanTerakhir}</td>
+                    <td className="p-4 text-gray-700 text-base">{pg.noHp}</td>
+                    <td className="p-4 text-center">
                       <button
                         onClick={() => {
                           setEditId(pg.id);
@@ -88,9 +88,9 @@ export const KepegawaianModule: React.FC = () => {
                           setPendidikanTerakhir(pg.pendidikanTerakhir || '');
                           setShowModal(true);
                         }}
-                        className="p-1 text-[#2E86C1] hover:bg-sky-100 rounded"
+                        className="p-1.5 text-[#2E86C1] hover:bg-sky-100 rounded"
                       >
-                        <Edit2 className="w-4 h-4" />
+                        <Edit2 className="w-5 h-5" />
                       </button>
                     </td>
                   </tr>

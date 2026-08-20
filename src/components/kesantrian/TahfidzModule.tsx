@@ -115,14 +115,14 @@ export const TahfidzModule: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="space-y-8 animate-in fade-in duration-200">
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-extrabold text-[#1A5276] flex items-center gap-2">
-            <BookOpenCheck className="w-5 h-5 text-[#1ABC9C]" />
+          <h2 className="text-xl font-extrabold text-[#1A5276] flex items-center gap-3">
+            <BookOpenCheck className="w-7 h-7 text-[#1ABC9C]" />
             Sub Tahfidz Quran (Buku Setoran Digital)
           </h2>
-          <p className="text-xs text-[#566573]">Pencatatan setoran hafalan Ziyadah & Murojaah Al-Qur'an 30 Juz</p>
+          <p className="text-sm text-[#566573] mt-1">Pencatatan setoran hafalan Ziyadah & Murojaah Al-Qur'an 30 Juz</p>
         </div>
 
         <button
@@ -133,22 +133,22 @@ export const TahfidzModule: React.FC = () => {
             setSantriId('');
             setShowModal(true);
           }}
-          className="px-4 py-2 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-xs rounded-lg shadow flex items-center gap-1.5 transition-all shrink-0"
+          className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-bold text-sm rounded-lg shadow flex items-center gap-2 transition-all shrink-0"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
           <span>Input Setoran Tahfidz</span>
         </button>
       </div>
 
       {/* Filter Bar: Tahun Ajaran + Search */}
-      <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-3">
+      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row items-start sm:items-center gap-4">
         {/* Dropdown Tahun Ajaran */}
-        <div className="flex items-center gap-2 shrink-0">
-          <CalendarDays className="w-4 h-4 text-[#1ABC9C]" />
+        <div className="flex items-center gap-2.5 shrink-0">
+          <CalendarDays className="w-5 h-5 text-[#1ABC9C]" />
           <select
             value={filterTahunAjaranId}
             onChange={e => setFilterTahunAjaranId(e.target.value)}
-            className="px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#1ABC9C] font-semibold"
+            className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#1ABC9C] font-semibold"
           >
             <option value="">Semua Tahun Ajaran</option>
             {tahunAjaranList.map(ta => (
@@ -166,29 +166,29 @@ export const TahfidzModule: React.FC = () => {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Cari Nama Santri / Surah..."
-            className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#1ABC9C]"
           />
-          <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+          <Search className="w-5 h-5 absolute left-3.5 top-3 text-gray-400" />
         </div>
       </div>
 
       {/* Panel Registrasi Peserta Tahfidz */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6">
         <div>
-          <h3 className="font-extrabold text-sm text-[#1A5276] flex items-center gap-2">
-            <BookOpenCheck className="w-4 h-4 text-[#1ABC9C]" />
+          <h3 className="font-extrabold text-lg text-[#1A5276] flex items-center gap-2.5">
+            <BookOpenCheck className="w-5 h-5 text-[#1ABC9C]" />
             Registrasi Peserta Tahfidz
           </h3>
-          <p className="text-xs text-[#566573]">Daftarkan santri ke program Tahfidz Quran untuk tahun ajaran yang sedang difilter</p>
+          <p className="text-sm text-[#566573] mt-1">Daftarkan santri ke program Tahfidz Quran untuk tahun ajaran yang sedang difilter</p>
         </div>
 
-        <form onSubmit={handleRegisterPeserta} className="flex flex-col sm:flex-row items-end gap-3">
+        <form onSubmit={handleRegisterPeserta} className="flex flex-col sm:flex-row items-end gap-4">
           <div className="w-full max-w-md">
-            <label className="block text-xs font-bold text-gray-700 mb-1">Pilih Santri (Status Aktif) *</label>
+            <label className="block text-sm font-bold text-gray-700 mb-1.5">Pilih Santri (Status Aktif) *</label>
             <select
               value={pesertaSantriId}
               onChange={e => setPesertaSantriId(e.target.value)}
-              className="w-full px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#1ABC9C] font-semibold"
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#1ABC9C] font-semibold"
             >
               <option value="">-- Pilih Santri --</option>
               {activeSantri.map(s => (
@@ -201,21 +201,21 @@ export const TahfidzModule: React.FC = () => {
           <button
             type="submit"
             disabled={!pesertaSantriId}
-            className="px-4 py-2 bg-[#1A5276] hover:bg-[#2E86C1] disabled:bg-gray-300 text-white font-bold text-xs rounded-lg shadow transition-all shrink-0"
+            className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] disabled:bg-gray-300 text-white font-bold text-sm rounded-lg shadow transition-all shrink-0"
           >
             Daftarkan Peserta
           </button>
         </form>
 
-        <div className="border-t border-gray-100 pt-3">
-          <h4 className="font-bold text-xs text-[#1A5276] mb-2">Daftar Peserta Tahfidz Terdaftar</h4>
-          <div className="overflow-x-auto border border-gray-150 rounded-lg max-h-60">
-            <table className="w-full text-left text-xs border-collapse">
+        <div className="border-t border-gray-100 pt-4">
+          <h4 className="font-bold text-sm text-[#1A5276] mb-3">Daftar Peserta Tahfidz Terdaftar</h4>
+          <div className="overflow-x-auto border border-gray-150 rounded-lg max-h-60 text-sm">
+            <table className="w-full text-left text-sm border-collapse">
               <thead>
-                <tr className="bg-gray-50 text-gray-700 font-bold uppercase tracking-wider border-b border-gray-200">
-                  <th className="p-2">Nama Santri</th>
-                  <th className="p-2">Tanggal Daftar</th>
-                  <th className="p-2 text-center">Status</th>
+                <tr className="bg-gray-50 text-gray-700 font-bold uppercase tracking-wider border-b border-gray-200 text-xs">
+                  <th className="p-3">Nama Santri</th>
+                  <th className="p-3">Tanggal Daftar</th>
+                  <th className="p-3 text-center">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-150">
@@ -228,17 +228,17 @@ export const TahfidzModule: React.FC = () => {
                 ) : (
                   filteredPesertaList.map(p => (
                     <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-2 font-semibold text-gray-800">{getSantriNameById(p.santriId)}</td>
-                      <td className="p-2 font-mono text-gray-600">{p.tanggalDaftar}</td>
-                      <td className="p-2 text-center">
-                        <span className={`inline-block rounded px-2 py-0.5 text-[10px] font-bold ${
+                      <td className="p-3 font-semibold text-gray-800 text-sm">{getSantriNameById(p.santriId)}</td>
+                      <td className="p-3 font-mono text-gray-600 text-sm">{p.tanggalDaftar}</td>
+                      <td className="p-3 text-center">
+                        <span className={`inline-block rounded px-3 py-1 text-xs font-bold ${
                           p.status === 'Aktif' ? 'bg-emerald-100 text-emerald-800' :
                           p.status === 'Lulus' ? 'bg-sky-100 text-sky-800' : 'bg-gray-100 text-gray-800'
                         }`}>
                           <select
                             value={p.status}
                             onChange={e => updateStatusPeserta(p.id, e.target.value as any)}
-                            className="bg-transparent border-none text-[10px] font-bold p-0 m-0 focus:ring-0 cursor-pointer outline-none"
+                            className="bg-transparent border-none text-xs font-bold p-0 m-0 focus:ring-0 cursor-pointer outline-none"
                           >
                             <option value="Aktif" className="text-emerald-800 bg-white">Aktif</option>
                             <option value="Non Aktif" className="text-gray-800 bg-white">Non Aktif</option>
@@ -255,36 +255,36 @@ export const TahfidzModule: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
+          <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                <th className="p-3">Tanggal</th>
-                <th className="p-3">Nama Santri</th>
-                <th className="p-3">Juz & Surah</th>
-                <th className="p-3">Ayat</th>
-                <th className="p-3">Jenis Setoran</th>
-                <th className="p-3">Nilai</th>
-                <th className="p-3">Pengampu</th>
+              <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                <th className="p-4">Tanggal</th>
+                <th className="p-4">Nama Santri</th>
+                <th className="p-4">Juz & Surah</th>
+                <th className="p-4">Ayat</th>
+                <th className="p-4">Jenis Setoran</th>
+                <th className="p-4">Nilai</th>
+                <th className="p-4">Pengampu</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {filteredSetoran.map(st => (
                 <tr key={st.id} className="hover:bg-sky-50 transition-colors">
-                  <td className="p-3 font-mono text-gray-600">{st.tanggal}</td>
-                  <td className="p-3 font-extrabold text-[#1A5276]">{getSantriNameById(st.santriId)}</td>
-                  <td className="p-3 font-bold text-emerald-700">Juz {st.juz} - {st.surah}</td>
-                  <td className="p-3 text-gray-700 font-semibold">Ayat {st.ayatMulai} - {st.ayatSelesai}</td>
-                  <td className="p-3">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+                  <td className="p-4 font-mono text-gray-600 text-base">{st.tanggal}</td>
+                  <td className="p-4 font-extrabold text-[#1A5276] text-base">{getSantriNameById(st.santriId)}</td>
+                  <td className="p-4 font-bold text-emerald-700 text-base">Juz {st.juz} - {st.surah}</td>
+                  <td className="p-4 text-gray-700 font-semibold text-base">Ayat {st.ayatMulai} - {st.ayatSelesai}</td>
+                  <td className="p-4">
+                    <span className={`px-3 py-1 rounded text-xs font-extrabold ${
                       st.jenisSetoran === 'Ziyadah' ? 'bg-teal-100 text-teal-800' : 'bg-sky-100 text-sky-800'
                     }`}>
                       {st.jenisSetoran}
                     </span>
                   </td>
-                  <td className="p-3 font-black text-amber-600">{st.nilai}</td>
-                  <td className="p-3 text-gray-600">{st.pengampu}</td>
+                  <td className="p-4 font-black text-amber-600 text-base">{st.nilai}</td>
+                  <td className="p-4 text-gray-600 text-base">{st.pengampu}</td>
                 </tr>
               ))}
             </tbody>

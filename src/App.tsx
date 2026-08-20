@@ -67,8 +67,8 @@ const MainApp: React.FC = () => {
         />
 
         {/* Main Content Viewport */}
-        <main className="flex-1 overflow-y-auto p-3 sm:p-5 bg-[#F4F6F7] flex flex-col justify-between">
-          <div className="max-w-[1920px] mx-auto space-y-6 w-full flex-1">
+        <main className="flex-1 overflow-y-auto p-8 sm:p-10 bg-[#F4F6F7] flex flex-col justify-between">
+          <div className="max-w-[1920px] mx-auto space-y-8 w-full flex-1">
             
             {/* RBAC Permission Check Guard */}
             {!hasPermission(currentUser.role, activeTab) ? (

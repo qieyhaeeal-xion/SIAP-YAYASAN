@@ -35,30 +35,30 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
 
   return (
     <header className="bg-[#1A5276] text-white shadow-md border-b border-[#2E86C1] sticky top-0 z-30">
-      <div className="px-4 py-2.5 flex items-center justify-between">
+      <div className="px-8 py-5 flex items-center justify-between">
         
         {/* Left Section: Brand & Sidebar Toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <button
             onClick={onToggleSidebar}
-            className="p-2 rounded-lg hover:bg-[#2E86C1] transition-colors text-white focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+            className="p-3 rounded-xl hover:bg-[#2E86C1] transition-colors text-white focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
             title="Toggle Menu Navigation"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-7 h-7" />
           </button>
 
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setIsLandingPage(true)}>
-            <div className="w-9 h-9 rounded-lg bg-[#1ABC9C] flex items-center justify-center font-bold text-white shadow-sm border border-white/20">
-              <BookOpen className="w-5 h-5" />
+          <div className="flex items-center gap-4 cursor-pointer" onClick={() => setIsLandingPage(true)}>
+            <div className="w-13 h-13 rounded-xl bg-[#1ABC9C] flex items-center justify-center font-bold text-white shadow-sm border border-white/20">
+              <BookOpen className="w-7 h-7" />
             </div>
             <div>
-              <div className="font-extrabold text-base tracking-wide flex items-center gap-1.5 leading-tight">
+              <div className="font-extrabold text-xl tracking-wide flex items-center gap-2.5 leading-tight">
                 SIAP
-                <span className="text-[10px] font-semibold bg-[#1ABC9C] text-white px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                <span className="text-sm font-semibold bg-[#1ABC9C] text-white px-2.5 py-0.5 rounded-full uppercase tracking-wider">
                   SIM Pesantren
                 </span>
               </div>
-              <p className="text-[11px] text-sky-200 font-medium hidden sm:block">
+              <p className="text-sm text-sky-200 font-medium hidden sm:block">
                 Pondok Pesantren Mukhtar Syafaat
               </p>
             </div>
@@ -66,25 +66,25 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
         </div>
 
         {/* Middle Section: Search Bar */}
-        <div className="hidden md:flex items-center relative max-w-xs w-full">
+        <div className="hidden md:flex items-center relative max-w-md w-full">
           <input
             type="text"
             placeholder="Cari Santri, NIS, Asrama..."
-            className="w-full pl-9 pr-3 py-1.5 bg-white/10 hover:bg-white/15 focus:bg-white text-white focus:text-[#1C2833] placeholder-sky-200 focus:placeholder-gray-400 text-xs rounded-md border border-white/20 focus:border-[#1ABC9C] transition-all outline-none"
+            className="w-full pl-12 pr-4 py-2.5 bg-white/10 hover:bg-white/15 focus:bg-white text-white focus:text-[#1C2833] placeholder-sky-200 focus:placeholder-gray-400 text-base rounded-xl border border-white/20 focus:border-[#1ABC9C] transition-all outline-none"
           />
-          <Search className="w-4 h-4 absolute left-2.5 text-sky-200 pointer-events-none" />
+          <Search className="w-5 h-5 absolute left-4 text-sky-200 pointer-events-none" />
         </div>
 
         {/* Right Section: Action Buttons & User Profile */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-3 sm:gap-4">
 
           {/* Landing Page Toggle Button */}
           <button
             onClick={() => setIsLandingPage(!isLandingPage)}
-            className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-md bg-[#2E86C1] hover:bg-[#1ABC9C] text-white transition-all shadow-sm"
+            className="flex items-center gap-2.5 text-base font-semibold px-5 py-2.5 rounded-xl bg-[#2E86C1] hover:bg-[#1ABC9C] text-white transition-all shadow-sm"
             title="Ke Halaman Utama / Public Landing"
           >
-            <Globe className="w-3.5 h-3.5" />
+            <Globe className="w-5 h-5" />
             <span className="hidden sm:inline">{isLandingPage ? 'Buka Dashboard' : 'Web Utama'}</span>
           </button>
 
@@ -92,12 +92,12 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
           <div className="relative">
             <button
               onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
-              className="p-2 rounded-lg hover:bg-[#2E86C1] transition-colors relative"
+              className="p-3 rounded-xl hover:bg-[#2E86C1] transition-colors relative"
               title="Notifikasi & Perizinan Pending"
             >
-              <Bell className="w-5 h-5" />
+              <Bell className="w-7 h-7" />
               {pendingPermitsCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-[#1ABC9C] text-white font-bold text-[10px] rounded-full flex items-center justify-center border-2 border-[#1A5276]">
+                <span className="absolute top-1 right-1 w-5 h-5 bg-[#1ABC9C] text-white font-bold text-xs rounded-full flex items-center justify-center border-2 border-[#1A5276]">
                   {pendingPermitsCount}
                 </span>
               )}
@@ -130,19 +130,19 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
           <div className="relative">
             <button
               onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-              className="flex items-center gap-2 pl-2 pr-1.5 py-1 rounded-lg hover:bg-[#2E86C1] transition-colors border border-white/20 bg-white/5"
+              className="flex items-center gap-3 pl-3 pr-2.5 py-2 rounded-xl hover:bg-[#2E86C1] transition-colors border border-white/20 bg-white/5"
             >
-              <div className="w-7 h-7 rounded-full bg-[#1ABC9C] flex items-center justify-center font-bold text-xs text-white">
+              <div className="w-11 h-11 rounded-full bg-[#1ABC9C] flex items-center justify-center font-bold text-base text-white">
                 {currentUser.nama.charAt(0)}
               </div>
               <div className="text-left hidden lg:block">
-                <div className="text-xs font-bold leading-tight truncate max-w-32.5">{currentUser.nama}</div>
-                <div className="text-[10px] text-sky-200 font-medium capitalize flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-[#1ABC9C]" />
+                <div className="text-base font-bold leading-tight truncate max-w-44">{currentUser.nama}</div>
+                <div className="text-sm text-sky-200 font-medium capitalize flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#1ABC9C]" />
                   {currentUser.role.replace('_', ' ')}
                 </div>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-sky-200" />
+              <ChevronDown className="w-5 h-5 text-sky-200" />
             </button>
 
             {/* Role Dropdown */}

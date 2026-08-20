@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+html {
+  font-size: 21px !important;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

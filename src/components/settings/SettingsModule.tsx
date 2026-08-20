@@ -19,47 +19,47 @@ export const SettingsModule: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-8 animate-in fade-in duration-200">
 
       {/* Header + Tab Navigation */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-extrabold text-[#1A5276] flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-[#1ABC9C]" />
+          <h2 className="text-xl font-extrabold text-[#1A5276] flex items-center gap-3">
+            <ShieldAlert className="w-7 h-7 text-[#1ABC9C]" />
             Pengaturan Sistem & Logika Perizinan RBAC
           </h2>
-          <p className="text-xs text-[#566573]">Manajemen hak akses role login, matriks perizinan modul, dan konfigurasi tahun ajaran</p>
+          <p className="text-sm text-[#566573] mt-1">Manajemen hak akses role login, matriks perizinan modul, dan konfigurasi tahun ajaran</p>
         </div>
 
         {/* Tab Pills */}
-        <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg flex-wrap">
+        <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-lg flex-wrap">
           <button
             onClick={() => setActiveTab('rbac')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${
               activeTab === 'rbac' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <ShieldCheck className="w-3.5 h-3.5" />
+            <ShieldCheck className="w-5 h-5" />
             Pengguna & Role
           </button>
 
           <button
             onClick={() => setActiveTab('matrix')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${
               activeTab === 'matrix' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <Lock className="w-3.5 h-3.5" />
+            <Lock className="w-5 h-5" />
             Matriks Perizinan Modul
           </button>
 
           <button
             onClick={() => setActiveTab('tahunAjaran')}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${
               activeTab === 'tahunAjaran' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <CalendarDays className="w-3.5 h-3.5" />
+            <CalendarDays className="w-5 h-5" />
             Tahun Ajaran
           </button>
         </div>
@@ -67,37 +67,37 @@ export const SettingsModule: React.FC = () => {
 
       {/* Tab 1: Pengguna & Role */}
       {activeTab === 'rbac' && (
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-4">
+        <div className="space-y-8">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-extrabold text-sm text-[#1A5276]">Daftar Pengguna & Level Akses Active</h3>
-                <p className="text-xs text-gray-500">Ganti role aktif untuk menguji logika perizinan pada navigasi dan modul</p>
+                <h3 className="font-extrabold text-lg text-[#1A5276]">Daftar Pengguna & Level Akses Active</h3>
+                <p className="text-sm text-gray-500 mt-1">Ganti role aktif untuk menguji logika perizinan pada navigasi dan modul</p>
               </div>
-              <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-300">
-                Mode Aktif: {currentUser.role.replace('_', ' ').toUpperCase()}
+              <span className="bg-emerald-100 text-emerald-800 text-sm font-bold px-4 py-1.5 rounded-full border border-emerald-300">
+                Mode Aksif: {currentUser.role.replace('_', ' ').toUpperCase()}
               </span>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <table className="w-full text-left text-sm border-collapse">
                 <thead>
-                  <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider">
-                    <th className="p-3 rounded-tl-lg">Username</th>
-                    <th className="p-3">Nama Lengkap</th>
-                    <th className="p-3">Role Level</th>
-                    <th className="p-3">Wewenang / Deskripsi Singkat</th>
-                    <th className="p-3 rounded-tr-lg text-center">Status / Aksi</th>
+                  <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
+                    <th className="p-4 rounded-tl-lg">Username</th>
+                    <th className="p-4">Nama Lengkap</th>
+                    <th className="p-4">Role Level</th>
+                    <th className="p-4">Wewenang / Deskripsi Singkat</th>
+                    <th className="p-4 rounded-tr-lg text-center">Status / Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {users.map(u => (
                     <tr key={u.id} className={`hover:bg-sky-50 transition-colors ${currentUser.role === u.role ? 'bg-sky-50/70 font-semibold' : ''}`}>
-                      <td className="p-3 font-mono font-bold text-[#1A5276]">{u.username}</td>
-                      <td className="p-3 font-extrabold text-gray-800">{u.nama}</td>
-                      <td className="p-3">
-                        <span className="inline-flex items-center gap-1 bg-sky-100 text-[#1A5276] px-2 py-0.5 rounded font-bold text-[11px] capitalize">
-                          <ShieldCheck className="w-3 h-3 text-[#1ABC9C]" />
+                      <td className="p-4 font-mono font-bold text-[#1A5276] text-base">{u.username}</td>
+                      <td className="p-4 font-extrabold text-gray-800 text-base">{u.nama}</td>
+                      <td className="p-4">
+                        <span className="inline-flex items-center gap-1.5 bg-sky-100 text-[#1A5276] px-3 py-1 rounded font-bold text-xs capitalize">
+                          <ShieldCheck className="w-3.5 h-3.5 text-[#1ABC9C]" />
                           {u.role.replace('_', ' ')}
                         </span>
                       </td>
