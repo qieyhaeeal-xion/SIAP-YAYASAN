@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
@@ -26,43 +27,40 @@ import { SettingsModule } from './components/settings/SettingsModule';
 import { ShieldAlert, Lock, ArrowLeft, UserCheck } from 'lucide-react';
 import { hasPermission, getFirstAllowedTab, ROLE_DETAILS } from './utils/rbac';
 
-const MainApp: React.FC = () => {
-  const { isLandingPage, setIsLandingPage, currentUser } = useApp();
-  const [activeTab, setActiveTab] = useState('dashboard');
+const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
+  return (
+    <LoginModal
+      isOpen
+      onClose={() => navigate('/')}
+      onSuccessLogin={() => navigate('/app')}
+    />
+  );
+};
+
+const AppLayout: React.FC = () => {
+  const { currentUser } = useApp();
+  const navigate = useNavigate();
+  const { tab = 'dashboard' } = useParams();
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
-  const [showLoginModal, setShowLoginModal] = useState(false);
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
-  const handleNavigate = (tab: string) => {
-    setActiveTab(tab);
-    setIsLandingPage(false);
-  };
-
-  if (isLandingPage) {
-    return (
-      <LandingPage
-        onOpenDashboard={() => setIsLandingPage(false)}
-        onOpenLogin={() => setShowLoginModal(true)}
-      />
-    );
-  }
+  const handleNavigate = (t: string) => navigate('/app/' + t);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
-      
+
       {/* Top Header */}
       <Header
-        onToggleSidebar={toggleSidebar}
-        onOpenLoginModal={() => setShowLoginModal(true)}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        onOpenLoginModal={() => navigate('/login')}
       />
 
       <div className="flex-1 flex overflow-hidden">
-        
+
         {/* Collapsible Left Sidebar — drawer di mobile, statis di desktop */}
         <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
+          activeTab={tab}
+          onNavigate={handleNavigate}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
@@ -70,9 +68,9 @@ const MainApp: React.FC = () => {
         {/* Main Content Viewport */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-6 bg-[#F4F6F7] flex flex-col justify-between min-w-0">
           <div className="max-w-screen-xl mx-auto space-y-6 w-full flex-1">
-            
+
             {/* RBAC Permission Check Guard */}
-            {!hasPermission(currentUser.role, activeTab) ? (
+            {!hasPermission(currentUser.role, tab) ? (
               <div className="bg-white rounded-2xl shadow-lg border border-amber-200 p-6 text-center max-w-xl mx-auto my-8 animate-in fade-in zoom-in-95 duration-200 space-y-4">
                 <div className="w-16 h-16 rounded-2xl bg-amber-100 border border-amber-300 text-amber-600 flex items-center justify-center mx-auto shadow-inner">
                   <Lock className="w-8 h-8" />
@@ -80,7 +78,7 @@ const MainApp: React.FC = () => {
                 <div className="space-y-1">
                   <h3 className="text-lg font-black text-gray-900">Akses Ditolak (Unauthorized)</h3>
                   <p className="text-xs text-gray-600">
-                    Role akun Anda <span className="font-extrabold text-[#1A5276] uppercase">[{currentUser.role.replace('_', ' ')}]</span> tidak memiliki wewenang untuk mengakses modul <span className="font-bold text-[#1ABC9C]">"{activeTab}"</span>.
+                    Role akun Anda <span className="font-extrabold text-[#1A5276] uppercase">[{currentUser.role.replace('_', ' ')}]</span> tidak memiliki wewenang untuk mengakses modul <span className="font-bold text-[#1ABC9C]">"{tab}"</span>.
                   </p>
                 </div>
 
@@ -96,14 +94,14 @@ const MainApp: React.FC = () => {
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                   <button
-                    onClick={() => setActiveTab(getFirstAllowedTab(currentUser.role))}
+                    onClick={() => handleNavigate(getFirstAllowedTab(currentUser.role))}
                     className="w-full sm:w-auto px-4 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white text-xs font-bold rounded-xl transition-all shadow flex items-center justify-center gap-2"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     Kembali ke Modul Diizinkan
                   </button>
                   <button
-                    onClick={() => setShowLoginModal(true)}
+                    onClick={() => navigate('/login')}
                     className="w-full sm:w-auto px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2"
                   >
                     <UserCheck className="w-4 h-4 text-[#1ABC9C]" />
@@ -113,37 +111,37 @@ const MainApp: React.FC = () => {
               </div>
             ) : (
               <>
-                {activeTab === 'dashboard' && <DashboardModule onNavigateTab={handleNavigate} />}
+                {tab === 'dashboard' && <DashboardModule onNavigateTab={handleNavigate} />}
 
                 {/* Kesantrian Sub-modules */}
-                {activeTab === 'sub-pesantren' && <SubPesantren />}
-                {activeTab === 'sub-madin' && <SubMadin />}
-                {activeTab === 'sub-sekolah' && <SubSekolah />}
-                {activeTab === 'data-santri' && <DataSantriModule />}
-                {activeTab === 'tahfidz' && <TahfidzModule />}
-                {activeTab === 'nadhoman' && <NadhomanModule />}
-                {activeTab === 'alumni' && <AlumniModule />}
+                {tab === 'sub-pesantren' && <SubPesantren />}
+                {tab === 'sub-madin' && <SubMadin />}
+                {tab === 'sub-sekolah' && <SubSekolah />}
+                {tab === 'data-santri' && <DataSantriModule />}
+                {tab === 'tahfidz' && <TahfidzModule />}
+                {tab === 'nadhoman' && <NadhomanModule />}
+                {tab === 'alumni' && <AlumniModule />}
 
                 {/* Kepengasuhan Sub-modules */}
-                {activeTab === 'kepengasuhan' && <KepengasuhanModule />}
+                {tab === 'kepengasuhan' && <KepengasuhanModule />}
 
                 {/* Kepegawaian */}
-                {activeTab === 'kepegawaian' && <KepegawaianModule />}
+                {tab === 'kepegawaian' && <KepegawaianModule />}
 
                 {/* Akademik & Presensi */}
-                {activeTab === 'akademik' && <AkademikModule />}
+                {tab === 'akademik' && <AkademikModule />}
 
                 {/* Keuangan & Syahriyah */}
-                {activeTab === 'keuangan' && <KeuanganModule />}
+                {tab === 'keuangan' && <KeuanganModule />}
 
                 {/* PPDB */}
-                {activeTab === 'ppdb' && <PPDBModule />}
+                {tab === 'ppdb' && <PPDBModule />}
 
                 {/* Portal Wali Santri */}
-                {activeTab === 'portal-wali' && <PortalWaliModule />}
+                {tab === 'portal-wali' && <PortalWaliModule />}
 
                 {/* Pengaturan & RBAC */}
-                {activeTab === 'pengaturan' && <SettingsModule />}
+                {tab === 'pengaturan' && <SettingsModule />}
               </>
             )}
 
@@ -154,17 +152,6 @@ const MainApp: React.FC = () => {
 
       </div>
 
-      {/* Login / Switch Role Modal */}
-      {showLoginModal && (
-        <LoginModal
-          onClose={() => setShowLoginModal(false)}
-          onSuccessLogin={() => {
-            setShowLoginModal(false);
-            setIsLandingPage(false);
-          }}
-        />
-      )}
-
     </div>
   );
 };
@@ -172,7 +159,15 @@ const MainApp: React.FC = () => {
 export default function App() {
   return (
     <AppProvider>
-      <MainApp />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/app" element={<AppLayout />} />
+          <Route path="/app/:tab" element={<AppLayout />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
     </AppProvider>
   );
 }

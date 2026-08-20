@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types/sisantri';
 import { 
@@ -20,7 +21,8 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModal }) => {
-  const { currentUser, switchRole, perizinanList, isLandingPage, setIsLandingPage } = useApp();
+  const navigate = useNavigate();
+  const { currentUser, switchRole, perizinanList } = useApp();
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
 
@@ -48,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
             <Menu className="w-5 h-5 md:w-6 md:h-6" />
           </button>
 
-          <div className="flex items-center gap-3 sm:gap-4 cursor-pointer min-w-0" onClick={() => setIsLandingPage(true)}>
+          <div className="flex items-center gap-3 sm:gap-4 cursor-pointer min-w-0" onClick={() => navigate('/')}>
             <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-xl bg-[#1ABC9C] flex items-center justify-center font-bold text-white shadow-sm border border-white/20 shrink-0">
               <BookOpen className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
@@ -81,12 +83,12 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
 
           {/* Landing Page Toggle Button */}
           <button
-            onClick={() => setIsLandingPage(!isLandingPage)}
+            onClick={() => navigate('/')}
             className="flex items-center justify-center gap-2 text-sm font-semibold p-2 md:px-4 md:py-2 rounded-xl bg-[#2E86C1] hover:bg-[#1ABC9C] text-white transition-all shadow-sm shrink-0"
             title="Ke Halaman Utama / Public Landing"
           >
             <Globe className="w-4 h-4" />
-            <span className="hidden md:inline">{isLandingPage ? 'Buka Dashboard' : 'Web Utama'}</span>
+            <span className="hidden md:inline">Web Utama</span>
           </button>
 
           {/* Notification Button */}

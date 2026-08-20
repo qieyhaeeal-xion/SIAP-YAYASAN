@@ -29,12 +29,12 @@ import { hasPermission, ROLE_DETAILS } from '../../utils/rbac';
 
 interface SidebarProps {
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  onNavigate: (tab: string) => void;
   isOpen: boolean;
   onClose?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, onClose }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, isOpen, onClose }) => {
   const { currentUser, perizinanList, ppdbList } = useApp();
   const [openKesantrian, setOpenKesantrian] = useState(true);
   const [openKepengasuhan, setOpenKepengasuhan] = useState(true);
@@ -50,9 +50,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpe
 
 const isTabAllowed = (tabId: string) => hasPermission(currentUser.role, tabId);
 
-  const handleTabClick = (tabId: string) => {
+const handleTabClick = (tabId: string) => {
     if (isTabAllowed(tabId)) {
-      setActiveTab(tabId);
+      onNavigate(tabId);
       onClose?.();
     }
   };

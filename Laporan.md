@@ -6,10 +6,10 @@
 | Parameter | Keterangan |
 |---|---|
 | **Nama Aplikasi** | **SIAP** (Sistem Informasi Administrasi Pesantren) & Portal E-Santri |
-| **Versi Frontend** | v1.0.0 (Prototype Single Page Application) |
-| **Teknologi Utama** | React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons |
+| **Versi Frontend** | v1.1.0 (SPA Multi-URL Routing) |
+| **Teknologi Utama** | React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons, React Router DOM |
 | **Dokumen Acuan** | [prd.md](file:///d:/web/sisantri---sim-pesantren-mukhtar-syafaat/prd.md) & `RENCANA APLIKASI.xlsx` |
-| **Tanggal Laporan** | 11 Agustus 2026 |
+| **Tanggal Laporan** | 21 Agustus 2026 |
 
 ---
 
@@ -240,7 +240,74 @@ Dilakukan perbaikan karakter encoding yang rusak (mojibake) pada komponen dashbo
 
 ---
 
-## 6. RENCANA TASK KEDEPANNYA (FUTURE ROADMAP)
+## 6. PEMBARUAN v1.1.0: OPTIMALISASI UKURAN UI & MIGRASI ROUTING URL
+
+Pembaruan ini mencakup tiga fokus utama: (1) pengecilan skala seluruh antarmuka agar ringkas di Vercel, (2) konsolidasi menu kepengasuhan yang duplikat, dan (3) migrasi dari navigasi state-based ke routing berbasis URL (`react-router-dom`) sehingga setiap halaman memiliki alamat URL unik.
+
+### 6.1 Optimalisasi Ukuran & Skala Antarmuka
+
+| # | Area | Perubahan |
+|---|---|---|
+| 1 | **Landing Page** | Semua class breakpoint `2xl:` dihapus; container dibatasi `max-w-screen-xl`; heading maksimal `text-5xl`; padding/gap dirapikan |
+| 2 | **Skala Global** | `src/index.css`: root font **16px (mobile)** & **14px (desktop ≥768px)**; elemen besar (kartu, statistik) menyusut proporsional |
+| 3 | **LoginModal** | Ukuran modal, heading, dan form diperkecil |
+| 4 | **Header & Sidebar** | Sidebar `w-80` (lebih ramping); Header padding & teks diperkecil |
+| 5 | **Dashboard per Role** | Kartu statistik, widget, dan grid di AdminYayasan, Pengurus, dan Guru diperkecil |
+
+> Catatan: Build hanya menyisakan *warning* chunk JS >500 kB (non-blokir) — tidak terkait ukuran tampilan.
+
+### 6.2 Konsolidasi Menu Kepengasuhan
+
+- Tab sidebar duplikat (`Perizinan`, `Kesehatan`, `Konseling`) yang sebelumnya memisah menjadi tiga CTA digabung menjadi **satu CTA "Kepengasuhan & Ketertiban"** dengan route tunggal `kepengasuhan`.
+- Tab internal modul (Perizinan, Kesehatan, Konseling) **tetap dipertahankan** di dalam `KepengasuhanModule`.
+- Ditambahkan permission baru `id: 'kepengasuhan'` di `src/utils/rbac.ts` dengan `allowedRoles: [admin_yayasan, admin_sistem, pengurus, guru]`.
+- Semua shortcut di dashboard (AdminYayasan & Pengurus) kini mengarah ke `onNavigateTab('kepengasuhan')`.
+
+### 6.3 Migrasi Routing URL (React Router DOM)
+
+Aplikasi berpindah dari navigasi berbasis state (`isLandingPage`) ke URL routing:
+
+| URL | Halaman |
+|---|---|
+| `/` | Landing Page publik |
+| `/login` | Halaman Login (LoginModal full-page) |
+| `/app` | Dashboard utama (default tab `dashboard`) |
+| `/app/:tab` | Modul spesifik (mis. `/data-santri`, `/kepengasuhan`, `/keuangan`) |
+| `*` | Redirect ke `/` |
+
+**Perubahan struktural:**
+- `src/App.tsx` ditulis ulang: `BrowserRouter` + `Routes`; komponen `LoginPage` & `AppLayout`; RBAC guard per tab dengan akses-ditolak UI.
+- `src/context/AppContext.tsx`: hapus `isLandingPage`/`setIsLandingPage` dari interface, state, dan provider value.
+- `Sidebar.tsx`: prop `setActiveTab` → `onNavigate` (memanggil `navigate('/app/' + tab)`).
+- `Header.tsx`: tombol "Web Utama" & brand → `navigate('/')`.
+- `LandingPage.tsx`: hapus props `onOpenDashboard`/`onOpenLogin`; CTA "BUKA SIAP DASHBOARD" → `navigate('/app')`; `onSuccessLogin` pada modal inline.
+- `LoginModal.tsx`: navigasi via callback `onSuccessLogin`.
+- `vercel.json` (baru): SPA rewrite `/(.*)` → `/index.html` agar `/app/*` & `/login` berfungsi di Vercel.
+- Dependency baru: `react-router-dom` terpasang.
+
+### 6.4 Bug Fix & QA Verifikasi
+
+**Bug Fix:** Urutan pemanggilan `onSuccessLogin()` sebelum `onClose()` di `LoginModal` menyebabkan navigasi `/app` tertimpa `navigate('/')` (akibat batching React) — login selalu kembali ke landing. Diperbaiki dengan membalik urutan: `onClose()` dulu, lalu `onSuccessLogin()`.
+
+**Verifikasi Browser (Playwright):**
+
+| Skenario | Hasil |
+|---|---|
+| `/` landing page render | ✅ |
+| CTA "BUKA SIAP DASHBOARD" → `/app` | ✅ |
+| `/app/data-santri` modul render (tanpa console error) | ✅ |
+| `/login` halaman login render | ✅ |
+| Submit login → `/app` | ✅ |
+| Modal "Masuk SIAP" di landing → submit → `/app` | ✅ |
+| Tombol "Web Utama" → `/` | ✅ |
+| URL tak dikenal → redirect `/` | ✅ |
+| `/app/keuangan` modul render | ✅ (hanya warning duplicate key `pmk-` pada data demo, pre-existing) |
+
+**Quality Gates:** `npm run lint` (tsc --noEmit) ✅, `npm run build` ✅, `git diff --check` ✅.
+
+---
+
+## 7. RENCANA TASK KEDEPANNYA (FUTURE ROADMAP)
 
 Untuk membawa sistem SiSantri dari tahap prototipe antarmuka (frontend MVP) menuju **sistem produksi berskala penuh (Production-Ready System)** yang siap diimplementasikan di Pondok Pesantren Mukhtar Syafaat, berikut adalah peta jalan (roadmap) rencana task teknis kedepannya:
 
@@ -284,11 +351,11 @@ timeline
 
 ---
 
-## 7. KESIMPULAN
+## 8. KESIMPULAN
 
 Sistem Informasi Manajemen Pesantren Mukhtar Syafaat (**SiSantri**) saat ini telah memiliki **fondasi frontend SPA yang sangat matang, komprehensif, dan 100% mematuhi seluruh spesifikasi dokumen [prd.md](file:///d:/web/sisantri---sim-pesantren-mukhtar-syafaat/prd.md) serta `RENCANA APLIKASI.xlsx`**. 
 
-Seluruh alur logika bisnis—mulai dari generasi NIS otomatis, formulir santri 8 bagian, mutasi PPDB 1-click, kalkulasi akumulasi nadhoman, pelunasan syahriyah, hingga portal monitoring wali santri—telah berfungsi dengan lancar secara interaktif. Langkah strategis berikutnya adalah mengeksekusi pengembangan sisi Backend REST API dan integrasi Database Relasional sesuai rencana task kedepannya.
+Seluruh alur logika bisnis—mulai dari generasi NIS otomatis, formulir santri 8 bagian, mutasi PPDB 1-click, kalkulasi akumulasi nadhoman, pelunasan syahriyah, hingga portal monitoring wali santri—telah berfungsi dengan lancar secara interaktif. Pada **v1.1.0**, aplikasi ditingkatkan dengan antarmuka yang lebih ringkas serta **routing berbasis URL** (`/`, `/login`, `/app/:tab`) sehingga setiap halaman dapat diakses melalui alamat yang unik dan dapat dibagikan, dengan SPA rewrite agar kompatibel penuh pada Vercel. Langkah strategis berikutnya adalah mengeksekusi pengembangan sisi Backend REST API dan integrasi Database Relasional sesuai rencana task kedepannya.
 
 ---
 *Laporan ini disusun secara otomatis oleh Antigravity AI Assistant tanpa mengubah kode sumber aplikasi.*

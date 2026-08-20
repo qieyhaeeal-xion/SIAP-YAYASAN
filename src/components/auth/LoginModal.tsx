@@ -46,7 +46,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onSuccessLogin,
   initialRoleCategory = 'yayasan'
 }) => {
-  const { switchRole, setIsLandingPage, users, setCurrentUser } = useApp();
+  const { switchRole, users, setCurrentUser } = useApp();
   const [activeTab, setActiveTab] = useState<RoleCategory>(initialRoleCategory);
   
   const [selectedRole, setSelectedRole] = useState<UserRole>('admin_yayasan');
@@ -85,9 +85,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       switchRole(selectedRole);
     }
 
-    setIsLandingPage(false); // Direct to main app dashboard
-    onSuccessLogin?.();
+    // Direct to main app dashboard
     onClose();
+    onSuccessLogin?.();
   };
 
   return (

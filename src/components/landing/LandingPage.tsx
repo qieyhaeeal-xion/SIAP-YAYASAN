@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { LoginModal, RoleCategory } from '../auth/LoginModal';
 import {
@@ -27,13 +28,11 @@ import {
   X
 } from 'lucide-react';
 
-interface LandingPageProps {
-  onOpenDashboard?: () => void;
-  onOpenLogin?: () => void;
-}
+interface LandingPageProps {}
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpenLogin }) => {
-  const { setIsLandingPage, addPPDB, unitsPesantren, unitSekolahList, marhalahList } = useApp();
+export const LandingPage: React.FC<LandingPageProps> = () => {
+  const navigate = useNavigate();
+  const { addPPDB, unitsPesantren, unitSekolahList, marhalahList } = useApp();
 
   // Login Modal state
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -250,7 +249,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
             <div className="flex flex-col min-[480px]:flex-row flex-wrap items-stretch min-[480px]:items-center gap-2 sm:gap-3 pt-1 sm:pt-2">
               <button
-                onClick={() => setIsLandingPage(false)}
+                onClick={() => navigate('/app')}
                 className="w-full min-[480px]:w-auto px-5 sm:px-6 py-3 sm:py-3.5 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-black text-xs sm:text-sm rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span className="text-center leading-snug">BUKA SIAP DASHBOARD UTAMA</span>
@@ -808,6 +807,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
+        onSuccessLogin={() => navigate('/app')}
         initialRoleCategory={loginCategory}
       />
 

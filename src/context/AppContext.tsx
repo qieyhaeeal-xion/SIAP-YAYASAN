@@ -76,8 +76,6 @@ import {
 
 interface AppContextType {
   // Mode & Auth
-  isLandingPage: boolean;
-  setIsLandingPage: (val: boolean) => void;
   currentUser: UserProfile;
   setCurrentUser: (user: UserProfile) => void;
   switchRole: (role: UserRole) => void;
@@ -236,7 +234,6 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
 }
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isLandingPage, setIsLandingPage] = useState<boolean>(true);
   const [users] = useLocalStorage<UserProfile[]>('users', INITIAL_USERS);
   const [currentUser, setCurrentUser] = useLocalStorage<UserProfile>('currentUser', INITIAL_USERS[0]);
 
@@ -922,8 +919,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   return (
     <AppContext.Provider
       value={{
-        isLandingPage,
-        setIsLandingPage,
         currentUser,
         setCurrentUser,
         switchRole,
