@@ -157,7 +157,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
                   Mukhtar Syafaat
                 </span>
               </div>
-              <p className="text-[11px] sm:text-sm text-[#566573] font-medium hidden sm:block truncate">Sistem Informasi Manajemen Pesantren Terpadu</p>
+              <p className="text-[11px] sm:text-sm text-[#566573] font-medium hidden sm:block truncate">Sistem Informasi Administrasi Pesantren</p>
             </div>
           </div>
 
@@ -236,7 +236,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
           <div className="md:col-span-7 space-y-5 sm:space-y-7 2xl:space-y-8 text-left">
             <div className="inline-flex items-center gap-2 sm:gap-2.5 bg-[#1ABC9C]/20 border border-[#1ABC9C] text-[#1ABC9C] px-3 sm:px-4 2xl:px-5 py-1.5 sm:py-2 2xl:py-2.5 rounded-full text-[11px] sm:text-sm 2xl:text-base font-extrabold tracking-wide max-w-full">
               <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 2xl:w-6 2xl:h-6 shrink-0" />
-              <span className="leading-snug">Sistem Informasi Pesantren Terpadu T.A. 2026/2027</span>
+              <span className="leading-snug">Sistem Informasi Administrasi Pesantren</span>
             </div>
 
             <h1 className="text-3xl min-[480px]:text-4xl sm:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black leading-[1.1] tracking-tight">
@@ -245,7 +245,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
             </h1>
 
             <p className="text-sm sm:text-base lg:text-xl 2xl:text-2xl text-sky-100 max-w-2xl 2xl:max-w-3xl leading-relaxed font-normal">
-              Mewujudkan generasi santri unggul ber-Akhlakul Karimah, fasih Al-Qur'an & Kitab Salaf, terintegrasi pendidikan formal (MTs, MA, SMK) serta Madrasah Diniyah Ula, Wustho, Ulya.
+              Mewujudkan generasi santri unggul ber-Akhlakul Karimah, fasih Al-Qur'an & Kitab Salaf, terintegrasi pendidikan formal (SMP, MTs, MA, SMK) serta Madrasah Diniyah Ula, Wustho, Ulya.
             </p>
 
             <div className="flex flex-col min-[480px]:flex-row flex-wrap items-stretch min-[480px]:items-center gap-3 sm:gap-4 2xl:gap-6 pt-2 sm:pt-3">
@@ -350,16 +350,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       <section className="bg-white py-8 sm:py-12 lg:py-16 2xl:py-24 border-b border-gray-200 px-4 sm:px-6 2xl:px-12">
         <div className="container mx-auto max-w-screen-2xl 2xl:max-w-[1700px] grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 2xl:gap-10 text-center">
           <div className="p-4 sm:p-6 lg:p-8 2xl:p-12 rounded-2xl sm:rounded-3xl 2xl:rounded-[2rem] bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#1A5276]">1.250+</div>
+            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#1A5276]">550+</div>
             <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg 2xl:text-xl text-[#566573] font-extrabold mt-1.5 sm:mt-2 2xl:mt-3 leading-snug">Santri Aktif Putra & Putri</div>
           </div>
           <div className="p-4 sm:p-6 lg:p-8 2xl:p-12 rounded-2xl sm:rounded-3xl 2xl:rounded-[2rem] bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#2E86C1]">3 Unit</div>
+            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#2E86C1]">12 Unit</div>
             <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg 2xl:text-xl text-[#566573] font-extrabold mt-1.5 sm:mt-2 2xl:mt-3 leading-snug">Kompleks Asrama Pesantren</div>
           </div>
           <div className="p-4 sm:p-6 lg:p-8 2xl:p-12 rounded-2xl sm:rounded-3xl 2xl:rounded-[2rem] bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#1ABC9C]">3 Lembaga</div>
-            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg 2xl:text-xl text-[#566573] font-extrabold mt-1.5 sm:mt-2 2xl:mt-3 leading-snug">Sekolah Formal (MTs, MA, SMK, SMP)</div>
+            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#1ABC9C]">5 Lembaga</div>
+            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg 2xl:text-xl text-[#566573] font-extrabold mt-1.5 sm:mt-2 2xl:mt-3 leading-snug">Sekolah Formal (TK/PAUD, MTs, MA, SMK, SMP)</div>
           </div>
           <div className="p-4 sm:p-6 lg:p-8 2xl:p-12 rounded-2xl sm:rounded-3xl 2xl:rounded-[2rem] bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
             <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#1A5276]">3 Marhalah</div>
@@ -539,7 +539,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
               </div>
               <h3 className="font-black text-lg sm:text-xl text-[#1A5276]">Setoran Kitab Nadhoman</h3>
               <p className="text-sm sm:text-base text-[#566573] mt-3 leading-relaxed font-normal">
-                Hafalan bait matan klasik: Aqidatul Awam (Tauhid), Matan Al-Imriti (Gramatika), hingga Alfiyah Ibn Malik (1000 Bait).
+                Hafalan bait matan klasik: Amtsilatu Tashrifiyah (Tata Bahasa), Al-Qusyairiyah (Terjemah Kitab Al-Jurumiyah) Matan Al-Imriti (Gramatika), hingga Alfiyah Ibn Malik (1000 Bait).
               </p>
             </div>
 

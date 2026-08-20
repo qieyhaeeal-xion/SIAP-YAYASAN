@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { useApp } from '../../../context/AppContext';
 import { 
   HeartHandshake, 
@@ -79,7 +79,7 @@ export const WaliSantriDashboard: React.FC<RoleDashboardProps> = ({ onNavigateTa
               Portal Monitoring Wali Santri E-Santri
             </div>
             <h2 className="text-2xl sm:text-3xl font-black leading-tight">
-              {greeting}, Bapak/Ibu {currentUser.nama}! ðŸŒ¸
+              {greeting}, Bapak/Ibu {currentUser.nama}! 
             </h2>
             <p className="text-sm text-teal-50 max-w-xl leading-relaxed">
               Pantau perkembangan ananda di Pondok Pesantren Mukhtar Syafaat. Cek capaian hafalan Qur'an, setoran kitab, status tagihan Syahriyah, perizinan, dan kesehatan.
@@ -107,14 +107,14 @@ export const WaliSantriDashboard: React.FC<RoleDashboardProps> = ({ onNavigateTa
               <h3 className="text-lg font-black text-gray-900">{santri?.namaLengkap}</h3>
               <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full">Santri Aktif</span>
             </div>
-            <p className="text-xs text-gray-500 font-mono mt-0.5">NIS: {santri?.nis} â€¢ NIK: {santri?.nik}</p>
+            <p className="text-xs text-gray-500 font-mono mt-0.5">NIS: {santri?.nis} • NIK: {santri?.nik}</p>
             <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-gray-600 font-semibold">
               <span className="bg-gray-100 px-2 py-0.5 rounded">{unitP?.namaUnit}</span>
-              <span>â€¢</span>
+              <span>•</span>
               <span className="bg-gray-100 px-2 py-0.5 rounded">{asrama?.namaAsrama} ({kamar?.namaKamar})</span>
-              <span>â€¢</span>
+              <span>•</span>
               <span className="bg-gray-100 px-2 py-0.5 rounded">{sekolah?.namaSekolah} ({kelas?.namaKelas})</span>
-              <span>â€¢</span>
+              <span>•</span>
               <span className="bg-gray-100 px-2 py-0.5 rounded">Madin {marhalah?.namaMarhalah} ({kelasMadin?.namaKelas})</span>
             </div>
           </div>
@@ -124,7 +124,7 @@ export const WaliSantriDashboard: React.FC<RoleDashboardProps> = ({ onNavigateTa
           <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-200 text-center w-full sm:w-auto">
             <p className="text-[11px] font-bold text-emerald-800">Status Syahriyah</p>
             <p className="text-sm font-black text-emerald-700 mt-0.5">
-              {unpaidInvoices.length === 0 ? 'âœ… Lunas Semua' : `âš ï¸ ${unpaidInvoices.length} Belum Lunas`}
+              {unpaidInvoices.length === 0 ? '✅ Lunas Semua' : `âš ï¸ ${unpaidInvoices.length} Belum Lunas`}
             </p>
           </div>
         </div>
