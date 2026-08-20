@@ -218,6 +218,26 @@ Pola grid statistik berulang di banyak file (dashboard per-role, landing, modul 
 - Utility class global pada `index.css` (via `@layer components`) seperti `.card-panel`, `.table-scroll` (= `overflow-x-auto`), dan `.container-page` (max-width + padding responsive) agar pemakaian konsisten.
 - Konvensi grid: selalu tulis kolom mobile pertama (mis. `grid-cols-1` atau `grid-cols-2`) sebelum breakpoint, jangan pernah `grid-cols-4` tanpa prefix.
 
+### 5.5 Perbaikan Karakter Encoding UTF-8
+
+Dilakukan perbaikan karakter encoding yang rusak (mojibake) pada komponen dashboard wali santri akibat proses konversi file yang tidak konsisten.
+
+**File yang Diperbaiki:**
+- `src/components/dashboard/roles/WaliSantriDashboard.tsx`
+
+**Perubahan yang Dilakukan:**
+
+| # | Karakter Lama (Rusak) | Karakter Baru (Benar) | Lokasi |
+|---|---|---|---|
+| 1 | `â€¢` | `•` (bullet point) | Baris 110, 113, 115, 117 - Pemisah antar informasi profil santri |
+| 2 | `âœ…` | `✅` (checkmark emoji) | Baris 127 - Status "Lunas Semua" pada tagihan syahriyah |
+| 3 | `âš ï¸` | `⚠️` (warning emoji) | Baris 127 - Status peringatan jumlah tagihan belum lunas |
+
+**Dampak Perbaikan:**
+- Karakter bullet point `•` sekarang tampil dengan benar sebagai pemisah visual antar informasi profil santri (Unit Pesantren, Asrama, Sekolah, Madin)
+- Emoji status syahriyah tampil dengan benar: ✅ untuk "Lunas Semua" dan ⚠️ untuk peringatan tagihan belum lunas
+- Tampilan dashboard wali santri menjadi lebih profesional dan mudah dibaca
+
 ---
 
 ## 6. RENCANA TASK KEDEPANNYA (FUTURE ROADMAP)
