@@ -120,7 +120,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
       {/* Top Header Bar */}
       <div className="bg-[#1A5276] text-white text-xs sm:text-sm py-2.5 px-4 sm:px-6 border-b border-[#2E86C1]">
-        <div className="container mx-auto max-w-screen-2xl flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="container mx-auto max-w-screen-xl flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="flex flex-col gap-2 min-w-0 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-1 text-xs sm:text-sm text-sky-200">
             <span className="flex items-start sm:items-center gap-2 font-medium min-w-0">
               <MapPin className="w-4 h-4 text-[#1ABC9C] shrink-0 mt-0.5 sm:mt-0" />
@@ -144,7 +144,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
       {/* Main Navbar */}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto max-w-screen-2xl px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+        <div className="container mx-auto max-w-screen-xl px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
 
           <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#1A5276] flex items-center justify-center font-bold text-white shadow-md shrink-0">
@@ -229,39 +229,39 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       </nav>
 
       {/* Hero Banner Section */}
-      <header className="bg-linear-to-r from-[#1A5276] via-[#2E86C1] to-[#1A5276] text-white py-12 sm:py-16 lg:py-28 2xl:py-36 px-4 sm:px-6 2xl:px-12 relative overflow-hidden">
+      <header className="bg-linear-to-r from-[#1A5276] via-[#2E86C1] to-[#1A5276] text-white py-12 sm:py-16 lg:py-20 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10 pointer-events-none" />
-        <div className="container mx-auto max-w-screen-2xl 2xl:max-w-[1700px] relative z-10 grid md:grid-cols-12 gap-8 lg:gap-14 2xl:gap-20 items-center">
+        <div className="container mx-auto max-w-screen-xl relative z-10 grid md:grid-cols-12 gap-8 lg:gap-12 items-center">
 
-          <div className="md:col-span-7 space-y-5 sm:space-y-7 2xl:space-y-8 text-left">
-            <div className="inline-flex items-center gap-2 sm:gap-2.5 bg-[#1ABC9C]/20 border border-[#1ABC9C] text-[#1ABC9C] px-3 sm:px-4 2xl:px-5 py-1.5 sm:py-2 2xl:py-2.5 rounded-full text-[11px] sm:text-sm 2xl:text-base font-extrabold tracking-wide max-w-full">
-              <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 2xl:w-6 2xl:h-6 shrink-0" />
+          <div className="md:col-span-7 space-y-5 sm:space-y-7 text-left">
+            <div className="inline-flex items-center gap-2 sm:gap-2.5 bg-[#1ABC9C]/20 border border-[#1ABC9C] text-[#1ABC9C] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-sm font-extrabold tracking-wide max-w-full">
+              <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 shrink-0" />
               <span className="leading-snug">Sistem Informasi Administrasi Pesantren</span>
             </div>
 
-            <h1 className="text-3xl min-[480px]:text-4xl sm:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black leading-[1.1] tracking-tight">
+            <h1 className="text-3xl min-[480px]:text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-black leading-[1.1] tracking-tight">
               Pondok Pesantren <br />
               <span className="text-[#1ABC9C]">Mukhtar Syafaat</span>
             </h1>
 
-            <p className="text-sm sm:text-base lg:text-xl 2xl:text-2xl text-sky-100 max-w-2xl 2xl:max-w-3xl leading-relaxed font-normal">
+            <p className="text-sm sm:text-base lg:text-xl text-sky-100 max-w-2xl leading-relaxed font-normal">
               Mewujudkan generasi santri unggul ber-Akhlakul Karimah, fasih Al-Qur'an & Kitab Salaf, terintegrasi pendidikan formal (SMP, MTs, MA, SMK) serta Madrasah Diniyah Ula, Wustho, Ulya.
             </p>
 
-            <div className="flex flex-col min-[480px]:flex-row flex-wrap items-stretch min-[480px]:items-center gap-3 sm:gap-4 2xl:gap-6 pt-2 sm:pt-3">
+            <div className="flex flex-col min-[480px]:flex-row flex-wrap items-stretch min-[480px]:items-center gap-3 sm:gap-4 pt-2 sm:pt-3">
               <button
                 onClick={() => setIsLandingPage(false)}
-                className="w-full min-[480px]:w-auto px-6 sm:px-8 2xl:px-12 py-3.5 sm:py-4 2xl:py-5 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-black text-xs sm:text-base 2xl:text-lg rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-2 sm:gap-3 2xl:gap-4 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full min-[480px]:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-black text-xs sm:text-base rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-2 sm:gap-3 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span className="text-center leading-snug">BUKA SIAP DASHBOARD UTAMA</span>
-                <ArrowRight className="w-5 h-5 2xl:w-6 2xl:h-6 shrink-0" />
+                <ArrowRight className="w-5 h-5 shrink-0" />
               </button>
 
               <button
                 onClick={() => setShowPpdbForm(true)}
-                className="w-full min-[480px]:w-auto px-6 sm:px-8 2xl:px-12 py-3.5 sm:py-4 2xl:py-5 bg-white text-[#1A5276] hover:bg-sky-50 font-black text-xs sm:text-base 2xl:text-lg rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-2 sm:gap-3 2xl:gap-4 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full min-[480px]:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-white text-[#1A5276] hover:bg-sky-50 font-black text-xs sm:text-base rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-2 sm:gap-3 hover:scale-[1.02] active:scale-[0.98]"
               >
-                <UserPlus className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                <UserPlus className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                 <span className="text-center leading-snug">DAFTAR PPDB SANTRI BARU</span>
               </button>
             </div>
@@ -269,74 +269,74 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
           {/* Quick Access Card */}
           <div className="md:col-span-5 flex justify-center w-full">
-            <div className="bg-white/10 backdrop-blur-md p-5 sm:p-8 lg:p-10 2xl:p-12 rounded-3xl sm:rounded-[2.5rem] border border-white/20 text-white space-y-4 sm:space-y-6 2xl:space-y-8 max-w-lg 2xl:max-w-2xl w-full shadow-2xl">
+            <div className="bg-white/10 backdrop-blur-md p-5 sm:p-8 lg:p-8 rounded-3xl sm:rounded-[2.5rem] border border-white/20 text-white space-y-4 sm:space-y-6 max-w-lg w-full shadow-2xl">
 
-              <div className="flex items-center justify-between pb-4 2xl:pb-6 border-b border-white/20">
-                <div className="flex items-center gap-4 2xl:gap-5">
-                  <div className="w-12 h-12 2xl:w-16 2xl:h-16 rounded-2xl bg-[#1ABC9C] flex items-center justify-center text-white font-bold text-2xl shadow-lg">
-                    <BookOpen className="w-7 h-7 2xl:w-10 2xl:h-10" />
+              <div className="flex items-center justify-between pb-4 border-b border-white/20">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-[#1ABC9C] flex items-center justify-center text-white font-bold text-2xl shadow-lg">
+                    <BookOpen className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="font-black text-lg sm:text-xl 2xl:text-3xl">Portal Multi-Akses</h3>
-                    <p className="text-xs sm:text-sm 2xl:text-base text-sky-200">Silakan pilih role untuk masuk</p>
+                    <h3 className="font-black text-lg sm:text-xl">Portal Multi-Akses</h3>
+                    <p className="text-xs sm:text-sm text-sky-200">Silakan pilih role untuk masuk</p>
                   </div>
                 </div>
               </div>
 
               {/* 3 Role Entry Cards */}
-              <div className="space-y-3 2xl:space-y-4">
+              <div className="space-y-3">
                 <button
                   onClick={() => openLogin('admin')}
-                  className="w-full p-3.5 sm:p-4 2xl:p-5 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/15 transition-all text-left flex items-center justify-between gap-2 group"
+                  className="w-full p-3.5 sm:p-4 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/15 transition-all text-left flex items-center justify-between gap-2 group"
                 >
-                  <div className="flex items-center gap-3 sm:gap-4 2xl:gap-5 min-w-0">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 2xl:w-14 2xl:h-14 rounded-xl bg-[#1A5276] flex items-center justify-center text-white font-bold shrink-0">
-                      <Building2 className="w-4 h-4 sm:w-5 sm:h-5 2xl:w-7 2xl:h-7 text-[#1ABC9C]" />
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1A5276] flex items-center justify-center text-white font-bold shrink-0">
+                      <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-[#1ABC9C]" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs sm:text-sm 2xl:text-lg font-black text-white group-hover:text-[#1ABC9C] transition-colors leading-snug">
+                      <div className="text-xs sm:text-sm font-black text-white group-hover:text-[#1ABC9C] transition-colors leading-snug">
                         1. Portal Admin & Bendahara
                       </div>
-                      <div className="text-[11px] sm:text-xs 2xl:text-sm text-sky-200 mt-0.5 2xl:mt-1 leading-snug">Manajemen Santri, Keuangan, PPDB & Pegawai</div>
+                      <div className="text-[11px] sm:text-xs text-sky-200 mt-0.5 leading-snug">Manajemen Santri, Keuangan, PPDB & Pegawai</div>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 2xl:w-7 2xl:h-7 text-sky-200 group-hover:translate-x-1 transition-transform shrink-0" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-sky-200 group-hover:translate-x-1 transition-transform shrink-0" />
                 </button>
 
                 <button
                   onClick={() => openLogin('guru')}
-                  className="w-full p-3.5 sm:p-4 2xl:p-5 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/15 transition-all text-left flex items-center justify-between gap-2 group"
+                  className="w-full p-3.5 sm:p-4 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/15 transition-all text-left flex items-center justify-between gap-2 group"
                 >
-                  <div className="flex items-center gap-3 sm:gap-4 2xl:gap-5 min-w-0">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 2xl:w-14 2xl:h-14 rounded-xl bg-[#1A5276] flex items-center justify-center text-white font-bold shrink-0">
-                      <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 2xl:w-7 2xl:h-7 text-[#1ABC9C]" />
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1A5276] flex items-center justify-center text-white font-bold shrink-0">
+                      <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-[#1ABC9C]" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs sm:text-sm 2xl:text-lg font-black text-white group-hover:text-[#1ABC9C] transition-colors leading-snug">
+                      <div className="text-xs sm:text-sm font-black text-white group-hover:text-[#1ABC9C] transition-colors leading-snug">
                         2. Portal Guru & Ustadz
                       </div>
-                      <div className="text-[11px] sm:text-xs 2xl:text-sm text-sky-200 mt-0.5 2xl:mt-1 leading-snug">Input Setoran Tahfidz, Nadhoman & Absensi</div>
+                      <div className="text-[11px] sm:text-xs text-sky-200 mt-0.5 leading-snug">Input Setoran Tahfidz, Nadhoman & Absensi</div>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 2xl:w-7 2xl:h-7 text-sky-200 group-hover:translate-x-1 transition-transform shrink-0" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-sky-200 group-hover:translate-x-1 transition-transform shrink-0" />
                 </button>
 
                 <button
                   onClick={() => openLogin('wali')}
-                  className="w-full p-3.5 sm:p-4 2xl:p-5 bg-[#1ABC9C] hover:bg-[#16a085] rounded-2xl text-white transition-all text-left flex items-center justify-between gap-2 shadow-xl group"
+                  className="w-full p-3.5 sm:p-4 bg-[#1ABC9C] hover:bg-[#16a085] rounded-2xl text-white transition-all text-left flex items-center justify-between gap-2 shadow-xl group"
                 >
-                  <div className="flex items-center gap-3 sm:gap-4 2xl:gap-5 min-w-0">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 2xl:w-14 2xl:h-14 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold shrink-0">
-                      <HeartHandshake className="w-4 h-4 sm:w-5 sm:h-5 2xl:w-7 2xl:h-7" />
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold shrink-0">
+                      <HeartHandshake className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-xs sm:text-sm 2xl:text-lg font-black text-white leading-snug">
+                      <div className="text-xs sm:text-sm font-black text-white leading-snug">
                         3. Portal Orang Tua / Wali
                       </div>
-                      <div className="text-[11px] sm:text-xs 2xl:text-sm text-teal-100 mt-0.5 2xl:mt-1 leading-snug">Cek Hafalan, Sakit UKS, Izin Pulang & Tagihan</div>
+                      <div className="text-[11px] sm:text-xs text-teal-100 mt-0.5 leading-snug">Cek Hafalan, Sakit UKS, Izin Pulang & Tagihan</div>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 2xl:w-7 2xl:h-7 text-white group-hover:translate-x-1 transition-transform shrink-0" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-x-1 transition-transform shrink-0" />
                 </button>
               </div>
 
@@ -347,70 +347,70 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       </header>
 
       {/* Quick Statistics Banner */}
-      <section className="bg-white py-8 sm:py-12 lg:py-16 2xl:py-24 border-b border-gray-200 px-4 sm:px-6 2xl:px-12">
-        <div className="container mx-auto max-w-screen-2xl 2xl:max-w-[1700px] grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 2xl:gap-10 text-center">
-          <div className="p-4 sm:p-6 lg:p-8 2xl:p-12 rounded-2xl sm:rounded-3xl 2xl:rounded-[2rem] bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#1A5276]">550+</div>
-            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg 2xl:text-xl text-[#566573] font-extrabold mt-1.5 sm:mt-2 2xl:mt-3 leading-snug">Santri Aktif Putra & Putri</div>
+      <section className="bg-white py-8 sm:py-12 lg:py-16 border-b border-gray-200 px-4 sm:px-6">
+        <div className="container mx-auto max-w-screen-xl grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 lg:gap-8 text-center">
+          <div className="p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-5xl font-black text-[#1A5276]">550+</div>
+            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg text-[#566573] font-extrabold mt-1.5 sm:mt-2 leading-snug">Santri Aktif Putra & Putri</div>
           </div>
-          <div className="p-4 sm:p-6 lg:p-8 2xl:p-12 rounded-2xl sm:rounded-3xl 2xl:rounded-[2rem] bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#2E86C1]">12 Unit</div>
-            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg 2xl:text-xl text-[#566573] font-extrabold mt-1.5 sm:mt-2 2xl:mt-3 leading-snug">Kompleks Asrama Pesantren</div>
+          <div className="p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-5xl font-black text-[#2E86C1]">12 Unit</div>
+            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg text-[#566573] font-extrabold mt-1.5 sm:mt-2 leading-snug">Kompleks Asrama Pesantren</div>
           </div>
-          <div className="p-4 sm:p-6 lg:p-8 2xl:p-12 rounded-2xl sm:rounded-3xl 2xl:rounded-[2rem] bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#1ABC9C]">5 Lembaga</div>
-            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg 2xl:text-xl text-[#566573] font-extrabold mt-1.5 sm:mt-2 2xl:mt-3 leading-snug">Sekolah Formal (TK/PAUD, MTs, MA, SMK, SMP)</div>
+          <div className="p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-5xl font-black text-[#1ABC9C]">5 Lembaga</div>
+            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg text-[#566573] font-extrabold mt-1.5 sm:mt-2 leading-snug">Sekolah Formal (TK/PAUD, MTs, MA, SMK, SMP)</div>
           </div>
-          <div className="p-4 sm:p-6 lg:p-8 2xl:p-12 rounded-2xl sm:rounded-3xl 2xl:rounded-[2rem] bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#1A5276]">3 Marhalah</div>
-            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg 2xl:text-xl text-[#566573] font-extrabold mt-1.5 sm:mt-2 2xl:mt-3 leading-snug">Madrasah Diniyah (Ula, Wustho, Ulya)</div>
+          <div className="p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-5xl font-black text-[#1A5276]">3 Marhalah</div>
+            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg text-[#566573] font-extrabold mt-1.5 sm:mt-2 leading-snug">Madrasah Diniyah (Ula, Wustho, Ulya)</div>
           </div>
         </div>
       </section>
 
       {/* Role Portal Overview Section */}
-      <section id="portal-roles" className="py-12 sm:py-20 lg:py-28 2xl:py-36 px-4 sm:px-6 2xl:px-12 bg-white border-b border-gray-100">
-        <div className="container mx-auto max-w-screen-2xl 2xl:max-w-[1700px] space-y-10 sm:space-y-16 2xl:space-y-20">
+      <section id="portal-roles" className="py-12 sm:py-20 lg:py-20 px-4 sm:px-6 bg-white border-b border-gray-100">
+        <div className="container mx-auto max-w-screen-xl space-y-10 sm:space-y-16">
 
-          <div className="text-center max-w-3xl 2xl:max-w-4xl mx-auto space-y-3 2xl:space-y-4">
-            <span className="text-xs sm:text-sm 2xl:text-base font-extrabold text-[#1ABC9C] uppercase tracking-wider bg-teal-50 px-4 py-1.5 2xl:px-6 2xl:py-2 rounded-full border border-teal-200 inline-block">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <span className="text-xs sm:text-sm font-extrabold text-[#1ABC9C] uppercase tracking-wider bg-teal-50 px-4 py-1.5 rounded-full border border-teal-200 inline-block">
               Integrasi Tiga Layanan
             </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-[#1A5276]">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-5xl font-black text-[#1A5276]">
               Portal Akses Terpadu SIAP
             </h2>
-            <p className="text-sm sm:text-base lg:text-lg 2xl:text-xl text-[#566573] leading-relaxed">
+            <p className="text-sm sm:text-base lg:text-lg text-[#566573] leading-relaxed">
               Aplikasi dirancang secara spesifik sesuai peran pengguna untuk kenyamanan, efisiensi, dan akurasi data.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 2xl:gap-12">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-8">
 
             {/* Admin Card */}
-            <div className="bg-[#F8FAFC] p-8 sm:p-10 2xl:p-14 rounded-3xl 2xl:rounded-[2rem] border border-gray-200 hover:border-[#1A5276] transition-all hover:shadow-xl flex flex-col justify-between">
-              <div className="space-y-6 2xl:space-y-8">
-                <div className="w-14 h-14 2xl:w-20 2xl:h-20 rounded-2xl 2xl:rounded-3xl bg-[#1A5276] text-white flex items-center justify-center font-bold shadow-lg">
-                  <Building2 className="w-7 h-7 2xl:w-10 2xl:h-10 text-[#1ABC9C]" />
+            <div className="bg-[#F8FAFC] p-6 sm:p-8 rounded-3xl border border-gray-200 hover:border-[#1A5276] transition-all hover:shadow-xl flex flex-col justify-between">
+              <div className="space-y-6">
+                <div className="w-14 h-14 rounded-2xl bg-[#1A5276] text-white flex items-center justify-center font-bold shadow-lg">
+                  <Building2 className="w-7 h-7 text-[#1ABC9C]" />
                 </div>
                 <div>
-                  <h3 className="font-black text-xl sm:text-2xl 2xl:text-3xl text-[#1A5276]">1. Portal Admin & Pengelola</h3>
-                  <p className="text-xs sm:text-sm 2xl:text-base text-[#566573] mt-2 2xl:mt-3 leading-relaxed">Akses penuh untuk staf tata usaha, bendahara, & pengasuhan.</p>
+                  <h3 className="font-black text-xl sm:text-2xl text-[#1A5276]">1. Portal Admin & Pengelola</h3>
+                  <p className="text-xs sm:text-sm text-[#566573] mt-2 leading-relaxed">Akses penuh untuk staf tata usaha, bendahara, & pengasuhan.</p>
                 </div>
-                <ul className="space-y-3 2xl:space-y-4 text-xs sm:text-sm 2xl:text-base text-gray-700 pt-2 font-medium">
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                <ul className="space-y-3 text-xs sm:text-sm text-gray-700 pt-2 font-medium">
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>8 Section Biodata Santri + Auto NIS</span>
                   </li>
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>Tagihan & Transaksi Kuitansi Syahriyah</span>
                   </li>
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>PPDB & Fitur Mutasi Santri Baru</span>
                   </li>
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>Manajemen Kepegawaian & Master Data</span>
                   </li>
                 </ul>
@@ -418,37 +418,37 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
               <button
                 onClick={() => openLogin('admin')}
-                className="w-full mt-8 2xl:mt-10 py-4 2xl:py-5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-black text-sm sm:text-base 2xl:text-lg rounded-2xl transition-all text-center shadow-lg hover:shadow-xl"
+                className="w-full mt-8 py-4 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-black text-sm sm:text-base rounded-2xl transition-all text-center shadow-lg hover:shadow-xl"
               >
                 MASUK SEBAGAI ADMIN
               </button>
             </div>
 
             {/* Guru Card */}
-            <div className="bg-[#F8FAFC] p-8 sm:p-10 2xl:p-14 rounded-3xl 2xl:rounded-[2rem] border border-gray-200 hover:border-[#2E86C1] transition-all hover:shadow-xl flex flex-col justify-between">
-              <div className="space-y-6 2xl:space-y-8">
-                <div className="w-14 h-14 2xl:w-20 2xl:h-20 rounded-2xl 2xl:rounded-3xl bg-[#2E86C1] text-white flex items-center justify-center font-bold shadow-lg">
-                  <GraduationCap className="w-7 h-7 2xl:w-10 2xl:h-10 text-[#1ABC9C]" />
+            <div className="bg-[#F8FAFC] p-6 sm:p-8 rounded-3xl border border-gray-200 hover:border-[#2E86C1] transition-all hover:shadow-xl flex flex-col justify-between">
+              <div className="space-y-6">
+                <div className="w-14 h-14 rounded-2xl bg-[#2E86C1] text-white flex items-center justify-center font-bold shadow-lg">
+                  <GraduationCap className="w-7 h-7 text-[#1ABC9C]" />
                 </div>
                 <div>
-                  <h3 className="font-black text-xl sm:text-2xl 2xl:text-3xl text-[#1A5276]">2. Portal Guru & Ustadz</h3>
-                  <p className="text-xs sm:text-sm 2xl:text-base text-[#566573] mt-2 2xl:mt-3 leading-relaxed">Kemudahan pencatatan setoran & kehadiran harian santri.</p>
+                  <h3 className="font-black text-xl sm:text-2xl text-[#1A5276]">2. Portal Guru & Ustadz</h3>
+                  <p className="text-xs sm:text-sm text-[#566573] mt-2 leading-relaxed">Kemudahan pencatatan setoran & kehadiran harian santri.</p>
                 </div>
-                <ul className="space-y-3 2xl:space-y-4 text-xs sm:text-sm 2xl:text-base text-gray-700 pt-2 font-medium">
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                <ul className="space-y-3 text-xs sm:text-sm text-gray-700 pt-2 font-medium">
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>Batch Presensi Kelas Formal & Madin</span>
                   </li>
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>Input Setoran Tahfidz Juz 1-30</span>
                   </li>
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>Pencatatan Hafalan Kitab Nadhoman</span>
                   </li>
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>Jurnal Konseling & Bimbingan Santri</span>
                   </li>
                 </ul>
@@ -456,37 +456,37 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
               <button
                 onClick={() => openLogin('guru')}
-                className="w-full mt-8 2xl:mt-10 py-4 2xl:py-5 bg-[#2E86C1] hover:bg-sky-600 text-white font-black text-sm sm:text-base 2xl:text-lg rounded-2xl transition-all text-center shadow-lg hover:shadow-xl"
+                className="w-full mt-8 py-4 bg-[#2E86C1] hover:bg-sky-600 text-white font-black text-sm sm:text-base rounded-2xl transition-all text-center shadow-lg hover:shadow-xl"
               >
                 MASUK SEBAGAI GURU / USTADZ
               </button>
             </div>
 
             {/* Wali Card */}
-            <div className="bg-[#F8FAFC] p-8 sm:p-10 2xl:p-14 rounded-3xl 2xl:rounded-[2rem] border border-gray-200 hover:border-[#1ABC9C] transition-all hover:shadow-xl flex flex-col justify-between">
-              <div className="space-y-6 2xl:space-y-8">
-                <div className="w-14 h-14 2xl:w-20 2xl:h-20 rounded-2xl 2xl:rounded-3xl bg-[#1ABC9C] text-white flex items-center justify-center font-bold shadow-lg">
-                  <HeartHandshake className="w-7 h-7 2xl:w-10 2xl:h-10" />
+            <div className="bg-[#F8FAFC] p-6 sm:p-8 rounded-3xl border border-gray-200 hover:border-[#1ABC9C] transition-all hover:shadow-xl flex flex-col justify-between">
+              <div className="space-y-6">
+                <div className="w-14 h-14 rounded-2xl bg-[#1ABC9C] text-white flex items-center justify-center font-bold shadow-lg">
+                  <HeartHandshake className="w-7 h-7" />
                 </div>
                 <div>
-                  <h3 className="font-black text-xl sm:text-2xl 2xl:text-3xl text-[#1A5276]">3. Portal Orang Tua / Wali</h3>
-                  <p className="text-xs sm:text-sm 2xl:text-base text-[#566573] mt-2 2xl:mt-3 leading-relaxed">Transparansi perkembangan putra/putri langsung di HP.</p>
+                  <h3 className="font-black text-xl sm:text-2xl text-[#1A5276]">3. Portal Orang Tua / Wali</h3>
+                  <p className="text-xs sm:text-sm text-[#566573] mt-2 leading-relaxed">Transparansi perkembangan putra/putri langsung di HP.</p>
                 </div>
-                <ul className="space-y-3 2xl:space-y-4 text-xs sm:text-sm 2xl:text-base text-gray-700 pt-2 font-medium">
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                <ul className="space-y-3 text-xs sm:text-sm text-gray-700 pt-2 font-medium">
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>Monitoring Real-Time Hafalan Qur'an</span>
                   </li>
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>Riwayat Kesehatan & Perawatan UKS</span>
                   </li>
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>Status Perizinan Keluar & Pulang</span>
                   </li>
-                  <li className="flex items-center gap-3 2xl:gap-4">
-                    <CheckCircle2 className="w-5 h-5 2xl:w-6 2xl:h-6 text-[#1ABC9C] shrink-0" />
+                  <li className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                     <span>Rincian Tagihan & Download Kuitansi</span>
                   </li>
                 </ul>
@@ -494,7 +494,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
               <button
                 onClick={() => openLogin('wali')}
-                className="w-full mt-8 2xl:mt-10 py-4 2xl:py-5 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-black text-sm sm:text-base 2xl:text-lg rounded-2xl transition-all text-center shadow-lg hover:shadow-xl"
+                className="w-full mt-8 py-4 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-black text-sm sm:text-base rounded-2xl transition-all text-center shadow-lg hover:shadow-xl"
               >
                 MASUK PORTAL WALI SANTRI
               </button>
@@ -506,8 +506,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       </section>
 
       {/* Program Unggulan Pesantren */}
-      <section id="program" className="py-12 sm:py-20 lg:py-28 px-4 sm:px-6 bg-[#F8FAFC]">
-        <div className="container mx-auto max-w-screen-2xl text-center space-y-10 sm:space-y-16">
+      <section id="program" className="py-12 sm:py-20 lg:py-20 px-4 sm:px-6 bg-[#F8FAFC]">
+        <div className="container mx-auto max-w-screen-xl text-center space-y-10 sm:space-y-16">
 
           <div className="max-w-3xl mx-auto space-y-3">
             <span className="text-xs sm:text-sm font-extrabold text-[#1ABC9C] uppercase tracking-wider bg-teal-50 px-4 py-1.5 rounded-full border border-teal-200 inline-block">
@@ -559,7 +559,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       </section>
 
       {/* PPDB Online Section */}
-      <section id="ppdb" className="py-12 sm:py-20 lg:py-28 bg-[#D6EAF8]/40 border-t border-b border-[#2E86C1]/30 px-4 sm:px-6">
+       <section id="ppdb" className="py-12 sm:py-20 lg:py-20 bg-[#D6EAF8]/40 border-t border-b border-[#2E86C1]/30 px-4 sm:px-6">
         <div className="container mx-auto max-w-5xl bg-white p-4 sm:p-8 lg:p-14 rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-sky-200">
 
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-6 mb-6 sm:mb-8 border-b border-gray-100">
@@ -733,8 +733,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#1A5276] text-white py-12 sm:py-16 lg:py-20 px-4 sm:px-6 border-t border-[#2E86C1]">
-        <div className="container mx-auto max-w-screen-2xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 text-xs sm:text-sm">
+      <footer className="bg-[#1A5276] text-white py-12 sm:py-16 lg:py-16 px-4 sm:px-6 border-t border-[#2E86C1]">
+        <div className="container mx-auto max-w-screen-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 text-xs sm:text-sm">
 
           <div className="space-y-4">
             <div className="flex items-center gap-3 font-black text-xl sm:text-2xl">
@@ -796,7 +796,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
         </div>
 
-        <div className="container mx-auto max-w-screen-2xl mt-10 sm:mt-12 pt-6 sm:pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-sky-200 gap-3 sm:gap-4 text-center sm:text-left">
+        <div className="container mx-auto max-w-screen-xl mt-10 sm:mt-12 pt-6 sm:pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs sm:text-sm text-sky-200 gap-3 sm:gap-4 text-center sm:text-left">
           <p>© 2026 Pondok Pesantren Mukhtar Syafaat. All rights reserved.</p>
           <div className="font-extrabold text-white/90 tracking-wide">
             Media Yayasan Mukhtar Syafa'at
