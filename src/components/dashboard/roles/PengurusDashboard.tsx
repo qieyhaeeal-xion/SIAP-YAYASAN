@@ -70,7 +70,7 @@ export const PengurusDashboard: React.FC<RoleDashboardProps> = ({ onNavigateTab 
       gradient: 'from-amber-500 to-orange-600',
       trend: pendingPermits.length > 0 ? 'Urgent' : 'Aman',
       trendColor: 'text-yellow-200',
-      onClick: () => onNavigateTab('perizinan'),
+      onClick: () => onNavigateTab('kepengasuhan'),
     },
     {
       label: 'Santri Sakit di UKS',
@@ -81,7 +81,7 @@ export const PengurusDashboard: React.FC<RoleDashboardProps> = ({ onNavigateTab 
       gradient: 'from-rose-500 to-red-600',
       trend: activePatients.length > 0 ? 'Pantau Medis' : 'Semua Sehat',
       trendColor: 'text-rose-200',
-      onClick: () => onNavigateTab('kesehatan'),
+      onClick: () => onNavigateTab('kepengasuhan'),
     },
     {
       label: 'Antrian Mutasi PPDB',
@@ -131,7 +131,7 @@ export const PengurusDashboard: React.FC<RoleDashboardProps> = ({ onNavigateTab 
 
           <div className="flex flex-wrap gap-2.5">
             <button
-              onClick={() => onNavigateTab('perizinan')}
+              onClick={() => onNavigateTab('kepengasuhan')}
               className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl shadow-lg transition-all flex items-center gap-2 hover:scale-105"
             >
               <FileCheck2 className="w-4 h-4" />
@@ -332,7 +332,7 @@ export const PengurusDashboard: React.FC<RoleDashboardProps> = ({ onNavigateTab 
                 Pasien UKS Aktif ({activePatients.length})
               </h3>
               <button
-                onClick={() => onNavigateTab('kesehatan')}
+                onClick={() => onNavigateTab('kepengasuhan')}
                 className="text-[11px] text-[#1ABC9C] hover:underline font-bold flex items-center gap-0.5"
               >
                 Log UKS <ArrowUpRight className="w-3 h-3" />

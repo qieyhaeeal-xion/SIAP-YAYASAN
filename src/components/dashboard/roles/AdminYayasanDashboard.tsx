@@ -418,7 +418,7 @@ export const AdminYayasanDashboard: React.FC<RoleDashboardProps> = ({ onNavigate
                 Izin Santri Menunggu Persetujuan
               </h3>
               <button
-                onClick={() => onNavigateTab('perizinan')}
+                onClick={() => onNavigateTab('kepengasuhan')}
                 className="text-[11px] text-[#1ABC9C] hover:underline font-bold flex items-center gap-0.5"
               >
                 Proses Izin ({pendingPermits}) <ArrowUpRight className="w-3 h-3" />

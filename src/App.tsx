@@ -125,9 +125,7 @@ const MainApp: React.FC = () => {
                 {activeTab === 'alumni' && <AlumniModule />}
 
                 {/* Kepengasuhan Sub-modules */}
-                {activeTab === 'kesehatan' && <KepengasuhanModule defaultSubTab="kesehatan" />}
-                {activeTab === 'perizinan' && <KepengasuhanModule defaultSubTab="perizinan" />}
-                {activeTab === 'konseling' && <KepengasuhanModule defaultSubTab="konseling" />}
+                {activeTab === 'kepengasuhan' && <KepengasuhanModule />}
 
                 {/* Kepegawaian */}
                 {activeTab === 'kepegawaian' && <KepegawaianModule />}

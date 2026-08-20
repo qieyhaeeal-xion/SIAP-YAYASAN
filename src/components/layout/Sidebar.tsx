@@ -10,8 +10,6 @@ import {
   BookMarked, 
   UserCheck, 
   HeartPulse, 
-  FileCheck2, 
-  MessageSquare, 
   Briefcase, 
   CalendarCheck, 
   Wallet, 
@@ -205,11 +203,11 @@ const isTabAllowed = (tabId: string) => hasPermission(currentUser.role, tabId);
           </div>
         )}
 
-        {/* SECTION: KEPENGASUHAN & KESEHATAN */}
-        {(isTabAllowed('perizinan') || isTabAllowed('kesehatan') || isTabAllowed('konseling') || showAllMenus) && (
+        {/* SECTION: KEPENGASUHAN & KETERTIBAN */}
+        {(isTabAllowed('kepengasuhan') || showAllMenus) && (
           <div className="space-y-2">
             <div className="flex items-center justify-between px-5 pt-1">
-              <p className="text-sm font-extrabold text-sky-300/60 uppercase tracking-wider">Pengasuhan & UKS</p>
+              <p className="text-sm font-extrabold text-sky-300/60 uppercase tracking-wider">Pengasuhan & Ketertiban</p>
               <button
                 onClick={() => setOpenKepengasuhan(!openKepengasuhan)}
                 className="text-sky-300/60 hover:text-white transition"
@@ -220,9 +218,7 @@ const isTabAllowed = (tabId: string) => hasPermission(currentUser.role, tabId);
 
             {openKepengasuhan && (
               <div className="space-y-1.5 pt-0.5">
-                {renderNavItem('perizinan', 'Perizinan Santri', <FileCheck2 className="w-6 h-6" />, pendingPermitsCount, 'bg-amber-500 text-white')}
-                {renderNavItem('kesehatan', 'Kesehatan (UKS)', <HeartPulse className="w-6 h-6" />)}
-                {renderNavItem('konseling', 'Konseling & Tamu', <MessageSquare className="w-6 h-6" />)}
+                {renderNavItem('kepengasuhan', 'Kepengasuhan & Ketertiban', <HeartPulse className="w-5 h-5" />, pendingPermitsCount, 'bg-amber-500 text-white')}
               </div>
             )}
           </div>

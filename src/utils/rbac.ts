@@ -78,6 +78,15 @@ export const MODULE_PERMISSIONS: ModulePermission[] = [
     deletableRoles: ['admin_yayasan', 'admin_sistem']
   },
   {
+    id: 'kepengasuhan',
+    label: 'Kepengasuhan & Ketertiban',
+    category: 'Kepengasuhan',
+    allowedRoles: ['admin_yayasan', 'admin_sistem', 'pengurus', 'guru'],
+    writableRoles: ['admin_yayasan', 'admin_sistem', 'pengurus', 'guru'],
+    deletableRoles: ['admin_yayasan', 'admin_sistem'],
+    approverRoles: ['admin_yayasan', 'admin_sistem', 'pengurus']
+  },
+  {
     id: 'kesehatan',
     label: 'Kesehatan (UKS)',
     category: 'Kepengasuhan',
