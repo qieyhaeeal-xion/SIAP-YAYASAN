@@ -461,7 +461,7 @@ export const SubMadin: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1">Total Bait *</label>
                   <input

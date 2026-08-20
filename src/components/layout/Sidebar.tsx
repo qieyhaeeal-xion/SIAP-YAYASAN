@@ -33,9 +33,10 @@ interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   isOpen: boolean;
+  onClose?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpen, onClose }) => {
   const { currentUser, perizinanList, ppdbList } = useApp();
   const [openKesantrian, setOpenKesantrian] = useState(true);
   const [openKepengasuhan, setOpenKepengasuhan] = useState(true);
@@ -49,15 +50,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpe
     color: 'bg-[#1ABC9C] text-white'
   };
 
-  const isTabAllowed = (tabId: string) => hasPermission(currentUser.role, tabId);
+const isTabAllowed = (tabId: string) => hasPermission(currentUser.role, tabId);
 
   const handleTabClick = (tabId: string) => {
     if (isTabAllowed(tabId)) {
       setActiveTab(tabId);
+      onClose?.();
     }
   };
-
-  if (!isOpen) return null;
 
   const renderNavItem = (
     tabId: string,
@@ -114,10 +114,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpe
         )}
       </button>
     );
-  };
+};
 
   return (
-    <aside className="w-96 bg-linear-to-b from-[#1A5276] via-[#154360] to-[#0E2F44] text-white flex flex-col shrink-0 border-r border-[#2E86C1]/40 shadow-2xl transition-all duration-300 select-none">
+    <>
+      {/* Mobile overlay backdrop — hanya tampil di < 768px saat drawer terbuka */}
+      <div
+        onClick={onClose}
+        aria-hidden="true"
+        className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      />
+
+      {/* Off-canvas drawer di mobile (< md) / sidebar statis di desktop (>= md) */}
+      <aside
+        className={`w-96 bg-linear-to-b from-[#1A5276] via-[#154360] to-[#0E2F44] text-white flex flex-col shrink-0 border-r border-[#2E86C1]/40 shadow-2xl transition-transform duration-300 ease-in-out select-none
+          fixed inset-y-0 left-0 z-50 max-w-[85vw]
+          md:static md:inset-auto md:z-auto md:max-w-none
+          ${isOpen ? 'translate-x-0' : '-translate-x-full pointer-events-none md:translate-x-0 md:pointer-events-auto md:hidden'}`}
+      >
       
       {/* User Persona Header */}
       <div className="p-6 bg-white/5 border-b border-white/10 space-y-4">
@@ -244,7 +260,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isOpe
         </div>
         <div className="w-3 h-3 rounded-full bg-emerald-400" title="Sistem Aktif" />
       </div>
-    </aside>
+</aside>
+    </>
   );
 };
 

@@ -116,7 +116,7 @@ export const KepegawaianModule: React.FC = () => {
                   {jabatanList.map(j => (<option key={j.id} value={j.id}>{j.namaJabatan}</option>))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold mb-1">Status Kepegawaian</label>
                   <select value={statusKepegawaian} onChange={e => setStatusKepegawaian(e.target.value as any)} className="w-full px-3 py-2 border rounded-lg">

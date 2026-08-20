@@ -350,7 +350,7 @@ export const SubSekolah: React.FC = () => {
                   {unitSekolahList.map(s => (<option key={s.id} value={s.id}>{s.namaSekolah}</option>))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 mb-1">Kode Kelas *</label>
                   <input type="text" required value={kodeKelas} onChange={e => setKodeKelas(e.target.value)} placeholder="e.g. X-MIPA-1" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#1ABC9C]" />

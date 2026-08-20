@@ -315,7 +315,7 @@ export const KepengasuhanModule: React.FC<{ defaultSubTab?: string }> = ({ defau
                 <label className="block font-bold mb-1">Alasan Perizinan *</label>
                 <input type="text" required value={alasanIzin} onChange={e => setAlasanIzin(e.target.value)} placeholder="e.g. Acara Pernikahan Keluarga" className="w-full px-3 py-2 border rounded-lg" />
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="block font-bold mb-1">Tgl Mulai *</label>
                   <input type="date" required value={tglMulai} onChange={e => setTglMulai(e.target.value)} className="w-full px-3 py-2 border rounded-lg" />

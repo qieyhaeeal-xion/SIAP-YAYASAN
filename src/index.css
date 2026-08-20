@@ -1,7 +1,19 @@
 @import "tailwindcss";
 
 html {
-  font-size: 21px !important;
+  font-size: 16px !important;
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 18px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  html {
+    font-size: 21px !important;
+  }
 }
 
 body {

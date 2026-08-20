@@ -149,7 +149,7 @@ export const AkademikModule: React.FC = () => {
   };
 
   return (
-    <div className="flex gap-6 animate-in fade-in duration-200 items-start">
+    <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in duration-200 items-stretch lg:items-start">
 
       {/* ===== MODAL KONFIRMASI SESI ===== */}
       {isConfirmOpen && (
@@ -251,7 +251,7 @@ export const AkademikModule: React.FC = () => {
       )}
 
       {/* ===== PANEL FILTER KIRI ===== */}
-      <div className="w-72 shrink-0 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden sticky top-6">
+      <div className="w-full lg:w-72 shrink-0 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden lg:sticky lg:top-6">
         <div className="p-5 bg-[#1A5276] text-white">
           <h3 className="font-extrabold text-base flex items-center gap-2.5">
             <Settings2 className="w-5 h-5 text-[#1ABC9C]" />
@@ -504,14 +504,14 @@ export const AkademikModule: React.FC = () => {
                         <tr key={s.id} className="hover:bg-sky-50 transition-colors">
                           <td className="p-4 font-mono font-bold text-[#1A5276] text-base w-32">{s.nis}</td>
                           <td className="p-4 font-extrabold text-gray-800 text-base">{s.namaLengkap}</td>
-                          <td className="p-4 text-center w-80">
-                            <div className="inline-flex items-center gap-2 bg-gray-100 p-1.5 rounded-lg w-full justify-center">
+                          <td className="p-4 text-center">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 bg-gray-100 p-1.5 rounded-lg">
                               {(['Hadir', 'Izin', 'Sakit', 'Alpha'] as const).map(st => (
                                 <button
                                   key={st}
                                   type="button"
                                   onClick={() => handleStatusChange(s.id, st)}
-                                  className={`flex-1 px-3 py-2 rounded text-xs font-extrabold transition-all ${currentStatus === st
+                                  className={`px-2 py-2 rounded text-xs font-extrabold transition-all ${currentStatus === st
                                     ? st === 'Hadir' ? 'bg-emerald-600 text-white shadow' :
                                       st === 'Izin' ? 'bg-amber-500 text-white shadow' :
                                         st === 'Sakit' ? 'bg-blue-600 text-white shadow' : 'bg-rose-600 text-white shadow'

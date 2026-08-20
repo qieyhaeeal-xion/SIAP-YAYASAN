@@ -178,7 +178,7 @@ export const WaliSantriDashboard: React.FC<RoleDashboardProps> = ({ onNavigateTa
       </div>
 
       {/* â”€â”€â”€ DETAIL SECTIONS â”€â”€â”€ */}
-      <div className="grid lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         {/* Left: Tagihan & Transaksi */}
         <div className="lg:col-span-7 bg-white rounded-2xl border border-gray-200 shadow-sm p-6 space-y-4">

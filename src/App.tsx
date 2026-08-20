@@ -29,7 +29,7 @@ import { hasPermission, getFirstAllowedTab, ROLE_DETAILS } from './utils/rbac';
 const MainApp: React.FC = () => {
   const { isLandingPage, setIsLandingPage, currentUser } = useApp();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -59,15 +59,16 @@ const MainApp: React.FC = () => {
 
       <div className="flex-1 flex overflow-hidden">
         
-        {/* Collapsible Left Sidebar */}
+        {/* Collapsible Left Sidebar — drawer di mobile, statis di desktop */}
         <Sidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
         />
 
         {/* Main Content Viewport */}
-        <main className="flex-1 overflow-y-auto p-8 sm:p-10 bg-[#F4F6F7] flex flex-col justify-between">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 lg:p-10 bg-[#F4F6F7] flex flex-col justify-between min-w-0">
           <div className="max-w-[1920px] mx-auto space-y-8 w-full flex-1">
             
             {/* RBAC Permission Check Guard */}

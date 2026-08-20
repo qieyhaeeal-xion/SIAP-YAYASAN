@@ -125,7 +125,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         </div>
 
         {/* Category Tabs: Yayasan | Pengurus | Guru | Wali */}
-        <div className="bg-sky-50/80 border-b border-sky-100 p-2 grid grid-cols-4 gap-1 shrink-0">
+        <div className="bg-sky-50/80 border-b border-sky-100 p-2 grid grid-cols-2 sm:grid-cols-4 gap-1 shrink-0">
           <button
             type="button"
             onClick={() => handleTabSelect('yayasan')}
@@ -189,7 +189,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               Pilih Akun Persona Demo (4 Role):
             </p>
 
-            <div className="grid grid-cols-2 gap-1.5 mt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-2">
               <button
                 type="button"
                 onClick={() => handlePresetSelect('admin_yayasan', 'admin')}

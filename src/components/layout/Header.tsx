@@ -35,30 +35,31 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
 
   return (
     <header className="bg-[#1A5276] text-white shadow-md border-b border-[#2E86C1] sticky top-0 z-30">
-      <div className="px-8 py-5 flex items-center justify-between">
+      <div className="px-4 sm:px-8 py-3.5 sm:py-5 flex items-center justify-between gap-3">
         
         {/* Left Section: Brand & Sidebar Toggle */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <button
             onClick={onToggleSidebar}
-            className="p-3 rounded-xl hover:bg-[#2E86C1] transition-colors text-white focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
+            aria-label="Buka / tutup menu navigasi"
             title="Toggle Menu Navigation"
+            className="p-2.5 md:p-3 rounded-xl bg-[#2E86C1]/40 hover:bg-[#2E86C1] active:scale-95 transition-all text-white focus:outline-none focus:ring-2 focus:ring-[#1ABC9C] shrink-0"
           >
-            <Menu className="w-7 h-7" />
+            <Menu className="w-6 h-6 md:w-7 md:h-7" />
           </button>
 
-          <div className="flex items-center gap-4 cursor-pointer" onClick={() => setIsLandingPage(true)}>
-            <div className="w-13 h-13 rounded-xl bg-[#1ABC9C] flex items-center justify-center font-bold text-white shadow-sm border border-white/20">
-              <BookOpen className="w-7 h-7" />
+          <div className="flex items-center gap-3 sm:gap-4 cursor-pointer min-w-0" onClick={() => setIsLandingPage(true)}>
+            <div className="w-10 h-10 sm:w-13 sm:h-13 rounded-xl bg-[#1ABC9C] flex items-center justify-center font-bold text-white shadow-sm border border-white/20 shrink-0">
+              <BookOpen className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
-            <div>
-              <div className="font-extrabold text-xl tracking-wide flex items-center gap-2.5 leading-tight">
+            <div className="min-w-0">
+              <div className="font-extrabold text-lg sm:text-xl tracking-wide flex items-center gap-2 leading-tight">
                 SIAP
-                <span className="text-sm font-semibold bg-[#1ABC9C] text-white px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                <span className="hidden sm:inline-block text-[10px] sm:text-sm font-semibold bg-[#1ABC9C] text-white px-2 py-0.5 rounded-full uppercase tracking-wider">
                   SIM Pesantren
                 </span>
               </div>
-              <p className="text-sm text-sky-200 font-medium hidden sm:block">
+              <p className="text-xs sm:text-sm text-sky-200 font-medium truncate">
                 Pondok Pesantren Mukhtar Syafaat
               </p>
             </div>
@@ -76,26 +77,26 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
         </div>
 
         {/* Right Section: Action Buttons & User Profile */}
-        <div className="flex items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-3 md:gap-4">
 
           {/* Landing Page Toggle Button */}
           <button
             onClick={() => setIsLandingPage(!isLandingPage)}
-            className="flex items-center gap-2.5 text-base font-semibold px-5 py-2.5 rounded-xl bg-[#2E86C1] hover:bg-[#1ABC9C] text-white transition-all shadow-sm"
+            className="flex items-center justify-center gap-2.5 text-base font-semibold p-2.5 md:px-5 md:py-2.5 rounded-xl bg-[#2E86C1] hover:bg-[#1ABC9C] text-white transition-all shadow-sm shrink-0"
             title="Ke Halaman Utama / Public Landing"
           >
             <Globe className="w-5 h-5" />
-            <span className="hidden sm:inline">{isLandingPage ? 'Buka Dashboard' : 'Web Utama'}</span>
+            <span className="hidden md:inline">{isLandingPage ? 'Buka Dashboard' : 'Web Utama'}</span>
           </button>
 
           {/* Notification Button */}
           <div className="relative">
             <button
               onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
-              className="p-3 rounded-xl hover:bg-[#2E86C1] transition-colors relative"
+              className="p-2.5 sm:p-3 rounded-xl hover:bg-[#2E86C1] transition-colors relative shrink-0"
               title="Notifikasi & Perizinan Pending"
             >
-              <Bell className="w-7 h-7" />
+              <Bell className="w-6 h-6 sm:w-7 sm:h-7" />
               {pendingPermitsCount > 0 && (
                 <span className="absolute top-1 right-1 w-5 h-5 bg-[#1ABC9C] text-white font-bold text-xs rounded-full flex items-center justify-center border-2 border-[#1A5276]">
                   {pendingPermitsCount}
@@ -130,9 +131,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
           <div className="relative">
             <button
               onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-              className="flex items-center gap-3 pl-3 pr-2.5 py-2 rounded-xl hover:bg-[#2E86C1] transition-colors border border-white/20 bg-white/5"
+              className="flex items-center gap-2 sm:gap-3 pl-2 pr-1.5 sm:pl-3 sm:pr-2.5 py-1.5 sm:py-2 rounded-xl hover:bg-[#2E86C1] transition-colors border border-white/20 bg-white/5 shrink-0"
             >
-              <div className="w-11 h-11 rounded-full bg-[#1ABC9C] flex items-center justify-center font-bold text-base text-white">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#1ABC9C] flex items-center justify-center font-bold text-base text-white">
                 {currentUser.nama.charAt(0)}
               </div>
               <div className="text-left hidden lg:block">
@@ -142,7 +143,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
                   {currentUser.role.replace('_', ' ')}
                 </div>
               </div>
-              <ChevronDown className="w-5 h-5 text-sky-200" />
+              <ChevronDown className="w-5 h-5 text-sky-200 hidden sm:block" />
             </button>
 
             {/* Role Dropdown */}

@@ -360,7 +360,7 @@ export const TahfidzModule: React.FC = () => {
                 {/* Form Input Setoran */}
                 {selectedSantri && (
                   <form onSubmit={handleSubmit} className="space-y-3 pt-2 border-t border-gray-100">
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
                         <label className="block font-bold mb-1 text-gray-700">Juz (1-30) *</label>
                         <input
@@ -384,7 +384,7 @@ export const TahfidzModule: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
                         <label className="block font-bold mb-1 text-gray-700">Ayat Mulai *</label>
                         <input
@@ -405,7 +405,7 @@ export const TahfidzModule: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div>
                         <label className="block font-bold mb-1 text-gray-700">Jenis Setoran</label>
                         <select

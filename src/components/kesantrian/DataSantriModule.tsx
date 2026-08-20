@@ -282,7 +282,7 @@ export const DataSantriModule: React.FC = () => {
               <Building2 className="w-4 h-4 text-[#1ABC9C]" />
               1. Asrama & Kamar
             </span>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <select
                 value={filterUnitPesantren}
                 onChange={e => {
@@ -325,7 +325,7 @@ export const DataSantriModule: React.FC = () => {
               <GraduationCap className="w-4 h-4 text-[#1ABC9C]" />
               2. Marhalah & Kelas Madin
             </span>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <select
                 value={filterMarhalah}
                 onChange={e => {
@@ -355,7 +355,7 @@ export const DataSantriModule: React.FC = () => {
               <School className="w-4 h-4 text-[#1ABC9C]" />
               3. Unit Formal & Kelas Formal
             </span>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <select
                 value={filterSekolah}
                 onChange={e => {
@@ -563,7 +563,7 @@ export const DataSantriModule: React.FC = () => {
               
               {/* TAB 1: DATA PRIBADI */}
               {formTab === 1 && (
-                <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">NIK (KTP/KK) *</label>
                     <input type="text" required value={formData.nik || ''} onChange={e => setFormData({ ...formData, nik: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
@@ -592,14 +592,14 @@ export const DataSantriModule: React.FC = () => {
                     <input type="text" value={formData.noHp || ''} onChange={e => setFormData({ ...formData, noHp: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
                   </div>
                   {/* DROPDOWN BERTINGKAT WILAYAH */}
-                  <div className="col-span-2">
+                  <div className="sm:col-span-2">
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2.5">
                       <p className="text-[10px] font-extrabold text-[#1A5276] uppercase tracking-wider flex items-center gap-1">
                         <span>📍</span> Alamat Tempat Tinggal
                       </p>
 
                       {/* Row 1: Provinsi, Kabupaten, Kecamatan */}
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         {/* Provinsi */}
                         <div>
                           <label className="block font-bold text-gray-700 mb-1 text-[11px]">Provinsi *</label>
@@ -671,7 +671,7 @@ export const DataSantriModule: React.FC = () => {
                       </div>
 
                       {/* Row 2: Desa, Dusun, Kode Pos */}
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <div>
                           <label className="block font-bold text-gray-700 mb-1 text-[11px]">Desa / Kelurahan</label>
                           <input
@@ -705,8 +705,8 @@ export const DataSantriModule: React.FC = () => {
                       </div>
 
                       {/* Row 3: Jalan, RT, RW */}
-                      <div className="grid grid-cols-5 gap-2">
-                        <div className="col-span-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                        <div className="sm:col-span-3">
                           <label className="block font-bold text-gray-700 mb-1 text-[11px]">Jalan / Alamat Detail</label>
                           <input
                             type="text"
@@ -754,7 +754,7 @@ export const DataSantriModule: React.FC = () => {
 
               {/* TAB 2: ORANG TUA / WALI */}
               {formTab === 2 && (
-                <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">Nama Ayah Kandung *</label>
                     <input type="text" required value={formData.namaAyah || ''} onChange={e => setFormData({ ...formData, namaAyah: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
@@ -771,7 +771,7 @@ export const DataSantriModule: React.FC = () => {
                     <label className="block font-bold text-gray-700 mb-1">Pekerjaan Ibu</label>
                     <input type="text" value={formData.pekerjaanIbu || ''} onChange={e => setFormData({ ...formData, pekerjaanIbu: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
                   </div>
-                  <div className="col-span-2">
+                  <div className="sm:col-span-2">
                     <label className="block font-bold text-gray-700 mb-1">No HP WhatsApp Wali Santri *</label>
                     <input type="text" required value={formData.noHpOrtu || ''} onChange={e => setFormData({ ...formData, noHpOrtu: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
                   </div>
@@ -780,7 +780,7 @@ export const DataSantriModule: React.FC = () => {
 
               {/* TAB 3: SEKOLAH FORMAL */}
               {formTab === 3 && (
-                <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">Unit Sekolah Formal *</label>
                     <select value={formData.unitSekolahId || ''} onChange={e => setFormData({ ...formData, unitSekolahId: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg">
@@ -798,7 +798,7 @@ export const DataSantriModule: React.FC = () => {
 
               {/* TAB 4: MADRASAH DINIYAH */}
               {formTab === 4 && (
-                <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">Marhalah Madin *</label>
                     <select value={formData.marhalahMadinId || ''} onChange={e => setFormData({ ...formData, marhalahMadinId: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg">
@@ -816,7 +816,7 @@ export const DataSantriModule: React.FC = () => {
 
               {/* TAB 5: ASRAMA & KAMAR */}
               {formTab === 5 && (
-                <div className="grid grid-cols-3 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">Unit Pesantren *</label>
                     <select value={formData.unitPesantrenId || ''} onChange={e => setFormData({ ...formData, unitPesantrenId: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg">
@@ -840,7 +840,7 @@ export const DataSantriModule: React.FC = () => {
 
               {/* TAB 6: HAFALAN TAHFIDZ & NADHOMAN */}
               {formTab === 6 && (
-                <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">Target Hafalan Quran (Juz)</label>
                     <input type="number" value={formData.targetJuz || 30} onChange={e => setFormData({ ...formData, targetJuz: Number(e.target.value) })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
@@ -849,7 +849,7 @@ export const DataSantriModule: React.FC = () => {
                     <label className="block font-bold text-gray-700 mb-1">Capaian Saat Ini (Juz)</label>
                     <input type="number" value={formData.capaianJuz || 0} onChange={e => setFormData({ ...formData, capaianJuz: Number(e.target.value) })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
                   </div>
-                  <div className="col-span-2">
+                  <div className="sm:col-span-2">
                     <label className="block font-bold text-gray-700 mb-1">Capaian Setoran Nadhoman Kitab</label>
                     <input type="text" value={formData.capaianNadhoman || ''} onChange={e => setFormData({ ...formData, capaianNadhoman: e.target.value })} placeholder="e.g. Imriti Bait ke-250 / Alfiyah Selesai" className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
                   </div>
@@ -858,7 +858,7 @@ export const DataSantriModule: React.FC = () => {
 
               {/* TAB 7: UKS / KESEHATAN */}
               {formTab === 7 && (
-                <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">Golongan Darah</label>
                     <input type="text" value={formData.golonganDarah || 'O'} onChange={e => setFormData({ ...formData, golonganDarah: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />

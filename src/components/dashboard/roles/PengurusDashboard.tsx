@@ -184,7 +184,7 @@ export const PengurusDashboard: React.FC<RoleDashboardProps> = ({ onNavigateTab 
       </div>
 
       {/* â”€â”€â”€ MAIN ROW â”€â”€â”€ */}
-      <div className="grid lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         {/* â”€â”€ LEFT: Quick Approval Perizinan + UKS â”€â”€ */}
         <div className="lg:col-span-7 space-y-5">
@@ -310,7 +310,7 @@ export const PengurusDashboard: React.FC<RoleDashboardProps> = ({ onNavigateTab 
               <Activity className="w-5 h-5 text-[#1ABC9C]" />
               Aksi Cepat Pengurus
             </h3>
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {quickMenus.map((m, i) => (
                 <button
                   key={i}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShieldAlert, ShieldCheck, CalendarDays, Check, X, Eye, Edit3, Lock, Info } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, CalendarDays, Check, X, Eye, Edit3, Lock, Info, Users, HeartHandshake, UserCog } from 'lucide-react';
 import { TahunAjaranModule } from './TahunAjaranModule';
 import { MODULE_PERMISSIONS, ROLE_DETAILS } from '../../utils/rbac';
 import { UserRole } from '../../types/sisantri';
@@ -17,6 +17,19 @@ export const SettingsModule: React.FC = () => {
     'guru',
     'wali_santri'
   ];
+
+  const roleMeta: { role: UserRole; label: string; icon: React.ReactNode }[] = [
+    { role: 'admin_yayasan', label: 'Admin Yayasan', icon: <ShieldCheck className="w-5 h-5" /> },
+    { role: 'pengurus', label: 'Pengurus Pesantren', icon: <UserCog className="w-5 h-5" /> },
+    { role: 'guru', label: 'Guru / Ustadz', icon: <Users className="w-5 h-5" /> },
+    { role: 'wali_santri', label: 'Wali Santri', icon: <HeartHandshake className="w-5 h-5" /> },
+  ];
+
+  const getModuleStats = (role: UserRole) => {
+    const allowed = MODULE_PERMISSIONS.filter(m => m.allowedRoles.includes(role) || role === 'admin_sistem').length;
+    const writable = MODULE_PERMISSIONS.filter(m => m.writableRoles.includes(role) || role === 'admin_sistem').length;
+    return { allowed, writable };
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
@@ -71,11 +84,11 @@ export const SettingsModule: React.FC = () => {
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-extrabold text-lg text-[#1A5276]">Daftar Pengguna & Level Akses Active</h3>
+                <h3 className="font-extrabold text-lg text-[#1A5276]">Daftar Pengguna & Level Akses</h3>
                 <p className="text-sm text-gray-500 mt-1">Ganti role aktif untuk menguji logika perizinan pada navigasi dan modul</p>
               </div>
               <span className="bg-emerald-100 text-emerald-800 text-sm font-bold px-4 py-1.5 rounded-full border border-emerald-300">
-                Mode Aksif: {currentUser.role.replace('_', ' ').toUpperCase()}
+                Mode Aktif: {currentUser.role.replace('_', ' ').toUpperCase()}
               </span>
             </div>
 
@@ -128,39 +141,62 @@ export const SettingsModule: React.FC = () => {
             {allRoles.map(roleKey => {
               const details = ROLE_DETAILS[roleKey];
               const isCurrent = currentUser.role === roleKey;
+              const stats = getModuleStats(roleKey);
+              const meta = roleMeta.find(r => r.role === roleKey);
               return (
-                <div 
+                <div
                   key={roleKey}
-                  className={`bg-white rounded-xl border p-4 shadow-sm transition-all space-y-2 relative overflow-hidden ${
-                    isCurrent ? 'border-[#1ABC9C] ring-2 ring-[#1ABC9C]/30' : 'border-gray-200 hover:border-sky-300'
+                  className={`bg-white rounded-2xl border p-5 shadow-sm transition-all space-y-4 relative overflow-hidden ${
+                    isCurrent ? 'border-[#1ABC9C] ring-2 ring-[#1ABC9C]/30' : 'border-gray-200 hover:border-sky-300 hover:shadow-md'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${details?.color || 'bg-gray-700 text-white'}`}>
-                      {roleKey.replace('_', ' ')}
-                    </span>
+                  <div className={`absolute inset-x-0 top-0 h-1 ${details?.color?.split(' ')[0] || 'bg-gray-700'}`} />
+
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-white shadow shrink-0 ${details?.color || 'bg-gray-700'}`}>
+                        {meta?.icon}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="font-extrabold text-sm text-[#1A5276] leading-tight truncate">{details?.title || roleKey}</h4>
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{roleKey.replace('_', ' ')}</p>
+                      </div>
+                    </div>
                     {isCurrent && (
-                      <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full">
-                        Aktif Saat Ini
+                      <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        Aktif
                       </span>
                     )}
                   </div>
 
-                  <h4 className="font-extrabold text-sm text-[#1A5276]">{details?.title || roleKey}</h4>
                   <p className="text-xs text-gray-600 leading-relaxed">{details?.description}</p>
 
-                  <div className="pt-2">
-                    <button
-                      onClick={() => switchRole(roleKey)}
-                      className={`w-full py-1.5 rounded text-xs font-bold transition-all ${
-                        isCurrent 
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 cursor-default'
-                          : 'bg-[#1A5276] text-white hover:bg-[#2E86C1]'
-                      }`}
-                    >
-                      {isCurrent ? 'Pengguna Menggunakan Role Ini' : `Aktifkan Mode ${roleKey.replace('_', ' ')}`}
-                    </button>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-sky-50 rounded-lg p-2 text-center">
+                      <p className="text-base font-black text-[#1A5276]">{stats.allowed}</p>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Modul</p>
+                    </div>
+                    <div className="bg-emerald-50 rounded-lg p-2 text-center">
+                      <p className="text-base font-black text-emerald-700">{stats.writable}</p>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Dapat Edit</p>
+                    </div>
+                    <div className={`rounded-lg p-2 text-center ${isCurrent ? 'bg-emerald-100' : 'bg-gray-100'}`}>
+                      <p className={`text-base font-black ${isCurrent ? 'text-emerald-700' : 'text-gray-500'}`}>{isCurrent ? 'Aktif' : 'Non'}</p>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Status</p>
+                    </div>
                   </div>
+
+                  <button
+                    onClick={() => switchRole(roleKey)}
+                    className={`w-full py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                      isCurrent
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 cursor-default'
+                        : 'bg-[#1A5276] text-white hover:bg-[#2E86C1]'
+                    }`}
+                  >
+                    {isCurrent ? '✓ Pengguna Menggunakan Role Ini' : `Aktifkan Mode ${roleKey.replace('_', ' ')}`}
+                  </button>
                 </div>
               );
             })}
