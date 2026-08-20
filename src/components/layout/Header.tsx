@@ -45,9 +45,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
             onClick={onToggleSidebar}
             aria-label="Buka / tutup menu navigasi"
             title="Toggle Menu Navigation"
-            className="p-2 md:p-2.5 rounded-xl bg-[#2E86C1]/40 hover:bg-[#2E86C1] active:scale-95 transition-all text-white focus:outline-none focus:ring-2 focus:ring-[#1ABC9C] shrink-0"
+            className="md:hidden p-2 rounded-xl bg-[#2E86C1]/40 hover:bg-[#2E86C1] active:scale-95 transition-all text-white focus:outline-none focus:ring-2 focus:ring-[#1ABC9C] shrink-0"
           >
-            <Menu className="w-5 h-5 md:w-6 md:h-6" />
+            <Menu className="w-5 h-5" />
           </button>
 
           <div className="flex items-center gap-3 sm:gap-4 cursor-pointer min-w-0" onClick={() => navigate('/')}>

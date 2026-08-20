@@ -305,6 +305,12 @@ Aplikasi berpindah dari navigasi berbasis state (`isLandingPage`) ke URL routing
 
 **Quality Gates:** `npm run lint` (tsc --noEmit) ✅, `npm run build` ✅, `git diff --check` ✅.
 
+### 6.5 Penguncian Sidebar pada Desktop
+
+- Tombol hamburger pada `Header.tsx` sekarang hanya tampil pada viewport mobile (`< md`).
+- Sidebar tetap terbuka dan terkunci pada desktop (`md+`) sehingga tidak dapat tertutup karena perubahan state drawer.
+- Perilaku drawer dan hamburger tetap tersedia pada mobile untuk menghemat ruang layar.
+
 ---
 
 ## 7. RENCANA TASK KEDEPANNYA (FUTURE ROADMAP)

@@ -125,13 +125,13 @@ const handleTabClick = (tabId: string) => {
         }`}
       />
 
-      {/* Off-canvas drawer di mobile (< md) / sidebar statis di desktop (>= md) */}
-        <aside
-        className={`w-80 bg-linear-to-b from-[#1A5276] via-[#154360] to-[#0E2F44] text-white flex flex-col shrink-0 border-r border-[#2E86C1]/40 shadow-2xl transition-transform duration-300 ease-in-out select-none
-          fixed inset-y-0 left-0 z-50 max-w-[85vw]
-          md:static md:inset-auto md:z-auto md:max-w-none
-          ${isOpen ? 'translate-x-0' : '-translate-x-full pointer-events-none md:translate-x-0 md:pointer-events-auto md:hidden'}`}
-      >
+       {/* Off-canvas drawer di mobile (< md) / sidebar terkunci di desktop (>= md) */}
+         <aside
+         className={`w-80 bg-linear-to-b from-[#1A5276] via-[#154360] to-[#0E2F44] text-white flex flex-col shrink-0 border-r border-[#2E86C1]/40 shadow-2xl transition-transform duration-300 ease-in-out select-none
+           fixed inset-y-0 left-0 z-50 max-w-[85vw]
+           md:static md:inset-auto md:z-auto md:max-w-none
+           ${isOpen ? 'translate-x-0' : '-translate-x-full pointer-events-none md:translate-x-0 md:pointer-events-auto'}`}
+       >
       
       {/* User Persona Header */}
       <div className="p-4 bg-white/5 border-b border-white/10 space-y-3">
