@@ -120,21 +120,21 @@ export const AdminYayasanDashboard: React.FC<RoleDashboardProps> = ({ onNavigate
     <div className="space-y-8 animate-in fade-in duration-300">
 
       {/* ─── HERO BANNER ─── */}
-<div className="relative bg-[#1A5276] text-white rounded-2xl shadow-xl overflow-hidden">
+      <div className="relative bg-[#1A5276] text-white rounded-2xl shadow-xl overflow-hidden">
         <div className="absolute -top-10 -right-10 w-72 h-72 rounded-full bg-white/5" />
         <div className="absolute -bottom-12 -right-4 w-56 h-56 rounded-full bg-indigo-400/10" />
         <div className="absolute top-1/2 -left-16 w-64 h-64 rounded-full bg-[#1ABC9C]/10 blur-3xl" />
 
-        <div className="relative z-10 p-11 sm:p-14 flex flex-col sm:flex-row sm:items-center justify-between gap-7">
-          <div className="space-y-4">
+        <div className="relative z-10 p-7 sm:p-9 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+          <div className="space-y-3">
 <div className="inline-flex items-center gap-2.5 bg-indigo-500/15 border border-indigo-400/40 text-indigo-300 px-4 py-1.5 rounded-full text-sm font-semibold">
               <ShieldCheck className="w-5 h-5" />
               Portal Eksekutif — Admin Yayasan Utama
             </div>
-            <h2 className="text-4xl sm:text-5xl font-black leading-tight">
+            <h2 className="text-3xl sm:text-4xl font-black leading-tight">
               {greeting}, {currentUser.nama}! 👑
             </h2>
-            <p className="text-lg text-sky-100 max-w-xl leading-relaxed">
+            <p className="text-sm sm:text-base text-sky-100 max-w-xl leading-relaxed">
               Ringkasan komprehensif tata kelola Yayasan Pondok Pesantren Mukhtar Syafaat. Pantau keuangan, santri, kepegawaian, dan perizinan secara real-time.
             </p>
 <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -151,18 +151,18 @@ export const AdminYayasanDashboard: React.FC<RoleDashboardProps> = ({ onNavigate
           </div>
 
           <div className="flex flex-wrap gap-4">
-            <button
+             <button
               onClick={() => onNavigateTab('keuangan')}
-              className="px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-bold rounded-xl shadow-lg transition-all flex items-center gap-3 hover:scale-105"
+               className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-lg transition-all flex items-center gap-2 hover:scale-105"
             >
-              <Wallet className="w-6 h-6" />
+               <Wallet className="w-5 h-5" />
               Laporan Keuangan
             </button>
             <button
               onClick={() => onNavigateTab('pengaturan')}
-              className="px-7 py-3.5 bg-white/15 hover:bg-white/25 text-white text-lg font-bold rounded-xl border border-white/30 transition-all flex items-center gap-3 hover:scale-105"
+               className="px-5 py-2.5 bg-white/15 hover:bg-white/25 text-white text-sm font-bold rounded-xl border border-white/30 transition-all flex items-center gap-2 hover:scale-105"
             >
-              <Settings className="w-6 h-6" />
+               <Settings className="w-5 h-5" />
               Kelola RBAC
             </button>
           </div>
@@ -180,7 +180,7 @@ export const AdminYayasanDashboard: React.FC<RoleDashboardProps> = ({ onNavigate
             {/* Lingkaran dekoratif kecil — pojok kanan bawah, di belakang konten & jauh dari teks */}
             <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-white/10 pointer-events-none" />
 
-            <div className="relative z-10 p-6 space-y-5">
+            <div className="relative z-10 p-4 space-y-3">
               {/* Ikon + label kategori (ikon sejajar kiri, bukan watermark kanan-atas) */}
               <div className="flex items-center gap-3">
                 <span className="w-11 h-11 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0 shadow-sm">
@@ -191,7 +191,7 @@ export const AdminYayasanDashboard: React.FC<RoleDashboardProps> = ({ onNavigate
 
               {/* Angka besar */}
               <div className="flex items-end gap-2">
-                <span className="text-4xl sm:text-5xl font-black leading-none tracking-tight">{card.value}</span>
+                 <span className="text-3xl sm:text-4xl font-black leading-none tracking-tight">{card.value}</span>
                 {card.unit && <span className="text-xl font-bold text-white/60 mb-1">{card.unit}</span>}
               </div>
 
@@ -216,7 +216,7 @@ export const AdminYayasanDashboard: React.FC<RoleDashboardProps> = ({ onNavigate
         <div className="lg:col-span-7 space-y-5">
 
 {/* Marhalah Bar Chart */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sm:p-8 space-y-6">
+           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-6 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="font-extrabold text-lg sm:text-xl text-[#1A5276] flex items-center gap-3">
@@ -273,7 +273,7 @@ export const AdminYayasanDashboard: React.FC<RoleDashboardProps> = ({ onNavigate
           </div>
 
           {/* Keuangan Yayasan */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
 <div className="mb-5 space-y-2.5">
               <h3 className="font-extrabold text-xl text-[#1A5276] flex items-center gap-3">
                 <Wallet className="w-7 h-7 text-emerald-500 shrink-0" />
@@ -291,17 +291,17 @@ export const AdminYayasanDashboard: React.FC<RoleDashboardProps> = ({ onNavigate
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
               <div className="p-6 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
                 <p className="text-sm font-bold text-emerald-700 uppercase tracking-wider">Total Kas Masuk</p>
-                <p className="text-4xl font-black text-emerald-800 mt-2">Rp {(totalPaidNominal / 1000000).toFixed(1)}jt</p>
+                 <p className="text-3xl font-black text-emerald-800 mt-2">Rp {(totalPaidNominal / 1000000).toFixed(1)}jt</p>
                 <p className="text-sm text-emerald-600 mt-1.5">{paidCount} tagihan lunas</p>
               </div>
               <div className="p-6 bg-rose-50 border border-rose-200 rounded-xl text-center">
                 <p className="text-sm font-bold text-rose-700 uppercase tracking-wider">Tunggakan Santri</p>
-                <p className="text-4xl font-black text-rose-700 mt-2">Rp {(totalUnpaidNominal / 1000000).toFixed(1)}jt</p>
+                 <p className="text-3xl font-black text-rose-700 mt-2">Rp {(totalUnpaidNominal / 1000000).toFixed(1)}jt</p>
                 <p className="text-sm text-rose-500 mt-1.5">{unpaidInvoices.length} santri</p>
               </div>
               <div className="p-6 bg-sky-50 border border-sky-200 rounded-xl text-center">
                 <p className="text-sm font-bold text-sky-700 uppercase tracking-wider">Total Record Tagihan</p>
-                <p className="text-4xl font-black text-sky-800 mt-2">{tagihanList.length}</p>
+                 <p className="text-3xl font-black text-sky-800 mt-2">{tagihanList.length}</p>
                 <p className="text-sm text-sky-500 mt-1.5">Semua periode</p>
               </div>
             </div>
@@ -323,7 +323,7 @@ export const AdminYayasanDashboard: React.FC<RoleDashboardProps> = ({ onNavigate
               {/* Spacing proporsional: 16px / 12px / 4px */}
               <div className="mt-4">
                 <p className="text-sm font-bold text-amber-700 uppercase tracking-wider">Setoran Tahfidz Al-Qur'an</p>
-                <p className="text-5xl font-black text-amber-800 mt-3 leading-none">{totalTahfidzEntries}</p>
+                 <p className="text-4xl font-black text-amber-800 mt-3 leading-none">{totalTahfidzEntries}</p>
                 <p className="text-sm text-amber-600 mt-1">Total rekaman rekap juz</p>
               </div>
             </div>
@@ -340,7 +340,7 @@ export const AdminYayasanDashboard: React.FC<RoleDashboardProps> = ({ onNavigate
               </div>
               <div className="mt-4">
                 <p className="text-sm font-bold text-cyan-700 uppercase tracking-wider">Setoran Nadhoman Kitab</p>
-                <p className="text-5xl font-black text-cyan-800 mt-3 leading-none">{totalNadhomanEntries}</p>
+                 <p className="text-4xl font-black text-cyan-800 mt-3 leading-none">{totalNadhomanEntries}</p>
                 <p className="text-sm text-cyan-600 mt-1">Total rekaman setoran bait</p>
               </div>
             </div>
@@ -352,7 +352,7 @@ export const AdminYayasanDashboard: React.FC<RoleDashboardProps> = ({ onNavigate
         <div className="lg:col-span-5 space-y-5">
 
 {/* Quick Menu */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8">
+           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 sm:p-6">
             <div className="flex items-center gap-3 mb-5">
               <Activity className="w-7 h-7 text-[#1ABC9C] shrink-0" />
               <h3 className="font-extrabold text-lg sm:text-xl text-[#1A5276] leading-snug">Akses Semua Modul Yayasan</h3>

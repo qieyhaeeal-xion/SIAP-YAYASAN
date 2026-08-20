@@ -164,7 +164,7 @@ export const PengurusDashboard: React.FC<RoleDashboardProps> = ({ onNavigateTab 
             <div className="relative z-10 space-y-2">
               <p className="text-xs font-bold uppercase tracking-wider text-white/70">{card.label}</p>
               <div className="flex items-end gap-1">
-                <span className="text-4xl sm:text-5xl font-black leading-none">{card.value}</span>
+                <span className="text-3xl sm:text-4xl font-black leading-none">{card.value}</span>
                 {card.unit && <span className="text-sm font-bold text-white/60 mb-1.5">{card.unit}</span>}
               </div>
               <div className="flex items-center justify-between pt-1">

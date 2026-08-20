@@ -144,7 +144,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
       {/* Main Navbar */}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="container mx-auto max-w-screen-xl px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+        <div className="container mx-auto max-w-screen-xl px-4 sm:px-6 py-3 sm:py-3 flex items-center justify-between gap-3">
 
           <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#1A5276] flex items-center justify-center font-bold text-white shadow-md shrink-0">
@@ -229,29 +229,29 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       </nav>
 
       {/* Hero Banner Section */}
-      <header className="bg-linear-to-r from-[#1A5276] via-[#2E86C1] to-[#1A5276] text-white py-12 sm:py-16 lg:py-20 px-4 sm:px-6 relative overflow-hidden">
+      <header className="bg-linear-to-r from-[#1A5276] via-[#2E86C1] to-[#1A5276] text-white py-10 sm:py-12 lg:py-14 px-4 sm:px-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10 pointer-events-none" />
-        <div className="container mx-auto max-w-screen-xl relative z-10 grid md:grid-cols-12 gap-8 lg:gap-12 items-center">
+        <div className="container mx-auto max-w-screen-xl relative z-10 grid md:grid-cols-12 gap-6 lg:gap-8 items-center">
 
-          <div className="md:col-span-7 space-y-5 sm:space-y-7 text-left">
+          <div className="md:col-span-7 space-y-4 sm:space-y-5 text-left">
             <div className="inline-flex items-center gap-2 sm:gap-2.5 bg-[#1ABC9C]/20 border border-[#1ABC9C] text-[#1ABC9C] px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-sm font-extrabold tracking-wide max-w-full">
               <Sparkles className="w-3.5 h-3.5 sm:w-5 sm:h-5 shrink-0" />
               <span className="leading-snug">Sistem Informasi Administrasi Pesantren</span>
             </div>
 
-            <h1 className="text-3xl min-[480px]:text-4xl sm:text-5xl lg:text-6xl xl:text-6xl font-black leading-[1.1] tracking-tight">
+            <h1 className="text-3xl min-[480px]:text-4xl sm:text-5xl lg:text-5xl xl:text-5xl font-black leading-[1.1] tracking-tight">
               Pondok Pesantren <br />
               <span className="text-[#1ABC9C]">Mukhtar Syafaat</span>
             </h1>
 
-            <p className="text-sm sm:text-base lg:text-xl text-sky-100 max-w-2xl leading-relaxed font-normal">
+            <p className="text-sm sm:text-base lg:text-lg text-sky-100 max-w-2xl leading-relaxed font-normal">
               Mewujudkan generasi santri unggul ber-Akhlakul Karimah, fasih Al-Qur'an & Kitab Salaf, terintegrasi pendidikan formal (SMP, MTs, MA, SMK) serta Madrasah Diniyah Ula, Wustho, Ulya.
             </p>
 
-            <div className="flex flex-col min-[480px]:flex-row flex-wrap items-stretch min-[480px]:items-center gap-3 sm:gap-4 pt-2 sm:pt-3">
+            <div className="flex flex-col min-[480px]:flex-row flex-wrap items-stretch min-[480px]:items-center gap-2 sm:gap-3 pt-1 sm:pt-2">
               <button
                 onClick={() => setIsLandingPage(false)}
-                className="w-full min-[480px]:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-black text-xs sm:text-base rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-2 sm:gap-3 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full min-[480px]:w-auto px-5 sm:px-6 py-3 sm:py-3.5 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-black text-xs sm:text-sm rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <span className="text-center leading-snug">BUKA SIAP DASHBOARD UTAMA</span>
                 <ArrowRight className="w-5 h-5 shrink-0" />
@@ -259,7 +259,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
               <button
                 onClick={() => setShowPpdbForm(true)}
-                className="w-full min-[480px]:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-white text-[#1A5276] hover:bg-sky-50 font-black text-xs sm:text-base rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-2 sm:gap-3 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full min-[480px]:w-auto px-5 sm:px-6 py-3 sm:py-3.5 bg-white text-[#1A5276] hover:bg-sky-50 font-black text-xs sm:text-sm rounded-2xl transition-all shadow-2xl flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <UserPlus className="w-5 h-5 text-[#1ABC9C] shrink-0" />
                 <span className="text-center leading-snug">DAFTAR PPDB SANTRI BARU</span>
@@ -269,7 +269,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
           {/* Quick Access Card */}
           <div className="md:col-span-5 flex justify-center w-full">
-            <div className="bg-white/10 backdrop-blur-md p-5 sm:p-8 lg:p-8 rounded-3xl sm:rounded-[2.5rem] border border-white/20 text-white space-y-4 sm:space-y-6 max-w-lg w-full shadow-2xl">
+            <div className="bg-white/10 backdrop-blur-md p-4 sm:p-6 rounded-3xl border border-white/20 text-white space-y-4 max-w-lg w-full shadow-2xl">
 
               <div className="flex items-center justify-between pb-4 border-b border-white/20">
                 <div className="flex items-center gap-4">
@@ -287,7 +287,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
               <div className="space-y-3">
                 <button
                   onClick={() => openLogin('admin')}
-                  className="w-full p-3.5 sm:p-4 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/15 transition-all text-left flex items-center justify-between gap-2 group"
+                  className="w-full p-3 sm:p-3.5 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/15 transition-all text-left flex items-center justify-between gap-2 group"
                 >
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1A5276] flex items-center justify-center text-white font-bold shrink-0">
@@ -305,7 +305,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
                 <button
                   onClick={() => openLogin('guru')}
-                  className="w-full p-3.5 sm:p-4 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/15 transition-all text-left flex items-center justify-between gap-2 group"
+                  className="w-full p-3 sm:p-3.5 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/15 transition-all text-left flex items-center justify-between gap-2 group"
                 >
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1A5276] flex items-center justify-center text-white font-bold shrink-0">
@@ -323,7 +323,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
 
                 <button
                   onClick={() => openLogin('wali')}
-                  className="w-full p-3.5 sm:p-4 bg-[#1ABC9C] hover:bg-[#16a085] rounded-2xl text-white transition-all text-left flex items-center justify-between gap-2 shadow-xl group"
+                  className="w-full p-3 sm:p-3.5 bg-[#1ABC9C] hover:bg-[#16a085] rounded-2xl text-white transition-all text-left flex items-center justify-between gap-2 shadow-xl group"
                 >
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold shrink-0">
@@ -347,36 +347,36 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       </header>
 
       {/* Quick Statistics Banner */}
-      <section className="bg-white py-8 sm:py-12 lg:py-16 border-b border-gray-200 px-4 sm:px-6">
-        <div className="container mx-auto max-w-screen-xl grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 lg:gap-8 text-center">
-          <div className="p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-5xl font-black text-[#1A5276]">550+</div>
-            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg text-[#566573] font-extrabold mt-1.5 sm:mt-2 leading-snug">Santri Aktif Putra & Putri</div>
+      <section className="bg-white py-6 sm:py-8 lg:py-10 border-b border-gray-200 px-4 sm:px-6">
+        <div className="container mx-auto max-w-screen-xl grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 text-center">
+          <div className="p-3 sm:p-4 lg:p-5 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-4xl xl:text-4xl font-black text-[#1A5276]">550+</div>
+            <div className="text-[10px] min-[480px]:text-xs sm:text-sm lg:text-base text-[#566573] font-extrabold mt-1 leading-snug">Santri Aktif Putra & Putri</div>
           </div>
-          <div className="p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-5xl font-black text-[#2E86C1]">12 Unit</div>
-            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg text-[#566573] font-extrabold mt-1.5 sm:mt-2 leading-snug">Kompleks Asrama Pesantren</div>
+          <div className="p-3 sm:p-4 lg:p-5 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-4xl xl:text-4xl font-black text-[#2E86C1]">12 Unit</div>
+            <div className="text-[10px] min-[480px]:text-xs sm:text-sm lg:text-base text-[#566573] font-extrabold mt-1 leading-snug">Kompleks Asrama Pesantren</div>
           </div>
-          <div className="p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-5xl font-black text-[#1ABC9C]">5 Lembaga</div>
-            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg text-[#566573] font-extrabold mt-1.5 sm:mt-2 leading-snug">Sekolah Formal (TK/PAUD, MTs, MA, SMK, SMP)</div>
+          <div className="p-3 sm:p-4 lg:p-5 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-4xl xl:text-4xl font-black text-[#1ABC9C]">5 Lembaga</div>
+            <div className="text-[10px] min-[480px]:text-xs sm:text-sm lg:text-base text-[#566573] font-extrabold mt-1 leading-snug">Sekolah Formal (TK/PAUD, MTs, MA, SMK, SMP)</div>
           </div>
-          <div className="p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
-            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl xl:text-5xl font-black text-[#1A5276]">3 Marhalah</div>
-            <div className="text-[10px] min-[480px]:text-xs sm:text-base lg:text-lg text-[#566573] font-extrabold mt-1.5 sm:mt-2 leading-snug">Madrasah Diniyah (Ula, Wustho, Ulya)</div>
+          <div className="p-3 sm:p-4 lg:p-5 rounded-2xl sm:rounded-3xl bg-sky-50/60 border border-sky-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-4xl xl:text-4xl font-black text-[#1A5276]">3 Marhalah</div>
+            <div className="text-[10px] min-[480px]:text-xs sm:text-sm lg:text-base text-[#566573] font-extrabold mt-1 leading-snug">Madrasah Diniyah (Ula, Wustho, Ulya)</div>
           </div>
         </div>
       </section>
 
       {/* Role Portal Overview Section */}
-      <section id="portal-roles" className="py-12 sm:py-20 lg:py-20 px-4 sm:px-6 bg-white border-b border-gray-100">
-        <div className="container mx-auto max-w-screen-xl space-y-10 sm:space-y-16">
+      <section id="portal-roles" className="py-10 sm:py-14 lg:py-16 px-4 sm:px-6 bg-white border-b border-gray-100">
+        <div className="container mx-auto max-w-screen-xl space-y-8 sm:space-y-10">
 
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="text-xs sm:text-sm font-extrabold text-[#1ABC9C] uppercase tracking-wider bg-teal-50 px-4 py-1.5 rounded-full border border-teal-200 inline-block">
               Integrasi Tiga Layanan
             </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl xl:text-5xl font-black text-[#1A5276]">
+            <h2 className="text-3xl sm:text-4xl lg:text-4xl xl:text-4xl font-black text-[#1A5276]">
               Portal Akses Terpadu SIAP
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-[#566573] leading-relaxed">
@@ -384,11 +384,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
 
             {/* Admin Card */}
-            <div className="bg-[#F8FAFC] p-6 sm:p-8 rounded-3xl border border-gray-200 hover:border-[#1A5276] transition-all hover:shadow-xl flex flex-col justify-between">
-              <div className="space-y-6">
+            <div className="bg-[#F8FAFC] p-5 sm:p-6 rounded-3xl border border-gray-200 hover:border-[#1A5276] transition-all hover:shadow-xl flex flex-col justify-between">
+              <div className="space-y-4">
                 <div className="w-14 h-14 rounded-2xl bg-[#1A5276] text-white flex items-center justify-center font-bold shadow-lg">
                   <Building2 className="w-7 h-7 text-[#1ABC9C]" />
                 </div>
@@ -425,8 +425,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
             </div>
 
             {/* Guru Card */}
-            <div className="bg-[#F8FAFC] p-6 sm:p-8 rounded-3xl border border-gray-200 hover:border-[#2E86C1] transition-all hover:shadow-xl flex flex-col justify-between">
-              <div className="space-y-6">
+            <div className="bg-[#F8FAFC] p-5 sm:p-6 rounded-3xl border border-gray-200 hover:border-[#2E86C1] transition-all hover:shadow-xl flex flex-col justify-between">
+              <div className="space-y-4">
                 <div className="w-14 h-14 rounded-2xl bg-[#2E86C1] text-white flex items-center justify-center font-bold shadow-lg">
                   <GraduationCap className="w-7 h-7 text-[#1ABC9C]" />
                 </div>
@@ -463,8 +463,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
             </div>
 
             {/* Wali Card */}
-            <div className="bg-[#F8FAFC] p-6 sm:p-8 rounded-3xl border border-gray-200 hover:border-[#1ABC9C] transition-all hover:shadow-xl flex flex-col justify-between">
-              <div className="space-y-6">
+            <div className="bg-[#F8FAFC] p-5 sm:p-6 rounded-3xl border border-gray-200 hover:border-[#1ABC9C] transition-all hover:shadow-xl flex flex-col justify-between">
+              <div className="space-y-4">
                 <div className="w-14 h-14 rounded-2xl bg-[#1ABC9C] text-white flex items-center justify-center font-bold shadow-lg">
                   <HeartHandshake className="w-7 h-7" />
                 </div>
@@ -506,8 +506,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       </section>
 
       {/* Program Unggulan Pesantren */}
-      <section id="program" className="py-12 sm:py-20 lg:py-20 px-4 sm:px-6 bg-[#F8FAFC]">
-        <div className="container mx-auto max-w-screen-xl text-center space-y-10 sm:space-y-16">
+      <section id="program" className="py-10 sm:py-14 lg:py-16 px-4 sm:px-6 bg-[#F8FAFC]">
+        <div className="container mx-auto max-w-screen-xl text-center space-y-8 sm:space-y-10">
 
           <div className="max-w-3xl mx-auto space-y-3">
             <span className="text-xs sm:text-sm font-extrabold text-[#1ABC9C] uppercase tracking-wider bg-teal-50 px-4 py-1.5 rounded-full border border-teal-200 inline-block">
@@ -521,9 +521,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 text-left">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 text-left">
 
-            <div className="bg-white p-8 sm:p-10 rounded-3xl border border-gray-200 shadow-sm hover:shadow-xl transition-all">
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm hover:shadow-xl transition-all">
               <div className="w-14 h-14 rounded-2xl bg-[#D6EAF8] text-[#1A5276] flex items-center justify-center font-bold mb-6">
                 <BookOpen className="w-7 h-7 text-[#1A5276]" />
               </div>
@@ -533,7 +533,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
               </p>
             </div>
 
-            <div className="bg-white p-8 sm:p-10 rounded-3xl border border-gray-200 shadow-sm hover:shadow-xl transition-all">
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm hover:shadow-xl transition-all">
               <div className="w-14 h-14 rounded-2xl bg-teal-100 text-[#1ABC9C] flex items-center justify-center font-bold mb-6">
                 <GraduationCap className="w-7 h-7 text-[#1ABC9C]" />
               </div>
@@ -543,7 +543,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
               </p>
             </div>
 
-            <div className="bg-white p-8 sm:p-10 rounded-3xl border border-gray-200 shadow-sm hover:shadow-xl transition-all">
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-200 shadow-sm hover:shadow-xl transition-all">
               <div className="w-14 h-14 rounded-2xl bg-sky-100 text-[#2E86C1] flex items-center justify-center font-bold mb-6">
                 <School className="w-7 h-7 text-[#2E86C1]" />
               </div>
@@ -559,8 +559,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       </section>
 
       {/* PPDB Online Section */}
-       <section id="ppdb" className="py-12 sm:py-20 lg:py-20 bg-[#D6EAF8]/40 border-t border-b border-[#2E86C1]/30 px-4 sm:px-6">
-        <div className="container mx-auto max-w-5xl bg-white p-4 sm:p-8 lg:p-14 rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-sky-200">
+       <section id="ppdb" className="py-10 sm:py-14 lg:py-16 bg-[#D6EAF8]/40 border-t border-b border-[#2E86C1]/30 px-4 sm:px-6">
+         <div className="container mx-auto max-w-5xl bg-white p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl shadow-2xl border border-sky-200">
 
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-6 mb-6 sm:mb-8 border-b border-gray-100">
             <div className="min-w-0">
@@ -733,7 +733,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenDashboard, onOpe
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#1A5276] text-white py-12 sm:py-16 lg:py-16 px-4 sm:px-6 border-t border-[#2E86C1]">
+      <footer className="bg-[#1A5276] text-white py-10 sm:py-12 lg:py-14 px-4 sm:px-6 border-t border-[#2E86C1]">
         <div className="container mx-auto max-w-screen-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 text-xs sm:text-sm">
 
           <div className="space-y-4">
