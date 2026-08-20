@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Wallet, Plus, Printer, CheckCircle, Search, X, FileText, ArrowUpRight } from 'lucide-react';
+import { Wallet, Plus, CheckCircle, Search, X } from 'lucide-react';
 import { TransaksiPembayaran, TagihanKeuangan } from '../../types/sisantri';
+import { PemasukanDistribusi } from './PemasukanDistribusi';
+import { KonfigurasiPemasukan } from './KonfigurasiPemasukan';
+import { MonitoringPemasukan } from './MonitoringPemasukan';
 
 export const KeuanganModule: React.FC = () => {
   const {
     tagihanList,
-    biayaMasterList,
-    transaksiList,
     addBayarTagihan,
-    getSantriNameById,
-    santriList,
-    currentUser
+    getSantriNameById
   } = useApp();
 
-  const [activeTabSub, setActiveTabSub] = useState<'tagihan' | 'transaksi' | 'master'>('tagihan');
+  const [activeTabSub, setActiveTabSub] = useState<'monitoring' | 'tagihan' | 'pemasukan' | 'konfigurasi'>('monitoring');
 
   // Modal Pembayaran
   const [showBayarModal, setShowBayarModal] = useState(false);
@@ -22,10 +21,6 @@ export const KeuanganModule: React.FC = () => {
   const [nominalBayar, setNominalBayar] = useState(0);
   const [metodePembayaran, setMetodePembayaran] = useState<TransaksiPembayaran['metodePembayaran']>('Cash');
   const [catatanPembayaran, setCatatanPembayaran] = useState('');
-
-  // Modal Cetak Kuitansi
-  const [showReceiptModal, setShowReceiptModal] = useState(false);
-  const [receiptData, setReceiptData] = useState<TransaksiPembayaran | null>(null);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -44,19 +39,14 @@ export const KeuanganModule: React.FC = () => {
     setShowBayarModal(false);
   };
 
-  const handleOpenReceipt = (tr: TransaksiPembayaran) => {
-    setReceiptData(tr);
-    setShowReceiptModal(true);
-  };
-
   const filteredTagihan = tagihanList.filter(t => {
     const sName = getSantriNameById(t.santriId).toLowerCase();
-    return sName.includes(searchQuery.toLowerCase()) || t.noTagihan.toLowerCase().includes(searchQuery.toLowerCase());
+    return sName.includes(searchQuery.toLowerCase()) || (t.noTagihan || '').toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
-      
+
       {/* Header Title */}
       <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -68,7 +58,15 @@ export const KeuanganModule: React.FC = () => {
         </div>
 
         {/* Sub Navigation Pills */}
-        <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-lg">
+        <div className="flex flex-wrap items-center gap-2 bg-gray-100 p-1.5 rounded-lg">
+          <button
+            onClick={() => setActiveTabSub('monitoring')}
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
+              activeTabSub === 'monitoring' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Monitoring Pemasukan
+          </button>
           <button
             onClick={() => setActiveTabSub('tagihan')}
             className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
@@ -78,20 +76,20 @@ export const KeuanganModule: React.FC = () => {
             Tagihan Santri
           </button>
           <button
-            onClick={() => setActiveTabSub('transaksi')}
+            onClick={() => setActiveTabSub('pemasukan')}
             className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
-              activeTabSub === 'transaksi' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
+              activeTabSub === 'pemasukan' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            Riwayat Transaksi
+            Pemasukan & Distribusi
           </button>
           <button
-            onClick={() => setActiveTabSub('master')}
+            onClick={() => setActiveTabSub('konfigurasi')}
             className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
-              activeTabSub === 'master' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
+              activeTabSub === 'konfigurasi' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            Pos Biaya Master
+            Konfigurasi Pemasukan
           </button>
         </div>
       </div>
@@ -168,75 +166,14 @@ export const KeuanganModule: React.FC = () => {
         </div>
       )}
 
-      {/* 2. RIWAYAT TRANSAKSI TAB */}
-      {activeTabSub === 'transaksi' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
-          <h3 className="font-extrabold text-lg text-[#1A5276]">Jurnal Transaksi Pembayaran Syahriyah</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
-                  <th className="p-4">No Kuitansi</th>
-                  <th className="p-4">Tanggal</th>
-                  <th className="p-4">Nama Santri</th>
-                  <th className="p-4">Nominal Terbayar</th>
-                  <th className="p-4">Metode</th>
-                  <th className="p-4 text-center">Cetak Nota</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {transaksiList.map(tr => (
-                  <tr key={tr.id} className="hover:bg-sky-50 transition-colors">
-                    <td className="p-4 font-mono font-bold text-[#1A5276] text-base">{tr.noKuitansi}</td>
-                    <td className="p-4 font-mono text-gray-600">{tr.tanggalBayar}</td>
-                    <td className="p-4 font-extrabold text-gray-800 text-base">{getSantriNameById(tr.santriId)}</td>
-                    <td className="p-4 font-extrabold text-emerald-700 text-base">Rp {tr.nominalDibayar.toLocaleString('id-ID')}</td>
-                    <td className="p-4 font-semibold text-gray-700">{tr.metodePembayaran}</td>
-                    <td className="p-4 text-center">
-                      <button
-                        onClick={() => handleOpenReceipt(tr)}
-                        className="px-3.5 py-1.5 bg-sky-100 hover:bg-sky-200 text-[#1A5276] rounded text-xs font-bold flex items-center gap-1.5 mx-auto"
-                      >
-                        <Printer className="w-4 h-4" />
-                        <span>Kuitansi Resmi</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {/* 0. MONITORING PEMASUKAN TAB */}
+      {activeTabSub === 'monitoring' && <MonitoringPemasukan />}
 
-      {/* 3. POS BIAYA MASTER TAB */}
-      {activeTabSub === 'master' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
-          <h3 className="font-extrabold text-lg text-[#1A5276]">Master Pos Biaya Syahriyah & Administrasi</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="bg-[#1A5276] text-white font-bold uppercase tracking-wider text-sm">
-                  <th className="p-4">Kode Biaya</th>
-                  <th className="p-4">Nama Pos Biaya</th>
-                  <th className="p-4">Nominal Standar</th>
-                  <th className="p-4">Tipe Frekuensi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {biayaMasterList.map(b => (
-                  <tr key={b.id} className="hover:bg-sky-50 transition-colors">
-                    <td className="p-4 font-mono font-bold text-[#1A5276] text-base">{b.kodeBiaya}</td>
-                    <td className="p-4 font-extrabold text-gray-800 text-base">{b.namaBiaya}</td>
-                    <td className="p-4 font-bold text-emerald-700 text-base">Rp {b.nominalStandard.toLocaleString('id-ID')}</td>
-                    <td className="p-4 font-semibold text-gray-600">{b.tipeFrekuensi}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {/* 3. PEMASUKAN & DISTRIBUSI TAB */}
+      {activeTabSub === 'pemasukan' && <PemasukanDistribusi />}
+
+      {/* 6. KONFIGURASI PEMASUKAN TAB */}
+      {activeTabSub === 'konfigurasi' && <KonfigurasiPemasukan />}
 
       {/* MODAL BAYAR TAGIHAN */}
       {showBayarModal && selectedTagihan && (
@@ -294,66 +231,6 @@ export const KeuanganModule: React.FC = () => {
                 <button type="submit" className="px-4 py-1.5 bg-[#1A5276] text-white font-bold rounded-lg shadow">PROSES BAYAR</button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL CETAK KUITANSI RESMI */}
-      {showReceiptModal && receiptData && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 border-2 border-[#1A5276]">
-            <div className="text-center border-b pb-3 border-gray-200">
-              <p className="text-xs font-black text-[#1A5276] uppercase tracking-wider">PONDOK PESANTREN MUKHTAR SYAFAAT</p>
-              <p className="text-[10px] text-gray-500">Blokagung, Karangdoro, Tegalsari, Banyuwangi, Jawa Timur</p>
-              <div className="mt-2 text-sm font-extrabold text-[#1ABC9C] border-y border-dashed border-gray-300 py-1">
-                KUITANSI PEMBAYARAN SYAHRIYAH RESMI
-              </div>
-            </div>
-
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between font-mono">
-                <span className="text-gray-500">No. Kuitansi:</span>
-                <span className="font-bold text-[#1A5276]">{receiptData.noKuitansi}</span>
-              </div>
-              <div className="flex justify-between font-mono">
-                <span className="text-gray-500">Tanggal:</span>
-                <span>{receiptData.tanggalBayar}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Nama Santri:</span>
-                <span className="font-bold">{getSantriNameById(receiptData.santriId)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Metode:</span>
-                <span className="font-semibold">{receiptData.metodePembayaran}</span>
-              </div>
-              <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-200 flex justify-between items-center mt-3">
-                <span className="font-bold text-emerald-900">JUMLAH DIBAYAR:</span>
-                <span className="text-base font-black text-emerald-700">Rp {receiptData.nominalDibayar.toLocaleString('id-ID')}</span>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t flex items-center justify-between">
-              <div className="text-[10px] text-gray-400">
-                <p>Kasir: {receiptData.penerimaBendahara}</p>
-                <p>Status: Sah & Terverifikasi</p>
-                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mt-0.5">Media Yayasan Mukhtar Syafa'at</p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setShowReceiptModal(false)}
-                  className="px-3 py-1.5 bg-gray-100 font-bold text-xs rounded-lg"
-                >
-                  TUTUP
-                </button>
-                <button
-                  onClick={() => { window.print(); setShowReceiptModal(false); }}
-                  className="px-4 py-1.5 bg-[#1A5276] text-white font-bold text-xs rounded-lg shadow flex items-center gap-1"
-                >
-                  <Printer className="w-3.5 h-3.5" /> PRINT
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       )}

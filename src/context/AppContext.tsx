@@ -26,7 +26,14 @@ import {
   UserRole,
   PresensiRecord,
   TahunAjaran,
-  PesertaTahfidz
+  PesertaTahfidz,
+  DistribusiKeuanganConfig,
+  DistribusiStatus,
+  PercentageMap,
+  Pemasukan,
+  AlokasiPemasukan,
+  AuditLog,
+  AuditAction
 } from '../types/sisantri';
 
 import {
@@ -55,8 +62,17 @@ import {
   INITIAL_USERS,
   INITIAL_PRESENSI,
   INITIAL_TAHUN_AJARAN,
-  INITIAL_PESERTA_TAHFIDZ
+  INITIAL_PESERTA_TAHFIDZ,
+  INITIAL_DISTRIBUSI_CONFIG,
+  INITIAL_PEMASUKAN,
+  INITIAL_ALOKASI,
+  INITIAL_AUDIT_LOG
 } from '../data/mockData';
+import {
+  validateDistribution,
+  createPemasukanRecord as buildPemasukanRecord,
+  NewPemasukanInput
+} from '../services/distributionService';
 
 interface AppContextType {
   // Mode & Auth
@@ -168,6 +184,20 @@ interface AppContextType {
   transaksiList: TransaksiPembayaran[];
   addBayarTagihan: (tagihanId: string, nominal: number, metode: TransaksiPembayaran['metodePembayaran'], catatan?: string) => void;
 
+  // Pemasukan & Distribusi
+  distribusiConfigList: DistribusiKeuanganConfig[];
+  pemasukanList: Pemasukan[];
+  alokasiList: AlokasiPemasukan[];
+  getAktifDistribusiConfig: () => DistribusiKeuanganConfig | undefined;
+  saveDistribusiConfig: (input: { id?: string; name: string; effectiveFrom: string; effectiveUntil?: string; percentages: PercentageMap; status?: DistribusiStatus }) => { ok: boolean; error?: string; config?: DistribusiKeuanganConfig };
+  activateDistribusiConfig: (id: string) => void;
+  createPemasukan: (input: NewPemasukanInput) => { ok: boolean; error?: string; pemasukan?: Pemasukan; alokasi?: AlokasiPemasukan[] };
+  getUnitKeyFromSantri: (santriId: string) => string | undefined;
+
+  // Audit Trail
+  auditLogList: AuditLog[];
+  addAuditLog: (input: { action: AuditAction; entityType: 'Pemasukan' | 'DistribusiKeuanganConfig'; entityId: string; entityLabel: string; detail: string; before?: unknown; after?: unknown }) => void;
+
   // PPDB
   ppdbList: PendaftarPPDB[];
   addPPDB: (item: Omit<PendaftarPPDB, 'id' | 'noPendaftaran' | 'statusSeleksi' | 'tanggalDaftar'>) => void;
@@ -245,6 +275,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [biayaMasterList] = useLocalStorage<BiayaMaster[]>('biayaMaster', INITIAL_BIAYA_MASTER);
   const [tagihanList, setTagihanList] = useLocalStorage<TagihanKeuangan[]>('tagihan', INITIAL_TAGIHAN);
   const [transaksiList, setTransaksiList] = useLocalStorage<TransaksiPembayaran[]>('transaksi', INITIAL_TRANSAKSI);
+
+  // Pemasukan & Distribusi
+  const [distribusiConfigList, setDistribusiConfigList] = useLocalStorage<DistribusiKeuanganConfig[]>('distribusiConfig', INITIAL_DISTRIBUSI_CONFIG);
+  const [pemasukanList, setPemasukanList] = useLocalStorage<Pemasukan[]>('pemasukan', INITIAL_PEMASUKAN);
+  const [alokasiList, setAlokasiList] = useLocalStorage<AlokasiPemasukan[]>('alokasiPemasukan', INITIAL_ALOKASI);
+  const [auditLogList, setAuditLogList] = useLocalStorage<AuditLog[]>('auditLog', INITIAL_AUDIT_LOG);
 
   // Tahun Ajaran
   const [tahunAjaranList, setTahunAjaranList] = useLocalStorage<TahunAjaran[]>('tahunAjaran', INITIAL_TAHUN_AJARAN);
@@ -620,6 +656,180 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } : t));
   };
 
+  // Pemasukan & Distribusi
+  const getAktifDistribusiConfig = (): DistribusiKeuanganConfig | undefined =>
+    distribusiConfigList.find(c => c.status === 'Aktif');
+
+  // Resolusi unit santri (PONPES/SMP/MTS/MA/SMK/MADIN) — untuk snapshot & filter monitoring.
+  const getUnitKeyFromSantri = (santriId: string): string | undefined => {
+    const s = santriList.find(x => x.id === santriId);
+    if (!s) return undefined;
+    const sekolah = unitSekolahList.find(u => u.id === s.unitSekolahId);
+    if (sekolah?.kodeSekolah) return sekolah.kodeSekolah;
+    const pesantren = unitsPesantren.find(u => u.id === s.unitPesantrenId);
+    if (pesantren) return 'PONPES';
+    const madin = marhalahList.find(m => m.id === s.marhalahMadinId);
+    if (madin) return 'MADIN';
+    return undefined;
+  };
+
+  // Rekam audit trail (siapa-melakukan-apa-kapan-terhadap-apa).
+  const addAuditLog = (input: {
+    action: AuditAction;
+    entityType: 'Pemasukan' | 'DistribusiKeuanganConfig';
+    entityId: string;
+    entityLabel: string;
+    detail: string;
+    before?: unknown;
+    after?: unknown;
+  }) => {
+    const log: AuditLog = {
+      id: `aud-${Date.now()}`,
+      action: input.action,
+      entityType: input.entityType,
+      entityId: input.entityId,
+      entityLabel: input.entityLabel,
+      actorId: currentUser.id,
+      actorName: currentUser.nama,
+      detail: input.detail,
+      before: input.before,
+      after: input.after,
+      createdAt: new Date().toISOString()
+    };
+    setAuditLogList(prev => [log, ...prev]);
+  };
+
+  const nextConfigVersion = (): string => {
+    const maxVersion = distribusiConfigList.reduce((max, c) => {
+      const v = parseInt((c.version || 'V-000').replace('V-', ''), 10);
+      return Number.isNaN(v) ? max : Math.max(max, v);
+    }, 0);
+    return `V-${(maxVersion + 1).toString().padStart(3, '0')}`;
+  };
+
+  const saveDistribusiConfig = (input: {
+    id?: string;
+    name: string;
+    effectiveFrom: string;
+    effectiveUntil?: string;
+    percentages: PercentageMap;
+    status?: DistribusiStatus;
+  }): { ok: boolean; error?: string; config?: DistribusiKeuanganConfig } => {
+    const validation = validateDistribution(input.percentages);
+    if (!validation.valid) {
+      return { ok: false, error: validation.errors.join(' ') };
+    }
+    const nowIso = new Date().toISOString();
+    const targetStatus: DistribusiStatus = input.status ?? 'Aktif';
+    const existing = input.id ? distribusiConfigList.find(c => c.id === input.id) : undefined;
+
+    // Hanya satu konfigurasi yang boleh Aktif — yang lain di-Arsip
+    if (targetStatus === 'Aktif') {
+      setDistribusiConfigList(prev =>
+        prev.map(c => (c.status === 'Aktif' ? { ...c, status: 'Arsip' as DistribusiStatus, updatedAt: nowIso } : c))
+      );
+    }
+
+    let config: DistribusiKeuanganConfig;
+    if (existing) {
+      config = {
+        ...existing,
+        name: input.name,
+        effectiveFrom: input.effectiveFrom,
+        effectiveUntil: input.effectiveUntil,
+        percentages: { ...input.percentages },
+        status: targetStatus,
+        updatedAt: nowIso
+      };
+      setDistribusiConfigList(prev => prev.map(c => (c.id === input.id ? config : c)));
+    } else {
+      config = {
+        id: `dcfg-${Date.now()}`,
+        name: input.name,
+        version: nextConfigVersion(),
+        effectiveFrom: input.effectiveFrom,
+        effectiveUntil: input.effectiveUntil,
+        percentages: { ...input.percentages },
+        status: targetStatus,
+        createdBy: currentUser.nama,
+        createdAt: nowIso,
+        updatedAt: nowIso
+      };
+      setDistribusiConfigList(prev => [config, ...prev]);
+    }
+
+    addAuditLog({
+      action: 'UPDATE_DISTRIBUTION_CONFIG',
+      entityType: 'DistribusiKeuanganConfig',
+      entityId: config.id,
+      entityLabel: config.name,
+      detail: `${existing ? `Perbarui konfigurasi ${config.name} (${config.version})` : `Buat konfigurasi baru ${config.name} (${config.version})`} — total distribusi ${validation.total.toFixed(2)}%, status ${targetStatus}.`,
+      before: existing ? { name: existing.name, percentages: existing.percentages, status: existing.status } : undefined,
+      after: { name: config.name, version: config.version, percentages: config.percentages, status: config.status }
+    });
+    return { ok: true, config };
+  };
+
+  const activateDistribusiConfig = (id: string) => {
+    const nowIso = new Date().toISOString();
+    const target = distribusiConfigList.find(c => c.id === id);
+    const previousAktif = distribusiConfigList.find(c => c.status === 'Aktif');
+    setDistribusiConfigList(prev =>
+      prev.map(c =>
+        c.id === id
+          ? { ...c, status: 'Aktif' as DistribusiStatus, updatedAt: nowIso }
+          : c.status === 'Aktif'
+            ? { ...c, status: 'Arsip' as DistribusiStatus, updatedAt: nowIso }
+            : c
+      )
+    );
+    if (target) {
+      addAuditLog({
+        action: 'ACTIVATE_DISTRIBUTION_CONFIG',
+        entityType: 'DistribusiKeuanganConfig',
+        entityId: id,
+        entityLabel: target.name,
+        detail: `Konfigurasi ${target.name} (${target.version}) diaktifkan${previousAktif && previousAktif.id !== id ? ` — ${previousAktif.name} (${previousAktif.version}) diarsipkan` : ''}.`,
+        before: { activeId: previousAktif?.id, activeName: previousAktif?.name },
+        after: { activeId: id, activeName: target.name }
+      });
+    }
+  };
+
+  const createPemasukan = (input: NewPemasukanInput): {
+    ok: boolean;
+    error?: string;
+    pemasukan?: Pemasukan;
+    alokasi?: AlokasiPemasukan[];
+  } => {
+    const config = getAktifDistribusiConfig();
+    if (!config) {
+      return { ok: false, error: 'Tidak ada konfigurasi pembagian yang aktif. Buat konfigurasi terlebih dahulu.' };
+    }
+    if (!input.nominal || input.nominal <= 0) {
+      return { ok: false, error: 'Nominal pembayaran harus lebih dari 0.' };
+    }
+    const unitId = getUnitKeyFromSantri(input.santriId);
+    const result = buildPemasukanRecord(input, config, pemasukanList.length + 1, unitId);
+    setPemasukanList(prev => [result.pemasukan, ...prev]);
+    setAlokasiList(prev => [...result.alokasi, ...prev]);
+
+    const santriNama = getSantriNameById(input.santriId);
+    const jumlah = result.alokasi.reduce((a, x) => a + x.nominal, 0);
+    const verifies = result.pemasukan.status === 'DISTRIBUTED';
+    addAuditLog({
+      action: verifies ? 'CREATE_PAYMENT' : 'DISTRIBUTION_FAILED',
+      entityType: 'Pemasukan',
+      entityId: result.pemasukan.id,
+      entityLabel: result.pemasukan.noPemasukan,
+      detail: verifies
+        ? `Pencatatan pembayaran ${result.pemasukan.jenisPembayaran} Rp ${result.pemasukan.nominal.toLocaleString('id-ID')} a.n. ${santriNama} (${unitId ?? '-'}) — terdistribusi ke 5 keuangan via ${result.pemasukan.configSnapshot.name} (${result.pemasukan.configVersion}).`
+        : `Distribusi gagal: total alokasi (${jumlah}) tidak sesuai nominal pembayaran (${result.pemasukan.nominal}). Transaksi disimpan dengan status FAILED untuk ditinjau.`,
+      after: { status: result.pemasukan.status, nominal: result.pemasukan.nominal, unit: unitId, error: result.pemasukan.distribusiError }
+    });
+    return { ok: true, pemasukan: result.pemasukan, alokasi: result.alokasi };
+  };
+
   // PPDB
   const addPPDB = (item: Omit<PendaftarPPDB, 'id' | 'noPendaftaran' | 'statusSeleksi' | 'tanggalDaftar'>) => {
     const year = new Date().getFullYear();
@@ -810,6 +1020,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         tagihanList,
         transaksiList,
         addBayarTagihan,
+
+        distribusiConfigList,
+        pemasukanList,
+        alokasiList,
+        getAktifDistribusiConfig,
+        saveDistribusiConfig,
+        activateDistribusiConfig,
+        createPemasukan,
+        getUnitKeyFromSantri,
+
+        auditLogList,
+        addAuditLog,
 
         ppdbList,
         addPPDB,

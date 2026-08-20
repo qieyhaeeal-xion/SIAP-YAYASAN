@@ -24,8 +24,15 @@ import {
   UserProfile,
   PresensiRecord,
   TahunAjaran,
-  PesertaTahfidz
+  PesertaTahfidz,
+  BiayaKategori,
+  bulanKeLabel,
+  DistribusiKeuanganConfig,
+  Pemasukan,
+  AlokasiPemasukan,
+  AuditLog
 } from '../types/sisantri';
+import { createPemasukanRecord, NewPemasukanInput } from '../services/distributionService';
 
 export const INITIAL_TAHUN_AJARAN: TahunAjaran[] = [
   {
@@ -512,47 +519,90 @@ export const INITIAL_PEGAWAI: Pegawai[] = [
 ];
 
 export const INITIAL_BIAYA_MASTER: BiayaMaster[] = [
-  { id: 'by-1', namaBiaya: 'Uang Pangkal & Pendaftaran', jenis: 'Tahunan', nominal: 2500000, keterangan: 'Dibayar sekali saat masuk' },
-  { id: 'by-2', namaBiaya: 'Syahriyah Pesantren (SPP Bulanan)', jenis: 'Syahriyah', nominal: 450000, keterangan: 'Biaya makan, asrama & listrik bulanan' },
-  { id: 'by-3', namaBiaya: 'Syahriyah Madin (SPP Diniyah)', jenis: 'Syahriyah', nominal: 100000, keterangan: 'Biaya pendidikan diniyah bulanan' },
-  { id: 'by-4', namaBiaya: 'Seragam & Perlengkapan Kitab', jenis: 'Non-Syahriyah', nominal: 750000, keterangan: 'Paket kitab matan & seragam pesantren' },
+  { id: 'by-1', kodeBiaya: 'BG-PANGKAL', namaBiaya: 'Uang Pangkal & Pendaftaran', jenis: 'Tahunan', tipeFrekuensi: 'Sekali / Tahunan', nominal: 2500000, nominalStandard: 2500000, kategori: 'YAYASAN', keterangan: 'Dibayar sekali saat masuk' },
+  { id: 'by-yayasan', kodeBiaya: 'BG-YAYASAN', namaBiaya: 'Syahriyah Yayasan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 100000, nominalStandard: 100000, kategori: 'YAYASAN', keterangan: 'Iuran keuangan yayasan bulanan' },
+  { id: 'by-sekolah', kodeBiaya: 'BG-SEKOLAH', namaBiaya: 'SPP Sekolah', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 150000, nominalStandard: 150000, kategori: 'SEKOLAH', keterangan: 'SPP pendidikan formal (MTs/MA/SMK)' },
+  { id: 'by-pesantren', kodeBiaya: 'BG-PESANTREN', namaBiaya: 'Syahriyah Pesantren', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 200000, nominalStandard: 200000, kategori: 'PESANTREN', keterangan: 'SPP kepesantrenan & asrama' },
+  { id: 'by-makan', kodeBiaya: 'BG-MAKAN', namaBiaya: 'Uang Makan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 250000, nominalStandard: 250000, kategori: 'MAKAN', keterangan: 'Biaya konsumsi santri bulanan' },
+  { id: 'by-madin', kodeBiaya: 'BG-MADIN', namaBiaya: 'Syahriyah Madin', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 75000, nominalStandard: 75000, kategori: 'MADIN', keterangan: 'SPP diniyah (Madin)' },
+  { id: 'by-4', kodeBiaya: 'BG-SERAGAM', namaBiaya: 'Seragam & Perlengkapan Kitab', jenis: 'Non-Syahriyah', tipeFrekuensi: 'Tahunan', nominal: 750000, nominalStandard: 750000, kategori: 'PESANTREN', keterangan: 'Paket kitab matan & seragam pesantren' },
 ];
 
-export const INITIAL_TAGIHAN: TagihanKeuangan[] = [
-  {
-    id: 'tgh-1',
-    santriId: 'snt-1',
-    biayaMasterId: 'by-2',
-    bulanTahun: 'Agustus 2026',
-    nominalTagihan: 450000,
-    nominalTerbayar: 450000,
-    status: 'Lunas',
-    tanggalJatuhTempo: '2026-08-10',
-    tahunAjaranId: 'ta-2526'
-  },
-  {
-    id: 'tgh-2',
-    santriId: 'snt-2',
-    biayaMasterId: 'by-2',
-    bulanTahun: 'Agustus 2026',
-    nominalTagihan: 450000,
-    nominalTerbayar: 0,
-    status: 'Belum Lunas',
-    tanggalJatuhTempo: '2026-08-10',
-    tahunAjaranId: 'ta-2526'
-  },
-  {
-    id: 'tgh-3',
-    santriId: 'snt-3',
-    biayaMasterId: 'by-2',
-    bulanTahun: 'Agustus 2026',
-    nominalTagihan: 450000,
-    nominalTerbayar: 200000,
-    status: 'Sebagian',
-    tanggalJatuhTempo: '2026-08-10',
-    tahunAjaranId: 'ta-2526'
+// ── Rekap Syahriyah: 5 kategori (YAYASAN/SEKOLAH/PESANTREN/MAKAN/MADIN) per santri per bulan ──
+const KATEGORI_BIAYA_ID: Record<BiayaKategori, string> = {
+  YAYASAN: 'by-yayasan',
+  SEKOLAH: 'by-sekolah',
+  PESANTREN: 'by-pesantren',
+  MAKAN: 'by-makan',
+  MADIN: 'by-madin'
+};
+
+const NOMINAL_BY_KATEGORI: Record<BiayaKategori, number> = {
+  YAYASAN: 100000,
+  SEKOLAH: 150000,
+  PESANTREN: 200000,
+  MAKAN: 250000,
+  MADIN: 75000
+};
+
+// Snapshot unit per santri (untuk filter PONPES/SMP/MTS/MA/SMK/MADIN)
+const UNIT_BY_SANTRI: Record<string, string> = {
+  'snt-1': 'MA',
+  'snt-2': 'SMK',
+  'snt-3': 'MTS'
+};
+
+const KATEGORI_ORDER: BiayaKategori[] = ['YAYASAN', 'SEKOLAH', 'PESANTREN', 'MAKAN', 'MADIN'];
+
+// Bulan "sekarang" untuk demo (Agustus = bulanKe 2) -> bulan lampau Lunas, bulan kini beragam, bulan depan belum
+const CURRENT_BULAN_KE = 2;
+
+function generateMockTagihan(): TagihanKeuangan[] {
+  const rows: TagihanKeuangan[] = [];
+  const santriIds = ['snt-1', 'snt-2', 'snt-3'];
+  let seq = 1;
+
+  for (const santriId of santriIds) {
+    for (let bulanKe = 1; bulanKe <= 12; bulanKe++) {
+      for (const k of KATEGORI_ORDER) {
+        const nominal = NOMINAL_BY_KATEGORI[k];
+        let terbayar = 0;
+
+        if (bulanKe < CURRENT_BULAN_KE) {
+          terbayar = nominal;
+        } else if (bulanKe === CURRENT_BULAN_KE) {
+          if (santriId === 'snt-1') terbayar = nominal;
+          else if (santriId === 'snt-2' && k !== 'MAKAN') terbayar = nominal;
+          else if (santriId === 'snt-3' && (k === 'YAYASAN' || k === 'SEKOLAH')) terbayar = Math.round(nominal / 2);
+        }
+
+        const status: TagihanKeuangan['status'] =
+          terbayar >= nominal && nominal > 0 ? 'Lunas' : terbayar > 0 ? 'Sebagian' : 'Belum Lunas';
+
+        rows.push({
+          id: `tgh-${seq}`,
+          santriId,
+          biayaMasterId: KATEGORI_BIAYA_ID[k],
+          noTagihan: `TG-${bulanKe.toString().padStart(2, '0')}-${seq.toString().padStart(3, '0')}`,
+          bulanTahun: `${bulanKeLabel(bulanKe)} 2026`,
+          bulanPeriode: bulanKeLabel(bulanKe),
+          tahunPeriode: 2026,
+          bulanKe,
+          unitId: UNIT_BY_SANTRI[santriId],
+          nominalTagihan: nominal,
+          nominalTerbayar: terbayar,
+          status,
+          tanggalJatuhTempo: `2026-${(bulanKe <= 6 ? bulanKe + 6 : bulanKe - 6).toString().padStart(2, '0')}-10`,
+          tahunAjaranId: 'ta-2526'
+        });
+        seq++;
+      }
+    }
   }
-];
+  return rows;
+}
+
+export const INITIAL_TAGIHAN: TagihanKeuangan[] = generateMockTagihan();
 
 export const INITIAL_TRANSAKSI: TransaksiPembayaran[] = [
   {
@@ -561,9 +611,12 @@ export const INITIAL_TRANSAKSI: TransaksiPembayaran[] = [
     santriId: 'snt-1',
     noKuitansi: 'KW-20260801-001',
     tanggal: '2026-08-01',
+    tanggalBayar: '2026-08-01',
     nominal: 450000,
+    nominalDibayar: 450000,
     metodePembayaran: 'Transfer Bank',
     penerima: 'H. Ahmad Rifa\'i (Bendahara)',
+    penerimaBendahara: 'H. Ahmad Rifa\'i (Bendahara)',
     catatan: 'Pembayaran Syahriyah Lunas via Bank Syariah Indonesia'
   },
   {
@@ -572,10 +625,132 @@ export const INITIAL_TRANSAKSI: TransaksiPembayaran[] = [
     santriId: 'snt-3',
     noKuitansi: 'KW-20260805-002',
     tanggal: '2026-08-05',
+    tanggalBayar: '2026-08-05',
     nominal: 200000,
+    nominalDibayar: 200000,
     metodePembayaran: 'Tunai',
     penerima: 'H. Ahmad Rifa\'i (Bendahara)',
+    penerimaBendahara: 'H. Ahmad Rifa\'i (Bendahara)',
     catatan: 'Pembayaran Syahriyah Sebagian (Sisa Rp 250.000)'
+  }
+];
+
+// ── KONFIGURASI PEMBAGIAN PEMASUKAN (histori berbasis periode) ──
+export const INITIAL_DISTRIBUSI_CONFIG: DistribusiKeuanganConfig[] = [
+  {
+    id: 'dcfg-1',
+    name: 'Periode A — Syahriyah 2025/2026 Awal',
+    version: 'V-001',
+    effectiveFrom: '2025-07-01',
+    effectiveUntil: '2025-12-31',
+    percentages: { YAYASAN: 15, MADIN: 15, SEKOLAH: 25, PESANTREN: 25, MAKAN: 20 },
+    status: 'Arsip',
+    createdBy: 'K.H. Mukhtar Syafaat',
+    createdAt: '2025-06-15T08:00:00.000Z',
+    updatedAt: '2025-06-15T08:00:00.000Z'
+  },
+  {
+    id: 'dcfg-2',
+    name: 'Periode B — Syahriyah 2026',
+    version: 'V-002',
+    effectiveFrom: '2026-01-01',
+    percentages: { YAYASAN: 10, MADIN: 15, SEKOLAH: 30, PESANTREN: 25, MAKAN: 20 },
+    status: 'Aktif',
+    createdBy: 'K.H. Mukhtar Syafaat',
+    createdAt: '2025-12-20T09:30:00.000Z',
+    updatedAt: '2025-12-20T09:30:00.000Z'
+  }
+];
+
+// ── PEMASUKAN & ALOKASI (contoh transaksi + snapshot distribusi) ──
+function unitKeyOf(santriId: string): string {
+  const map: Record<string, string> = { 'snt-1': 'MA', 'snt-2': 'SMK', 'snt-3': 'MTS' };
+  return map[santriId] ?? 'PONPES';
+}
+
+function buildMockPemasukan(): { pemasukan: Pemasukan[]; alokasi: AlokasiPemasukan[] } {
+  const aktif = INITIAL_DISTRIBUSI_CONFIG.find(c => c.status === 'Aktif');
+  if (!aktif) return { pemasukan: [], alokasi: [] };
+
+  const samples: Omit<NewPemasukanInput, 'createdBy'>[] = [
+    { santriId: 'snt-1', tanggal: '2026-08-05', nominal: 500000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Transfer Bank', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526', catatan: 'Transfer BSI' },
+    { santriId: 'snt-2', tanggal: '2026-08-07', nominal: 450000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Tunai', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526' },
+    { santriId: 'snt-3', tanggal: '2026-08-09', nominal: 600000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'E-Wallet (QRIS)', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526' }
+  ];
+
+  const pemasukan: Pemasukan[] = [];
+  const alokasi: AlokasiPemasukan[] = [];
+  samples.forEach((s, i) => {
+    const rec = createPemasukanRecord({ ...s, createdBy: 'K.H. Mukhtar Syafaat' }, aktif, i + 1, unitKeyOf(s.santriId));
+    pemasukan.push(rec.pemasukan);
+    alokasi.push(...rec.alokasi);
+  });
+
+  // Contoh transaksi GAGAL distribusi (untuk demo monitoring error) — total distribusi tidak sesuai.
+  const failedConfig: DistribusiKeuanganConfig = {
+    id: 'dcfg-9',
+    name: 'Periode Rusak (uji error)',
+    version: 'V-900',
+    effectiveFrom: '2026-08-01',
+    percentages: { YAYASAN: 10, MADIN: 15, SEKOLAH: 30, PESANTREN: 25, MAKAN: 19.5 },
+    status: 'Draft',
+    createdBy: 'K.H. Mukhtar Syafaat',
+    createdAt: '2026-08-01T08:00:00.000Z',
+    updatedAt: '2026-08-01T08:00:00.000Z'
+  };
+  const failedRec = createPemasukanRecord(
+    { santriId: 'snt-1', tanggal: '2026-08-10', nominal: 500000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Tunai', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526', createdBy: 'K.H. Mukhtar Syafaat' },
+    failedConfig,
+    99,
+    'MA'
+  );
+  pemasukan.push(failedRec.pemasukan);
+  alokasi.push(...failedRec.alokasi);
+
+  return { pemasukan, alokasi };
+}
+
+const { pemasukan: _pemasukanMock, alokasi: _alokasiMock } = buildMockPemasukan();
+export const INITIAL_PEMASUKAN: Pemasukan[] = _pemasukanMock;
+export const INITIAL_ALOKASI: AlokasiPemasukan[] = _alokasiMock;
+
+// ── AUDIT TRAIL AWAL ────────────────────────────────────
+export const INITIAL_AUDIT_LOG: AuditLog[] = [
+  {
+    id: 'aud-1',
+    action: 'CREATE_PAYMENT',
+    entityType: 'Pemasukan',
+    entityId: _pemasukanMock[0]?.id ?? 'pmk-0',
+    entityLabel: _pemasukanMock[0]?.noPemasukan ?? 'PMK-0000',
+    actorId: 'usr-1',
+    actorName: 'K.H. Mukhtar Syafaat',
+    detail: 'Pencatatan pembayaran Syahriyah Rp 500.000 a.n. Ahmad Fauzi (MA) - distribusi otomatis ke 5 keuangan.',
+    after: { status: 'DISTRIBUTED', nominal: 500000, unit: 'MA' },
+    createdAt: '2026-08-05T08:00:00.000Z'
+  },
+  {
+    id: 'aud-2',
+    action: 'CREATE_PAYMENT',
+    entityType: 'Pemasukan',
+    entityId: _pemasukanMock[1]?.id ?? 'pmk-0',
+    entityLabel: _pemasukanMock[1]?.noPemasukan ?? 'PMK-0000',
+    actorId: 'usr-1',
+    actorName: 'K.H. Mukhtar Syafaat',
+    detail: 'Pencatatan pembayaran Syahriyah Rp 450.000 a.n. Ahmad Fauzi (SMK) - distribusi otomatis ke 5 keuangan.',
+    after: { status: 'DISTRIBUTED', nominal: 450000, unit: 'SMK' },
+    createdAt: '2026-08-07T09:15:00.000Z'
+  },
+  {
+    id: 'aud-3',
+    action: 'DISTRIBUTION_FAILED',
+    entityType: 'Pemasukan',
+    entityId: _pemasukanMock[3]?.id ?? 'pmk-0',
+    entityLabel: _pemasukanMock[3]?.noPemasukan ?? 'PMK-0099',
+    actorId: 'usr-1',
+    actorName: 'K.H. Mukhtar Syafaat',
+    detail: _pemasukanMock[3]?.distribusiError ?? 'Distribusi gagal: total alokasi tidak sesuai nominal pembayaran. Transaksi disimpan dengan status FAILED untuk ditinjau.',
+    after: { status: 'FAILED', nominal: 500000, error: _pemasukanMock[3]?.distribusiError },
+    createdAt: '2026-08-10T10:00:00.000Z'
   }
 ];
 

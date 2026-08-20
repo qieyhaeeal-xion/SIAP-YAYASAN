@@ -7,7 +7,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // --- TAHUN AJARAN -------------------------------------
@@ -24,8 +23,9 @@ model TahunAjaran {
   setoranNadhoman SetoranNadhoman[]
   pesertaTahfidz  PesertaTahfidz[]
   presensi        Presensi[]
-  tagihan         TagihanKeuangan[]
+tagihan         TagihanKeuangan[]
   pendaftarPpdb   PendaftarPpdb[]
+  pemasukan       Pemasukan[]
 }
 
 // --- MASTER KESANTRIAN --------------------------------
@@ -223,8 +223,9 @@ model Santri {
   perizinan       Perizinan[]
   konseling       LogKonseling[]
   kunjungan       KunjunganSantri[]
-  tagihan         TagihanKeuangan[]
+tagihan         TagihanKeuangan[]
   transaksi       TransaksiPembayaran[]
+  pemasukan       Pemasukan[]
   presensi        Presensi[]
   user            User?
 
@@ -388,11 +389,20 @@ model Presensi {
 }
 
 // --- KEUANGAN -----------------------------------------
+enum BiayaKategori {
+  YAYASAN
+  SEKOLAH
+  PESANTREN
+  MAKAN
+  MADIN
+}
+
 model BiayaMaster {
   id         String @id @default(cuid())
   namaBiaya  String
   jenis      String
   nominal    Int
+  kategori   BiayaKategori @default(PESANTREN)
   keterangan String?
 
   tagihan TagihanKeuangan[]
@@ -403,6 +413,8 @@ model TagihanKeuangan {
   santriId         String
   biayaMasterId    String
   bulanTahun       String
+  bulanKe          Int? // 1..12, Juli=1 s/d Juni=12 (tahun ajaran, bukan kalender)
+  unitId           String? // snapshot unit filter: PONPES/SMP/MTS/MA/SMK/MADIN
   nominalTagihan   Int
   nominalTerbayar  Int    @default(0)
   status           String @default("Belum Lunas")
@@ -414,7 +426,120 @@ model TagihanKeuangan {
   tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [id])
   transaksi   TransaksiPembayaran[]
 
+  @@index([bulanKe])
+  @@index([unitId])
   createdAt DateTime @default(now())
+}
+
+// ── PEMASUKAN & DISTRIBUSI ────────────────────────────
+// Satu pembayaran santri = satu Pemasukan; dibagi ke 5 konteks keuangan
+// (YAYASAN/MADIN/SEKOLAH/PESANTREN/MAKAN) yang berdiri SEJAJAR,
+// berdasar persentase konfigurasi yang disnapshot saat transaksi.
+
+enum KonteksKeuangan {
+  YAYASAN
+  MADIN
+  SEKOLAH
+  PESANTREN
+  MAKAN
+}
+
+model DistribusiKeuanganConfig {
+  id              String @id @default(cuid())
+  name            String
+  version         String @default("V-001") // label versi berurutan: V-001, V-002, ...
+  effectiveFrom   String
+  effectiveUntil  String?
+  yayasanPersen   Float  @default(0)
+  madinPersen     Float  @default(0)
+  sekolahPersen   Float  @default(0)
+  pesantrenPersen Float  @default(0)
+  makanPersen     Float  @default(0)
+  status          String @default("Draft") // Draft | Aktif | Arsip
+  createdBy       String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  pemasukan Pemasukan[]
+}
+
+model Pemasukan {
+  id               String @id @default(cuid())
+  noPemasukan      String @unique // identitas transaksi asli
+  santriId         String
+  unitId           String? // snapshot unit santri (PONPES/SMP/MTS/MA/SMK/MADIN)
+  tanggal          String
+  nominal          Int
+  jenisPembayaran  String
+  metodePembayaran String
+  periode          String
+  bulanKe          Int?
+  tahunAjaranId    String?
+  catatan          String?
+  configId         String
+  configVersion    String @default("V-001") // label versi konfigurasi (snapshot)
+
+  // Status proses transaksi: PENDING | PAID | DISTRIBUTED | FAILED
+  status          String @default("PAID")
+  paidAt          DateTime @default(now())
+  distributedAt   DateTime?
+  distribusiError String?
+
+  // Snapshot konfigurasi saat transaksi (tidak pernah dihitung ulang)
+  configName          String
+  configEffectiveFrom String
+  configEffectiveUntil String?
+  yayasanPersenSnapshot   Float
+  madinPersenSnapshot     Float
+  sekolahPersenSnapshot   Float
+  pesantrenPersenSnapshot Float
+  makanPersenSnapshot     Float
+
+  createdBy  String
+  createdAt  DateTime @default(now())
+
+  santri      Santri      @relation(fields: [santriId], references: [id])
+  config      DistribusiKeuanganConfig @relation(fields: [configId], references: [id])
+  tahunAjaran TahunAjaran? @relation(fields: [tahunAjaranId], references: [id])
+  alokasi     AlokasiPemasukan[]
+
+  @@index([santriId])
+  @@index([configId])
+  @@index([bulanKe])
+  @@index([status])
+  @@index([unitId])
+}
+
+model AlokasiPemasukan {
+  id          String @id @default(cuid())
+  pemasukanId String
+  konteks     KonteksKeuangan
+  persentase  Float
+  nominal     Int
+
+  pemasukan Pemasukan @relation(fields: [pemasukanId], references: [id], onDelete: Cascade)
+
+  @@unique([pemasukanId, konteks])
+}
+
+// ── AUDIT TRAIL ────────────────────────────────────────
+// Rekam siapa-melakukan-apa-kapan-terhadap-data-apa (sebelum & sesudah).
+model AuditLog {
+  id          String  @id @default(cuid())
+  action      String // CREATE_PAYMENT | UPDATE_DISTRIBUTION_CONFIG | ACTIVATE_DISTRIBUTION_CONFIG | DISTRIBUTION_FAILED | VIEW_TRANSACTION
+  entityType  String  @default("Pemasukan") // Pemasukan | DistribusiKeuanganConfig
+  entityId    String
+  entityLabel String
+  actorId     String
+  actorName   String
+  detail      String
+  before      Json?
+  after       Json?
+  createdAt   DateTime @default(now())
+
+  @@index([entityId])
+  @@index([entityType])
+  @@index([createdAt])
 }
 
 model TransaksiPembayaran {

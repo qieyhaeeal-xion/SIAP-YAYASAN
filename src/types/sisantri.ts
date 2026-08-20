@@ -322,6 +322,8 @@ export interface PresensiRecord {
 
 // ---------------- KEUANGAN TYPES ---------------- //
 
+export type BiayaKategori = 'YAYASAN' | 'SEKOLAH' | 'PESANTREN' | 'MAKAN' | 'MADIN';
+
 export interface BiayaMaster {
   id: string;
   namaBiaya: string;
@@ -330,6 +332,7 @@ export interface BiayaMaster {
   tipeFrekuensi?: string;
   nominal?: number;
   nominalStandard?: number;
+  kategori?: BiayaKategori;
   keterangan?: string;
 }
 
@@ -341,11 +344,139 @@ export interface TagihanKeuangan {
   bulanTahun?: string; // e.g. "Agustus 2026"
   bulanPeriode?: string;
   tahunPeriode?: number | string;
+  bulanKe?: number; // 1..12, Juli=1 s/d Juni=12 (tahun ajaran)
+  unitId?: string; // PONPES/SMP/MTS/MA/SMK/MADIN
   nominalTagihan: number;
   nominalTerbayar: number;
   status: 'Lunas' | 'Sebagian' | 'Belum Lunas';
   tanggalJatuhTempo?: string;
   tahunAjaranId?: string;
+}
+
+export interface RekapKategoriItem {
+  nominal: number;
+  terbayar: number;
+  status: TagihanKeuangan['status'];
+}
+
+// Hasil pivot 5 baris tagihan (per kategori) -> 1 baris rekap per santri per bulan
+export interface RekapBulananSantri {
+  santriId: string;
+  namaSantri: string;
+  bulanKe: number;
+  bulanLabel: string; // "Juli", "Agustus", dst
+  unitId?: string; // PONPES/SMP/MTS/MA/SMK/MADIN (dari tagihan)
+  kategori: {
+    yayasan: RekapKategoriItem;
+    sekolah: RekapKategoriItem;
+    pesantren: RekapKategoriItem;
+    makan: RekapKategoriItem;
+    madin: RekapKategoriItem;
+  };
+  totalTagihan: number;
+  totalTerbayar: number;
+}
+
+// Mapping biayaMasterId -> kategori (karena kategori hidup di BiayaMaster)
+export type KategoriLookup = Record<string, BiayaKategori>;
+
+// Urutan bulan tahun ajaran: Juli=1 .. Juni=12
+export const BULAN_KE_LABEL: readonly string[] = [
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni'
+];
+
+export function bulanKeLabel(bulanKe: number): string {
+  return BULAN_KE_LABEL[bulanKe - 1] ?? `Bulan ${bulanKe}`;
+}
+
+// Fallback untuk data lama yang belum punya bulanKe (parsing dari string "Agustus 2026")
+export function bulanKeFromBulanTahun(bulanTahun: string): number | undefined {
+  const idx = BULAN_KE_LABEL.findIndex(b => bulanTahun.includes(b));
+  return idx >= 0 ? idx + 1 : undefined;
+}
+
+function computeStatus(nominal: number, terbayar: number): RekapKategoriItem['status'] {
+  if (nominal <= 0) return 'Belum Lunas';
+  if (terbayar >= nominal) return 'Lunas';
+  if (terbayar > 0) return 'Sebagian';
+  return 'Belum Lunas';
+}
+
+const KATEGORI_KEY_MAP: Record<BiayaKategori, keyof RekapBulananSantri['kategori']> = {
+  YAYASAN: 'yayasan',
+  SEKOLAH: 'sekolah',
+  PESANTREN: 'pesantren',
+  MAKAN: 'makan',
+  MADIN: 'madin'
+};
+
+const emptyKategori = (): RekapKategoriItem => ({ nominal: 0, terbayar: 0, status: 'Belum Lunas' });
+
+// Pivot 5 baris TagihanKeuangan (per kategori) menjadi satu RekapBulananSantri.
+// Param ke-4 opsional: lookup kategori dari biayaMasterList (default 'PESANTREN' bila tidak dikenal).
+export function pivotTagihanToRekap(
+  tagihanList: TagihanKeuangan[],
+  santriId: string,
+  bulanKe: number,
+  kategoriLookup: KategoriLookup = {}
+): RekapBulananSantri {
+  const rekap: RekapBulananSantri = {
+    santriId,
+    namaSantri: '',
+    bulanKe,
+    bulanLabel: bulanKeLabel(bulanKe),
+    kategori: {
+      yayasan: emptyKategori(),
+      sekolah: emptyKategori(),
+      pesantren: emptyKategori(),
+      makan: emptyKategori(),
+      madin: emptyKategori()
+    },
+    totalTagihan: 0,
+    totalTerbayar: 0
+  };
+
+  for (const t of tagihanList) {
+    if (t.santriId !== santriId) continue;
+    const bKe = t.bulanKe ?? bulanKeFromBulanTahun(t.bulanTahun ?? '');
+    if (bKe !== bulanKe) continue;
+
+    const kategori = kategoriLookup[t.biayaMasterId] ?? 'PESANTREN';
+    const key = KATEGORI_KEY_MAP[kategori];
+    if (!key) continue;
+
+    if (!rekap.unitId && t.unitId) rekap.unitId = t.unitId;
+
+    const item = rekap.kategori[key];
+    item.nominal += t.nominalTagihan || 0;
+    item.terbayar += t.nominalTerbayar || 0;
+    item.status = computeStatus(item.nominal, item.terbayar);
+  }
+
+  const kategoriKeys = Object.keys(rekap.kategori) as (keyof RekapBulananSantri['kategori'])[];
+  for (const k of kategoriKeys) {
+    rekap.totalTagihan += rekap.kategori[k].nominal;
+    rekap.totalTerbayar += rekap.kategori[k].terbayar;
+  }
+
+  return rekap;
+}
+
+// Bikin 1 baris rekap untuk tiap santri (5 kategori terisi 0 bila bulan itu kosong),
+// meniru sheet Excel yang menampilkan seluruh santri.
+export function buildRekapRows(
+  santriList: Santri[],
+  tagihanList: TagihanKeuangan[],
+  bulanKe: number,
+  kategoriLookup: KategoriLookup = {},
+  getNamaSantri: (id: string) => string = id => id
+): RekapBulananSantri[] {
+  return santriList.map(s => {
+    const row = pivotTagihanToRekap(tagihanList, s.id, bulanKe, kategoriLookup);
+    row.namaSantri = getNamaSantri(s.id);
+    return row;
+  });
 }
 
 export interface TransaksiPembayaran {
@@ -361,6 +492,102 @@ export interface TransaksiPembayaran {
   penerima?: string;
   penerimaBendahara?: string;
   catatan?: string;
+}
+
+// ---------------- PEMASUKAN & DISTRIBUSI TYPES ---------------- //
+
+// Lima konteks keuangan utama — SEJAJAR (tidak ada induk-anak)
+export type KonteksKeuangan = BiayaKategori;
+
+// Urutan tampil konsisten: YAYASAN, MADIN, SEKOLAH, PESANTREN, MAKAN
+export const KONTEKS_KEUANGAN_ORDER: readonly KonteksKeuangan[] = ['YAYASAN', 'MADIN', 'SEKOLAH', 'PESANTREN', 'MAKAN'];
+
+export type PercentageMap = Record<KonteksKeuangan, number>;
+export type DistribusiStatus = 'Draft' | 'Aktif' | 'Arsip';
+
+// Status proses transaksi pemasukan — bisa dipantau & ditelusuri.
+// PENDING  → pembayaran tercatat, belum diproses
+// PAID     → pembayaran berhasil diterima
+// DISTRIBUTED → pembagian ke 5 keuangan berhasil & terverifikasi
+// FAILED   → distribusi gagal (error tersimpan di distribusiError, transaksi tidak hilang)
+export type PemasukanStatus = 'PENDING' | 'PAID' | 'DISTRIBUTED' | 'FAILED';
+
+// Konfigurasi pembagian pemasukan santri ke 5 keuangan utama.
+// Berbasis periode (effectiveFrom/Until) agar histori aturan tersimpan.
+export interface DistribusiKeuanganConfig {
+  id: string;
+  name: string;
+  version: string; // label versi berurutan: V-001, V-002, ...
+  effectiveFrom: string; // tanggal mulai berlaku (YYYY-MM-DD)
+  effectiveUntil?: string;
+  percentages: PercentageMap; // total harus 100
+  status: DistribusiStatus;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Satu pembayaran santri = satu pemasukan (identitas transaksi asli).
+export interface Pemasukan {
+  id: string;
+  noPemasukan: string; // identitas transaksi asli (unik)
+  santriId: string;
+  unitId?: string; // snapshot unit santri saat transaksi (PONPES/SMP/MTS/MA/SMK/MADIN)
+  tanggal: string;
+  nominal: number;
+  jenisPembayaran: string;
+  metodePembayaran: string;
+  periode: string; // e.g. "Agustus 2026"
+  bulanKe?: number;
+  tahunAjaranId?: string;
+  catatan?: string;
+  configId: string; // konfigurasi yang dipakai saat transaksi
+  configVersion: string; // label versi konfigurasi (snapshot)
+  configSnapshot: {
+    name: string;
+    version: string;
+    effectiveFrom: string;
+    effectiveUntil?: string;
+    percentages: PercentageMap;
+  };
+  status: PemasukanStatus;
+  paidAt: string; // saat pembayaran diterima
+  distributedAt?: string; // saat distribusi selesai
+  distribusiError?: string; // pesan error bila status FAILED
+  createdBy: string; // operator/petugas pencatat
+  createdAt: string;
+}
+
+// Hasil bagi satu pemasukan ke satu konteks keuangan (snapshot persentase+nominal).
+export interface AlokasiPemasukan {
+  id: string;
+  pemasukanId: string;
+  konteks: KonteksKeuangan;
+  persentase: number;
+  nominal: number;
+}
+
+// ── AUDIT TRAIL ─────────────────────────────────────────
+// Rekam siapa-melakukan-apa-kapan-terhadap-data-apa (sebelum & sesudah).
+export type AuditAction =
+  | 'CREATE_PAYMENT'
+  | 'UPDATE_DISTRIBUTION_CONFIG'
+  | 'ACTIVATE_DISTRIBUTION_CONFIG'
+  | 'DISTRIBUTION_FAILED'
+  | 'VIEW_TRANSACTION';
+
+export interface AuditLog {
+  id: string;
+  action: AuditAction;
+  entityType: 'Pemasukan' | 'DistribusiKeuanganConfig';
+  entityId: string;
+  entityLabel: string; // ringkas (no pemasukan / nama konfigurasi)
+  actorId: string;
+  actorName: string;
+  detail: string; // deskripsi manusiawi
+  before?: unknown; // snapshot sebelum perubahan
+  after?: unknown; // snapshot sesudah perubahan
+  createdAt: string; // ISO timestamp
 }
 
 // ---------------- PPDB TYPES ---------------- //
