@@ -3,7 +3,6 @@ import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types/sisantri';
 import { 
   X, 
-  ShieldCheck, 
   User, 
   Key, 
   ArrowRight, 
@@ -15,6 +14,24 @@ import {
 } from 'lucide-react';
 
 export type RoleCategory = 'yayasan' | 'pengurus' | 'guru' | 'wali' | 'admin';
+
+// Hak akses modul otomatis ditentukan dari role yang dipilih (bukan pilihan manual terpisah)
+const ROLE_TO_ACCESS: Record<RoleCategory, UserRole> = {
+  yayasan: 'admin_yayasan',
+  pengurus: 'pengurus',
+  guru: 'guru',
+  wali: 'wali_santri',
+  admin: 'admin_yayasan',
+};
+
+// Username demo otomatis mengikuti role yang dipilih
+const USERNAME_BY_CATEGORY: Record<RoleCategory, string> = {
+  yayasan: 'admin',
+  pengurus: 'pengurus',
+  guru: 'guru_halim',
+  wali: 'walisyafiq',
+  admin: 'admin',
+};
 
 interface LoginModalProps {
   isOpen?: boolean;
@@ -41,19 +58,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     if (isOpen) {
       const normalizedCat: RoleCategory = initialRoleCategory === 'admin' ? 'yayasan' : initialRoleCategory;
       setActiveTab(normalizedCat);
-      if (normalizedCat === 'yayasan') {
-        setSelectedRole('admin_yayasan');
-        setUsername('admin');
-      } else if (normalizedCat === 'pengurus') {
-        setSelectedRole('pengurus');
-        setUsername('pengurus');
-      } else if (normalizedCat === 'guru') {
-        setSelectedRole('guru');
-        setUsername('guru_halim');
-      } else if (normalizedCat === 'wali') {
-        setSelectedRole('wali_santri');
-        setUsername('walisyafiq');
-      }
+      setSelectedRole(ROLE_TO_ACCESS[normalizedCat]);
+      setUsername(USERNAME_BY_CATEGORY[normalizedCat]);
       setPassword('123456');
     }
   }, [isOpen, initialRoleCategory]);
@@ -63,25 +69,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const handleTabSelect = (category: RoleCategory) => {
     const normalizedCat: RoleCategory = category === 'admin' ? 'yayasan' : category;
     setActiveTab(normalizedCat);
-    if (normalizedCat === 'yayasan') {
-      setSelectedRole('admin_yayasan');
-      setUsername('admin');
-    } else if (normalizedCat === 'pengurus') {
-      setSelectedRole('pengurus');
-      setUsername('pengurus');
-    } else if (normalizedCat === 'guru') {
-      setSelectedRole('guru');
-      setUsername('guru_halim');
-    } else if (normalizedCat === 'wali') {
-      setSelectedRole('wali_santri');
-      setUsername('walisyafiq');
-    }
-    setPassword('123456');
-  };
-
-  const handlePresetSelect = (role: UserRole, user: string) => {
-    setSelectedRole(role);
-    setUsername(user);
+    setSelectedRole(ROLE_TO_ACCESS[normalizedCat]);
+    setUsername(USERNAME_BY_CATEGORY[normalizedCat]);
     setPassword('123456');
   };
 
@@ -103,138 +92,88 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-xl sm:max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Modal Header */}
-        <div className="bg-linear-to-r from-[#1A5276] via-[#2E86C1] to-[#1A5276] text-white p-5 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#1ABC9C] flex items-center justify-center font-bold text-white shadow-md">
-              <BookOpen className="w-6 h-6" />
+        <div className="bg-linear-to-r from-[#1A5276] via-[#2E86C1] to-[#1A5276] text-white p-7 sm:p-8 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-4 sm:gap-5">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-[#1ABC9C] flex items-center justify-center font-bold text-white shadow-md">
+              <BookOpen className="w-8 h-8 sm:w-9 sm:h-9" />
             </div>
             <div>
-              <h3 className="font-black text-lg leading-tight">Portal Login SIAP</h3>
-              <p className="text-xs text-sky-200">Pondok Pesantren Mukhtar Syafaat</p>
+              <h3 className="font-black text-2xl sm:text-4xl leading-tight">Portal Login SIAP</h3>
+              <p className="text-sm sm:text-lg text-sky-200">Pondok Pesantren Mukhtar Syafaat</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6 sm:w-8 sm:h-8" />
           </button>
         </div>
 
         {/* Category Tabs: Yayasan | Pengurus | Guru | Wali */}
-        <div className="bg-sky-50/80 border-b border-sky-100 p-2 grid grid-cols-2 sm:grid-cols-4 gap-1 shrink-0">
+        <div className="bg-sky-50/80 border-b border-sky-100 p-3 sm:p-4 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 shrink-0">
           <button
             type="button"
             onClick={() => handleTabSelect('yayasan')}
-            className={`py-2 px-1 rounded-xl text-[11px] font-extrabold flex flex-col items-center justify-center gap-1 transition-all ${
+            className={`py-3.5 sm:py-5 px-1 rounded-xl text-base sm:text-lg font-extrabold flex flex-col items-center justify-center gap-2 sm:gap-3 transition-all ${
               activeTab === 'yayasan'
                 ? 'bg-[#1A5276] text-white shadow-md'
                 : 'text-gray-600 hover:bg-sky-100'
             }`}
           >
-            <Building2 className="w-3.5 h-3.5 text-[#1ABC9C]" />
+            <Building2 className="w-6 h-6 sm:w-7 sm:h-7 text-[#1ABC9C]" />
             <span>Yayasan</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleTabSelect('pengurus')}
-            className={`py-2 px-1 rounded-xl text-[11px] font-extrabold flex flex-col items-center justify-center gap-1 transition-all ${
+            className={`py-3.5 sm:py-5 px-1 rounded-xl text-base sm:text-lg font-extrabold flex flex-col items-center justify-center gap-2 sm:gap-3 transition-all ${
               activeTab === 'pengurus'
                 ? 'bg-[#1A5276] text-white shadow-md'
                 : 'text-gray-600 hover:bg-sky-100'
             }`}
           >
-            <HeartHandshake className="w-3.5 h-3.5 text-[#1ABC9C]" />
+            <HeartHandshake className="w-6 h-6 sm:w-7 sm:h-7 text-[#1ABC9C]" />
             <span>Pengurus</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleTabSelect('guru')}
-            className={`py-2 px-1 rounded-xl text-[11px] font-extrabold flex flex-col items-center justify-center gap-1 transition-all ${
+            className={`py-3.5 sm:py-5 px-1 rounded-xl text-base sm:text-lg font-extrabold flex flex-col items-center justify-center gap-2 sm:gap-3 transition-all ${
               activeTab === 'guru'
                 ? 'bg-[#1A5276] text-white shadow-md'
                 : 'text-gray-600 hover:bg-sky-100'
             }`}
           >
-            <GraduationCap className="w-3.5 h-3.5 text-[#1ABC9C]" />
+            <GraduationCap className="w-6 h-6 sm:w-7 sm:h-7 text-[#1ABC9C]" />
             <span>Guru</span>
           </button>
 
           <button
             type="button"
             onClick={() => handleTabSelect('wali')}
-            className={`py-2 px-1 rounded-xl text-[11px] font-extrabold flex flex-col items-center justify-center gap-1 transition-all ${
+            className={`py-3.5 sm:py-5 px-1 rounded-xl text-base sm:text-lg font-extrabold flex flex-col items-center justify-center gap-2 sm:gap-3 transition-all ${
               activeTab === 'wali'
                 ? 'bg-[#1A5276] text-white shadow-md'
                 : 'text-gray-600 hover:bg-sky-100'
             }`}
           >
-            <User className="w-3.5 h-3.5 text-[#1ABC9C]" />
+            <User className="w-6 h-6 sm:w-7 sm:h-7 text-[#1ABC9C]" />
             <span>Wali Santri</span>
           </button>
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleLoginSubmit} className="p-6 space-y-4 overflow-y-auto">
+        <form onSubmit={handleLoginSubmit} className="p-7 sm:p-10 space-y-6 sm:space-y-7 overflow-y-auto">
           
-          {/* Quick Demo Credentials Panel */}
-          <div className="bg-sky-50 border border-sky-200 rounded-xl p-3.5 text-xs text-[#1A5276]">
-            <p className="font-extrabold mb-1.5 flex items-center gap-1 text-[#1A5276]">
-              <ShieldCheck className="w-4 h-4 text-[#1ABC9C]" />
-              Pilih Akun Persona Demo (4 Role):
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-2">
-              <button
-                type="button"
-                onClick={() => handlePresetSelect('admin_yayasan', 'admin')}
-                className={`p-2 rounded-lg text-[11px] font-bold text-left transition-all ${
-                  selectedRole === 'admin_yayasan' || selectedRole === 'admin_sistem' ? 'bg-[#1A5276] text-white shadow' : 'bg-white text-gray-700 hover:bg-sky-100 border border-gray-200'
-                }`}
-              >
-                👑 Admin Yayasan (Utama)
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handlePresetSelect('pengurus', 'pengurus')}
-                className={`p-2 rounded-lg text-[11px] font-bold text-left transition-all ${
-                  selectedRole === 'pengurus' ? 'bg-[#2E86C1] text-white shadow' : 'bg-white text-gray-700 hover:bg-sky-100 border border-gray-200'
-                }`}
-              >
-                📋 Pengurus Pesantren
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handlePresetSelect('guru', 'guru_halim')}
-                className={`p-2 rounded-lg text-[11px] font-bold text-left transition-all ${
-                  selectedRole === 'guru' ? 'bg-[#1ABC9C] text-white shadow' : 'bg-white text-gray-700 hover:bg-sky-100 border border-gray-200'
-                }`}
-              >
-                📖 Guru / Ustadz
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handlePresetSelect('wali_santri', 'walisyafiq')}
-                className={`p-2 rounded-lg text-[11px] font-bold text-left transition-all ${
-                  selectedRole === 'wali_santri' ? 'bg-emerald-600 text-white shadow' : 'bg-white text-gray-700 hover:bg-sky-100 border border-gray-200'
-                }`}
-              >
-                🌸 Wali Santri Farhan
-              </button>
-            </div>
-          </div>
-
           {/* Username Input */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">
+            <label className="block text-lg sm:text-xl font-bold text-gray-700 mb-2.5 sm:mb-3">
               Username / ID Akun
             </label>
             <div className="relative">
@@ -244,52 +183,33 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 onChange={e => setUsername(e.target.value)}
                 required
                 placeholder="Masukkan username..."
-                className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent outline-none font-semibold text-gray-800"
+                className="w-full pl-12 sm:pl-14 pr-4 py-5 sm:py-6 border border-gray-300 rounded-xl text-lg sm:text-xl focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent outline-none font-semibold text-gray-800 placeholder:text-gray-400"
               />
-              <User className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+              <User className="w-7 h-7 text-gray-400 absolute left-4 sm:left-5 top-1/2 -translate-y-1/2" />
             </div>
           </div>
 
           {/* Password Input */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">Kata Sandi</label>
+            <label className="block text-lg sm:text-xl font-bold text-gray-700 mb-2.5 sm:mb-3">Kata Sandi</label>
             <div className="relative">
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
-                className="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-xl text-xs focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent outline-none font-semibold text-gray-800"
+                placeholder="Masukkan kata sandi..."
+                className="w-full pl-12 sm:pl-14 pr-4 py-5 sm:py-6 border border-gray-300 rounded-xl text-lg sm:text-xl focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent outline-none font-semibold text-gray-800 placeholder:text-gray-400"
               />
-              <Key className="w-4 h-4 text-gray-400 absolute left-3 top-3" />
+              <Key className="w-7 h-7 text-gray-400 absolute left-4 sm:left-5 top-1/2 -translate-y-1/2" />
             </div>
           </div>
 
-          {/* Hak Akses Modul Dropdown */}
-          <div>
-            <label className="block text-xs font-bold text-gray-700 mb-1">Pilih Hak Akses Modul</label>
-            <select
-              value={selectedRole}
-              onChange={e => setSelectedRole(e.target.value as UserRole)}
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-xs font-bold focus:ring-2 focus:ring-[#1ABC9C] outline-none text-[#1A5276]"
-            >
-              <option value="admin_sistem">Admin Sistem (Akses Penuh Seluruh Modul)</option>
-              <option value="admin_pesantren">Admin Pesantren (Asrama & Kesantrian)</option>
-              <option value="admin_madin">Admin Madrasah Diniyah</option>
-              <option value="admin_sekolah">Admin Sekolah Formal (MTs/MA/SMK)</option>
-              <option value="guru">Guru Sekolah / Ustadz Diniyah</option>
-              <option value="admin_kepengasuhan">Pengasuhan, Perizinan & UKS Kesehatan</option>
-              <option value="bendahara">Bendahara Keuangan & Tagihan Syahriyah</option>
-              <option value="pimpinan">Pengasuh Utama / Pimpinan Pesantren</option>
-              <option value="wali_santri">Wali Santri / Orang Tua Murid</option>
-            </select>
-          </div>
-
           {/* Feature Highlight Pill */}
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-[11px] text-emerald-800 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 sm:p-5 text-base sm:text-lg text-emerald-800 flex items-center gap-3.5 sm:gap-4">
+            <CheckCircle2 className="w-7 h-7 text-emerald-600 shrink-0" />
             <span>
-              {activeTab === 'admin' && 'Modul Keuangan, Santri, Presensi, Kepegawaian & PPDB Mutasi'}
+              {activeTab === 'yayasan' && 'Modul Keuangan, Santri, Presensi, Kepegawaian & PPDB Mutasi'}
               {activeTab === 'guru' && 'Input Presensi Batch, Setoran Tahfidz, Kitab Nadhoman & Konseling'}
               {activeTab === 'wali' && 'Portal Real-Time Monitoring Hafalan, Kesehatan, Izin & Syahriyah'}
             </span>
@@ -298,13 +218,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-3 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-extrabold text-xs rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl active:scale-[0.99]"
+            className="w-full py-5 sm:py-6 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-extrabold text-lg sm:text-xl rounded-xl transition-all flex items-center justify-center gap-3.5 sm:gap-4 shadow-lg hover:shadow-xl active:scale-[0.99]"
           >
             <span>MASUK KE SISTEM SIAP</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-7 h-7" />
           </button>
 
-          <p className="text-[11px] text-gray-400 text-center pt-2 border-t border-gray-100">
+          <p className="text-base sm:text-lg text-gray-400 text-center pt-5 sm:pt-6 border-t border-gray-100">
             SIM Pesantren Mukhtar Syafaat • Aman, Terintegrasi & Real-time
           </p>
 

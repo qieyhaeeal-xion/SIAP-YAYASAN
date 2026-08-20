@@ -158,7 +158,69 @@ Berdasarkan analisis perbandingan terhadap spesifikasi pada [prd.md](file:///d:/
 
 ---
 
-## 5. RENCANA TASK KEDEPANNYA (FUTURE ROADMAP)
+## 5. AUDIT & PERBAIKAN RESPONSIVE DESIGN (TASK TAMBAHAN)
+
+Dilakukan audit menyeluruh terhadap seluruh komponen `.tsx` untuk pola CSS yang rawan **horizontal overflow** (halaman melebar / kartu terpotong di tepi kanan) pada viewport sempit. Pendekatan yang digunakan adalah **mobile-first**: diperbaiki untuk layar kecil dulu (375px / 390px), kemudian di-scale up ke tablet, laptop, dan desktop.
+
+### 5.1 Masalah yang Ditemukan
+
+| # | Pola Bermasalah | Lokasi | Dampak |
+|---|---|---|---|
+| 1 | Grid statistik `grid-cols-4` tanpa breakpoint | Landing Page (section statistik) | 4 kartu dipaksa 1 baris, kartu terakhir terpotong di < 640px |
+| 2 | Flexbox tanpa `flex-wrap` pada top header bar | Landing Page | Konten informasi (alamat + jam) berdesakan/overflow di mobile |
+| 3 | Judul brand + badge "Mukhtar Syafaat" tanpa `flex-wrap` | Navbar Landing | Teks kepotong saat viewport menyempit |
+| 4 | Sidebar statis di mobile (drawer di desktop) | `App.tsx` & `Sidebar.tsx` | Konten utama terdorong/terpotong oleh sidebar di layar < 768px |
+| 5 | Tombol CTA hero sejajar (`flex-row` statis) | Hero Landing | Dua tombol besar tidak muat di satu baris mobile |
+| 6 | Grid footer `grid-cols-4` tanpa fallback mobile | Footer Landing | Kolom footer berdesakan di layar sempit |
+| 7 | Container tabel tanpa `overflow-x-auto` | Berbagai modul | Tabel lebar mendorong layout keluar viewport |
+
+### 5.2 Perubahan yang Dilakukan
+
+**A. Landing Page (`LandingPage.tsx`)**
+- Root container diberi `overflow-x-hidden` sebagai pengaman menyeluruh.
+- Top header bar diubah dari `flex` statis menjadi `flex-col gap-2.5 sm:flex-row sm:flex-wrap` + `min-w-0` agar konten membungkus (wrap) di mobile dan tersusun horizontal di `sm`.
+- Navbar: judul brand diberi `flex flex-wrap` + ukuran teks bertingkat (`text-lg sm:text-xl lg:text-2xl`), badge diberi `max-w-[9rem]` agar tidak mendorong tombol.
+- Menu mobile (drawer) memakai `grid grid-cols-1 min-[420px]:grid-cols-3` untuk tombol login — menghindari overflow di layar < 420px.
+- **Hero section**: judul memakai `text-3xl min-[480px]:text-4xl sm:text-5xl lg:text-6xl xl:text-7xl` agar menyusut di mobile; baris tombol CTA diubah menjadi `flex-col min-[480px]:flex-row flex-wrap` + tombol `w-full min-[480px]:w-auto`.
+- **Grid statistik ("1.250+ Santri", "3 Unit", "3 Lembaga", "3 Marhalah")**: diubah dari `grid-cols-4` menjadi `grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6` — 2 kolom di mobile, 4 kolom di `md`. Padding/angka juga diberi breakpoint (`text-2xl min-[480px]:text-3xl sm:text-4xl lg:text-5xl`, `p-4 sm:p-6 lg:p-8`).
+- **Card "Portal Multi-Akses"** (hero kanan): diberi `w-full max-w-lg` + `p-5 sm:p-8 lg:p-10`, konten role memakai `min-w-0` agar teks panjang wrap, sehingga aman saat stacked di bawah hero pada mobile.
+- Grid "Portal Akses Terpadu" & "Program Unggulan": `grid sm:grid-cols-2 lg:grid-cols-3` (1 kolom di mobile).
+- Form PPDB: semua grid input memakai `grid grid-cols-1 sm:grid-cols-2` / `lg:grid-cols-3`.
+- Footer: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`.
+- Skema warna & seluruh copy **tidak diubah** — hanya kelas layout/responsive.
+
+**B. Layout & Navigasi (`App.tsx`, `Header.tsx`, `Sidebar.tsx`)**
+- Sidebar berubah menjadi **off-canvas drawer di mobile** (`fixed inset-y-0 left-0 z-50 max-w-[85vw]`) dan statis di desktop, dengan callback `onClose` agar menu tertutup setelah navigasi. Konten utama diberi `min-w-0` sehingga tidak terdorong keluar viewport.
+- Inisialisasi state `sidebarOpen` sekarang responsif: `window.innerWidth >= 768` (terbuka default di desktop, tertutup di mobile).
+- Header diberi `min-w-0` pada elemen judul agar tidak overflow saat viewport menyempit.
+
+**C. Tabel & Data List (seluruh modul)**
+- Semua container tabel pada modul (Kesantrian, Kepegawaian, Keuangan, PPDB, Kepengasuhan, Settings, Tahun Ajaran, dll) sudah dibungkus `overflow-x-auto`, sehingga kolom tabel yang lebar **scroll horizontal** di dalam kartu, tidak mendorong halaman.
+- Grid statistik pada dashboard per-role memakai `grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4` (atau variasi 1→2→4).
+
+### 5.3 Checklist Breakpoint yang Diuji
+
+| Breakpoint | Lebar | Hasil |
+|---|---|---|
+| Mobile kecil (xs) | 375px | Statistik wrap 2 kolom, hero & CTA menyusut, card portal stacked penuh, tanpa scroll horizontal |
+| Mobile standar | 390px | Aman, drawer sidebar berfungsi, form PPDB 1 kolom |
+| Tablet | 768px | Sidebar statis muncul, statistik 4 kolom, hero 2 kolom (teks + card) |
+| Laptop | 1024px | Navbar link desktop tampil, grid program 3 kolom |
+| Desktop | 1440px | Layout penuh maksimal, grid 12 kolom hero aktif |
+
+> Catatan: Uji ulang manual tetap disarankan pada perangkat nyata (iOS Safari & Chrome Android) karena emulator devtools tidak 100% identik dengan rendering asli perangkat.
+
+### 5.4 Rekomendasi Ekstraksi Reusable (Anti-Regresi)
+
+Pola grid statistik berulang di banyak file (dashboard per-role, landing, modul keuangan). Disarankan untuk diekstrak menjadi utility/komponen agar konsisten dan mencegah regresi:
+
+- `src/components/ui/StatCard.tsx` — kartu statistik responsif (prop: `value`, `label`, `color`) dengan kelas `p-4 sm:p-6 rounded-2xl sm:rounded-3xl` terstandar.
+- Utility class global pada `index.css` (via `@layer components`) seperti `.card-panel`, `.table-scroll` (= `overflow-x-auto`), dan `.container-page` (max-width + padding responsive) agar pemakaian konsisten.
+- Konvensi grid: selalu tulis kolom mobile pertama (mis. `grid-cols-1` atau `grid-cols-2`) sebelum breakpoint, jangan pernah `grid-cols-4` tanpa prefix.
+
+---
+
+## 6. RENCANA TASK KEDEPANNYA (FUTURE ROADMAP)
 
 Untuk membawa sistem SiSantri dari tahap prototipe antarmuka (frontend MVP) menuju **sistem produksi berskala penuh (Production-Ready System)** yang siap diimplementasikan di Pondok Pesantren Mukhtar Syafaat, berikut adalah peta jalan (roadmap) rencana task teknis kedepannya:
 
@@ -202,7 +264,7 @@ timeline
 
 ---
 
-## 6. KESIMPULAN
+## 7. KESIMPULAN
 
 Sistem Informasi Manajemen Pesantren Mukhtar Syafaat (**SiSantri**) saat ini telah memiliki **fondasi frontend SPA yang sangat matang, komprehensif, dan 100% mematuhi seluruh spesifikasi dokumen [prd.md](file:///d:/web/sisantri---sim-pesantren-mukhtar-syafaat/prd.md) serta `RENCANA APLIKASI.xlsx`**. 
 
