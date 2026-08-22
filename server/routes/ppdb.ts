@@ -59,7 +59,7 @@ router.post('/:id/mutasi', requireRole('admin_sistem', 'admin_pesantren'), async
         nis, status: 'Aktif', namaLengkap: pendaftar.namaLengkap, namaPanggilan: pendaftar.namaLengkap.split(' ')[0],
         jenisKelamin: pendaftar.jenisKelamin, tempatLahir: pendaftar.tempatLahir || '', tanggalLahir: pendaftar.tanggalLahir || '',
         alamat: pendaftar.alamat || '', namaAyah: pendaftar.namaOrtu || '', noHpOrtu: pendaftar.noHpOrtu || '',
-        sekolahAsal: pendaftar.sekolahAsal || '', jenisSantriAsuh: 'Bukan Asuh',
+        sekolahAsal: pendaftar.sekolahAsal || '', statusSantri: 'Reguler',
         unitPesantrenId: pendaftar.unitPesantrenPilihanId, asramaId: defaultAsrama?.id,
         kamarId: defaultKamar?.id, unitSekolahId: pendaftar.unitSekolahPilihanId,
         kelasSekolahId: defaultKelasSekolah?.id, marhalahMadinId: pendaftar.marhalahPilihanId,

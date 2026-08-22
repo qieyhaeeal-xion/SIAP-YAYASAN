@@ -161,7 +161,9 @@ export const INITIAL_SANTRI: Santri[] = [
     pekerjaanIbu: 'Guru Guru',
     penghasilanIbu: 'Rp 2.000.000 - Rp 3.000.000',
     noHpOrtu: '081234567890',
-    jenisSantriAsuh: 'Bukan Asuh',
+    kategoriUtama: 'Santri',
+    tipeAsuh: 'Bukan Asuh',
+    program: 'Pelajar',
     tanggalDaftar: '2023-07-10',
     tahunAjaranId: 'ta-2526'
   },
@@ -212,7 +214,10 @@ export const INITIAL_SANTRI: Santri[] = [
     pekerjaanIbu: 'Ibu Rumah Tangga',
     penghasilanIbu: 'Tidak Berpenghasilan',
     noHpOrtu: '081398765432',
-    jenisSantriAsuh: 'ASUH 1',
+    kategoriUtama: 'Santri',
+    tipeAsuh: 'Asuh',
+    golonganAsuh: 'A1',
+    program: 'Pelajar',
     alasanAsuh: 'Bantuan Beasiswa Yatim Prestasi',
     tanggalDaftar: '2024-07-02',
     tahunAjaranId: 'ta-2526'
@@ -263,7 +268,9 @@ export const INITIAL_SANTRI: Santri[] = [
     pekerjaanIbu: 'Dokter Umum',
     penghasilanIbu: 'Rp 10.000.000+',
     noHpOrtu: '081555667788',
-    jenisSantriAsuh: 'Bukan Asuh',
+    kategoriUtama: 'Santri',
+    tipeAsuh: 'Bukan Asuh',
+    program: 'Pelajar',
     tanggalDaftar: '2024-06-15',
     tahunAjaranId: 'ta-2526'
   },
@@ -313,7 +320,9 @@ export const INITIAL_SANTRI: Santri[] = [
     pekerjaanIbu: 'Wiraswasta',
     penghasilanIbu: 'Rp 3.000.000 - Rp 5.000.000',
     noHpOrtu: '081233445566',
-    jenisSantriAsuh: 'Bukan Asuh',
+    kategoriUtama: 'Santri',
+    tipeAsuh: 'Bukan Asuh',
+    program: 'Lulus',
     alasanKeluar: 'Lulus Pendidikan MA Mukhtar Syafaat',
     tahunKeluar: '2025',
     noHpAlumni: '087788990011',
@@ -520,21 +529,21 @@ export const INITIAL_PEGAWAI: Pegawai[] = [
 ];
 
 export const INITIAL_BIAYA_MASTER: BiayaMaster[] = [
-  { id: 'by-1', kodeBiaya: 'BG-PANGKAL', namaBiaya: 'Uang Pangkal & Pendaftaran', jenis: 'Tahunan', tipeFrekuensi: 'Sekali / Tahunan', nominal: 2500000, nominalStandard: 2500000, kategori: 'YAYASAN', kategoriPembayaran: 'Insidental', wajib: true, keterangan: 'Dibayar sekali saat masuk' },
-  { id: 'by-yayasan', kodeBiaya: 'BG-YAYASAN', namaBiaya: 'Syahriyah Yayasan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 100000, nominalStandard: 100000, kategori: 'YAYASAN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'Iuran keuangan yayasan bulanan' },
-  { id: 'by-sekolah', kodeBiaya: 'BG-SEKOLAH', namaBiaya: 'SPP Sekolah', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 150000, nominalStandard: 150000, kategori: 'SEKOLAH', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP pendidikan formal (MTs/MA/SMK)' },
-  { id: 'by-pesantren', kodeBiaya: 'BG-PESANTREN', namaBiaya: 'Syahriyah Pesantren', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 200000, nominalStandard: 200000, kategori: 'PESANTREN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP kepesantrenan & asrama' },
-  { id: 'by-makan', kodeBiaya: 'BG-MAKAN', namaBiaya: 'Uang Makan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 250000, nominalStandard: 250000, kategori: 'MAKAN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'Biaya konsumsi santri bulanan' },
-  { id: 'by-madin', kodeBiaya: 'BG-MADIN', namaBiaya: 'Syahriyah Madin', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 75000, nominalStandard: 75000, kategori: 'MADIN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP diniyah (Madin)' },
-  { id: 'by-4', kodeBiaya: 'BG-SERAGAM', namaBiaya: 'Seragam & Perlengkapan Kitab', jenis: 'Non-Syahriyah', tipeFrekuensi: 'Tahunan', nominal: 750000, nominalStandard: 750000, kategori: 'PESANTREN', kategoriPembayaran: 'Insidental', wajib: true, keterangan: 'Paket kitab matan & seragam pesantren' },
+  { id: 'by-1', namaBiaya: 'Uang Pangkal & Pendaftaran', jenis: 'Tahunan', tipeFrekuensi: 'Sekali / Tahunan', nominal: 2500000, nominalStandard: 2500000, kategori: 'YAYASAN', kategoriPembayaran: 'Insidental', wajib: true, keterangan: 'Dibayar sekali saat masuk' },
+  { id: 'by-yayasan', namaBiaya: 'Syahriyah Yayasan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 100000, nominalStandard: 100000, kategori: 'YAYASAN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'Iuran keuangan yayasan bulanan' },
+  { id: 'by-sekolah', namaBiaya: 'SPP Sekolah', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 150000, nominalStandard: 150000, kategori: 'SEKOLAH', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP pendidikan formal (MTs/MA/SMK)' },
+  { id: 'by-pesantren', namaBiaya: 'Syahriyah Pesantren', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 200000, nominalStandard: 200000, kategori: 'PESANTREN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP kepesantrenan & asrama' },
+  { id: 'by-makan', namaBiaya: 'Uang Makan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 250000, nominalStandard: 250000, kategori: 'MAKAN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'Biaya konsumsi santri bulanan' },
+  { id: 'by-madin', namaBiaya: 'Syahriyah Madin', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 75000, nominalStandard: 75000, kategori: 'MADIN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP diniyah (Madin)' },
+  { id: 'by-4', namaBiaya: 'Seragam & Perlengkapan Kitab', jenis: 'Non-Syahriyah', tipeFrekuensi: 'Tahunan', nominal: 750000, nominalStandard: 750000, kategori: 'PESANTREN', kategoriPembayaran: 'Insidental', wajib: true, keterangan: 'Paket kitab matan & seragam pesantren' },
 ];
 
 export const INITIAL_TARIF_PEMBAYARAN: TarifPembayaran[] = [
   {
     id: 'tarif-asuh-sekolah',
     biayaMasterId: 'by-sekolah',
-    targetScope: 'Santri Asuh',
-    targetValue: 'ASUH 1',
+    targetScope: 'Golongan Asuh',
+    targetValue: 'A1',
     nominal: 75000,
     wajib: true,
     aktif: true,

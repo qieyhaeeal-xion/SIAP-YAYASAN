@@ -168,8 +168,11 @@ export interface Santri {
   noHpOrtu: string;
   noHp?: string;
 
-  // Section G: Keterangan Santri Asuh
-  jenisSantriAsuh: 'Bukan Asuh' | 'ASUH 1' | 'ASUH 2' | 'ASUH 3';
+  // Section G: Keterangan Status Santri (HIRARKI 4-LEVEL)
+  kategoriUtama: 'Santri' | 'Desa';
+  tipeAsuh?: 'Asuh' | 'Bukan Asuh' | null;
+  golonganAsuh?: 'A1' | 'A2' | 'A3' | null;
+  program?: 'Pengabdian' | 'Lulus' | 'Pelajar' | null;
   alasanAsuh?: string;
 
   // Section H: Keterangan Keluar / Alumni
@@ -335,11 +338,23 @@ export interface BiayaMaster {
   kategori?: BiayaKategori;
   keterangan?: string;
   kategoriPembayaran?: 'Rutin' | 'Insidental' | 'Sukarela';
+  // Target status santri (HIRARKI 4-LEVEL)
+  targetKategoriUtama?: 'Santri' | 'Desa';
+  targetTipeAsuh?: 'Asuh' | 'Bukan Asuh' | null;
+  targetGolonganAsuh?: 'A1' | 'A2' | 'A3' | null;
+  targetProgram?: 'Pengabdian' | 'Lulus' | 'Pelajar' | null;
+  targetUnitPesantrenId?: string | null;
+  targetUnitSekolahId?: string | null;
   wajib?: boolean;
   aktif?: boolean;
 }
 
-export type TarifTargetScope = 'Semua Santri' | 'Unit Sekolah' | 'Unit Pesantren' | 'Kelas Sekolah' | 'Kelas Madin' | 'Santri Asuh';
+export type TarifTargetScope = 'Semua Santri' | 'Unit Sekolah' | 'Unit Pesantren' | 'Kelas Sekolah' | 'Kelas Madin' | 'Kategori Utama' | 'Tipe Asuh' | 'Golongan Asuh' | 'Program';
+
+export type SantriKategori = 'Santri' | 'Desa';
+export type TipeAsuh = 'Asuh' | 'Bukan Asuh';
+export type GolonganAsuh = 'A1' | 'A2' | 'A3';
+export type ProgramSantri = 'Pengabdian' | 'Lulus' | 'Pelajar';
 
 export interface TarifPembayaran {
   id: string;

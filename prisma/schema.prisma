@@ -26,6 +26,7 @@ model TahunAjaran {
 tagihan         TagihanKeuangan[]
   pendaftarPpdb   PendaftarPpdb[]
   pemasukan       Pemasukan[]
+  riwayatPenempatan RiwayatPenempatan[]
 }
 
 // --- MASTER KESANTRIAN --------------------------------
@@ -38,6 +39,7 @@ model UnitPesantren {
   asrama    Asrama[]
   santri    Santri[]
   pendaftar PendaftarPpdb[]
+  riwayatPenempatan RiwayatPenempatan[]
 }
 
 model Asrama {
@@ -51,6 +53,7 @@ model Asrama {
   unitPesantren UnitPesantren @relation(fields: [unitPesantrenId], references: [id], onDelete: Cascade)
   kamar         Kamar[]
   santri        Santri[]
+  riwayatPenempatan RiwayatPenempatan[]
 }
 
 model Kamar {
@@ -63,6 +66,7 @@ model Kamar {
 
   asrama Asrama   @relation(fields: [asramaId], references: [id], onDelete: Cascade)
   santri Santri[]
+  riwayatPenempatan RiwayatPenempatan[]
 }
 
 model MarhalahMadin {
@@ -75,6 +79,7 @@ model MarhalahMadin {
   kitab      KitabHafalan[]
   santri     Santri[]
   pendaftar  PendaftarPpdb[]
+  riwayatPenempatan RiwayatPenempatan[]
 }
 
 model KelasMadin {
@@ -86,6 +91,7 @@ model KelasMadin {
   marhalah MarhalahMadin @relation(fields: [marhalahId], references: [id], onDelete: Cascade)
   santri   Santri[]
   presensi Presensi[]
+  riwayatPenempatan RiwayatPenempatan[]
 }
 
 model KitabHafalan {
@@ -108,6 +114,7 @@ model UnitSekolah {
   kelas     KelasSekolah[]
   santri    Santri[]
   pendaftar PendaftarPpdb[]
+  riwayatPenempatan RiwayatPenempatan[]
 }
 
 model JurusanSekolah {
@@ -119,6 +126,7 @@ model JurusanSekolah {
   sekolah UnitSekolah    @relation(fields: [sekolahId], references: [id], onDelete: Cascade)
   kelas   KelasSekolah[]
   santri  Santri[]
+  riwayatPenempatan RiwayatPenempatan[]
 }
 
 model KelasSekolah {
@@ -133,13 +141,35 @@ model KelasSekolah {
   jurusan  JurusanSekolah? @relation(fields: [jurusanId], references: [id])
   santri   Santri[]
   presensi Presensi[]
+  riwayatPenempatan RiwayatPenempatan[]
+}
+
+// --- WALI SANTRI (1 keluarga, dipakai bersama antar saudara) --
+model Wali {
+  id              String  @id @default(cuid())
+  namaAyah        String?
+  nikAyah         String?
+  pekerjaanAyah   String?
+  penghasilanAyah String?
+  namaIbu         String?
+  nikIbu          String?
+  pekerjaanIbu    String?
+  penghasilanIbu  String?
+  namaWali        String?
+  hubunganWali    String?
+  noHpOrtu        String?
+
+  santri    Santri[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // --- SANTRI (TABEL UTAMA) -----------------------------
 model Santri {
-  id     String @id @default(cuid())
-  nis    String @unique
-  status String @default("Aktif")
+  id        String    @id @default(cuid())
+  nis       String    @unique
+  status    String    @default("Aktif")
+  deletedAt DateTime? // soft-delete: null = record hidup
 
   nik           String?
   nisn          String?
@@ -183,20 +213,13 @@ model Santri {
   tahunLulusSekolahAsal String?
   noKip                 String?
 
-  namaAyah        String?
-  nikAyah         String?
-  pekerjaanAyah   String?
-  penghasilanAyah String?
-  namaIbu         String?
-  nikIbu          String?
-  pekerjaanIbu    String?
-  penghasilanIbu  String?
-  namaWali        String?
-  hubunganWali    String?
-  noHpOrtu        String?
+  waliId String?
 
-  jenisSantriAsuh    String @default("Bukan Asuh")
-  alasanAsuh         String?
+  kategoriUtama    String @default("Santri")
+  tipeAsuh         String?
+  golonganAsuh     String?
+  program          String?
+  alasanAsuh       String?
 
   alasanKeluar       String?
   tahunKeluar        String?
@@ -215,6 +238,7 @@ model Santri {
   kelasSekolah  KelasSekolah?  @relation(fields: [kelasSekolahId], references: [id])
   marhalahMadin MarhalahMadin? @relation(fields: [marhalahMadinId], references: [id])
   kelasMadin    KelasMadin?    @relation(fields: [kelasMadinId], references: [id])
+  wali          Wali?          @relation(fields: [waliId], references: [id])
 
   setoranTahfidz  SetoranTahfidz[]
   setoranNadhoman SetoranNadhoman[]
@@ -227,10 +251,45 @@ tagihan         TagihanKeuangan[]
   transaksi       TransaksiPembayaran[]
   pemasukan       Pemasukan[]
   presensi        Presensi[]
+  riwayatPenempatan RiwayatPenempatan[]
   user            User?
 
+  @@index([waliId])
+  @@index([tahunAjaranId])
+  @@index([status])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// --- RIWAYAT PENEMPATAN (1 baris per santri per tahun ajaran) --
+model RiwayatPenempatan {
+  id              String @id @default(cuid())
+  santriId        String
+  tahunAjaranId   String
+  unitPesantrenId String?
+  asramaId        String?
+  kamarId         String?
+  unitSekolahId   String?
+  jurusanId       String?
+  kelasSekolahId  String?
+  marhalahMadinId String?
+  kelasMadinId    String?
+  keterangan      String?
+
+  santri         Santri         @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  tahunAjaran    TahunAjaran    @relation(fields: [tahunAjaranId], references: [id])
+  unitPesantren  UnitPesantren? @relation(fields: [unitPesantrenId], references: [id])
+  asrama         Asrama?        @relation(fields: [asramaId], references: [id])
+  kamar          Kamar?         @relation(fields: [kamarId], references: [id])
+  unitSekolah    UnitSekolah?   @relation(fields: [unitSekolahId], references: [id])
+  jurusan        JurusanSekolah? @relation(fields: [jurusanId], references: [id])
+  kelasSekolah   KelasSekolah?  @relation(fields: [kelasSekolahId], references: [id])
+  marhalahMadin  MarhalahMadin? @relation(fields: [marhalahMadinId], references: [id])
+  kelasMadin     KelasMadin?    @relation(fields: [kelasMadinId], references: [id])
+
+  @@unique([santriId, tahunAjaranId])
+  @@index([santriId])
+  createdAt DateTime @default(now())
 }
 
 // --- TAHFIDZ & NADHOMAN -------------------------------
@@ -264,6 +323,7 @@ model SetoranTahfidz {
   santri      Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
   tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [id])
 
+  @@index([santriId])
   createdAt DateTime @default(now())
 }
 
@@ -281,6 +341,7 @@ model SetoranNadhoman {
   santri      Santri      @relation(fields: [santriId], references: [id], onDelete: Cascade)
   tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [id])
 
+  @@index([santriId])
   createdAt DateTime @default(now())
 }
 
@@ -297,6 +358,7 @@ model KesehatanUks {
   petugasUks    String?
 
   santri    Santri   @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  @@index([santriId])
   createdAt DateTime @default(now())
 }
 
@@ -314,6 +376,7 @@ model Perizinan {
   catatanKepengasuhan String?
 
   santri    Santri   @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  @@index([santriId])
   createdAt DateTime @default(now())
 }
 
@@ -327,6 +390,7 @@ model LogKonseling {
   konselor         String?
 
   santri    Santri   @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  @@index([santriId])
   createdAt DateTime @default(now())
 }
 
@@ -342,6 +406,7 @@ model KunjunganSantri {
   jamKeluar String?
 
   santri    Santri   @relation(fields: [santriId], references: [id], onDelete: Cascade)
+  @@index([santriId])
   createdAt DateTime @default(now())
 }
 
@@ -386,6 +451,8 @@ model Presensi {
   tahunAjaran  TahunAjaran   @relation(fields: [tahunAjaranId], references: [id])
   kelasSekolah KelasSekolah? @relation(fields: [kelasSekolahId], references: [id])
   kelasMadin   KelasMadin?   @relation(fields: [kelasMadinId], references: [id])
+
+  @@index([santriId])
 }
 
 // --- KEUANGAN -----------------------------------------
@@ -407,6 +474,12 @@ model BiayaMaster {
   nominalStandard    Int?
   kategori           BiayaKategori @default(PESANTREN)
   kategoriPembayaran String @default("Rutin")
+  targetKategoriUtama   String?
+  targetTipeAsuh        String?
+  targetGolonganAsuh    String?
+  targetProgram         String?
+  targetUnitPesantrenId String?
+  targetUnitSekolahId   String?
   wajib              Boolean @default(true)
   aktif              Boolean @default(true)
   keterangan         String?
@@ -452,6 +525,7 @@ model TagihanKeuangan {
   tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [id])
   transaksi   TransaksiPembayaran[]
 
+  @@index([santriId])
   @@index([bulanKe])
   @@index([unitId])
   createdAt DateTime @default(now())
@@ -586,6 +660,7 @@ model TransaksiPembayaran {
   tagihan TagihanKeuangan @relation(fields: [tagihanId], references: [id])
   santri  Santri          @relation(fields: [santriId], references: [id])
 
+  @@index([santriId])
   createdAt DateTime @default(now())
 }
 

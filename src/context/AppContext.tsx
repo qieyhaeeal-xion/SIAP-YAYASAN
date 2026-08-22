@@ -302,6 +302,56 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // PPDB
   const [ppdbList, setPpdbList] = useLocalStorage<PendaftarPPDB[]>('ppdb', INITIAL_PENDAFTAR_PPDB);
 
+  // MIGRASI: Konversi data lama ke struktur hirarki status santri (kategoriUtama/tipeAsuh/golonganAsuh/program)
+  useEffect(() => {
+    setSantriList(prev => {
+      const needsMigration = prev.some(s => s.kategoriUtama === undefined);
+      if (!needsMigration) return prev;
+      const ASUH_MAP: Record<string, string> = { 'Bukan Asuh': 'Bukan Asuh', 'ASUH 1': 'A1', 'ASUH 2': 'A2', 'ASUH 3': 'A3' };
+      return prev.map(s => {
+        if (s.kategoriUtama) return s;
+        const rec = s as unknown as Record<string, unknown>;
+        const oldJenis = rec.jenisSantriAsuh as string | undefined;
+        const oldStatus = (s as unknown as { statusSantri?: string }).statusSantri;
+        let kategoriUtama: Santri['kategoriUtama'] = 'Santri';
+        let tipeAsuh: Santri['tipeAsuh'] = 'Bukan Asuh';
+        let golonganAsuh: Santri['golonganAsuh'] = undefined;
+        let program: Santri['program'] = 'Pelajar';
+        if (oldStatus === 'Desa') {
+          kategoriUtama = 'Desa'; tipeAsuh = null; golonganAsuh = null; program = null;
+        } else if (oldStatus && ['A1', 'A2', 'A3'].includes(oldStatus)) {
+          tipeAsuh = 'Asuh'; golonganAsuh = oldStatus as Santri['golonganAsuh'];
+        } else if (oldStatus === 'Pengabdian') {
+          program = 'Pengabdian';
+        } else if (oldStatus === 'Lulus') {
+          program = 'Lulus';
+        } else if (oldJenis) {
+          const mapped = ASUH_MAP[oldJenis];
+          if (mapped === 'Bukan Asuh') { tipeAsuh = 'Bukan Asuh'; }
+          else { tipeAsuh = 'Asuh'; golonganAsuh = mapped as Santri['golonganAsuh']; }
+        }
+        return { ...s, kategoriUtama, tipeAsuh, golonganAsuh, program } as Santri;
+      });
+    });
+    setTarifPembayaranList(prev => {
+      const needsMigration = prev.some(t => (t.targetScope as string) === 'Santri Asuh' || (t.targetScope as string) === 'Status Santri');
+      if (!needsMigration) return prev;
+      return prev.map(t => {
+        const scope = t.targetScope as string;
+        if (scope === 'Santri Asuh' || scope === 'Status Santri') {
+          const val = t.targetValue || '';
+          const isGolongan = ['A1', 'A2', 'A3'].includes(val);
+          return {
+            ...t,
+            targetScope: (isGolongan ? 'Golongan Asuh' : scope === 'Santri Asuh' ? 'Tipe Asuh' : 'Program') as TarifTargetScope,
+            targetValue: val
+          };
+        }
+        return t;
+      });
+    });
+  }, []);
+
   // AUTO NIS GENERATOR
   // Format 6 digit: 2 digit tahun masuk + 4 digit sequence (e.g., 260001, 260002...)
   const generateNextNIS = (): string => {
@@ -666,7 +716,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       case 'Unit Pesantren': return santri.unitPesantrenId === tarif.targetValue;
       case 'Kelas Sekolah': return santri.kelasSekolahId === tarif.targetValue;
       case 'Kelas Madin': return santri.kelasMadinId === tarif.targetValue;
-      case 'Santri Asuh': return santri.jenisSantriAsuh === tarif.targetValue;
+      case 'Kategori Utama': return santri.kategoriUtama === tarif.targetValue;
+      case 'Tipe Asuh': return santri.tipeAsuh === tarif.targetValue;
+      case 'Golongan Asuh': return santri.golonganAsuh === tarif.targetValue;
+      case 'Program': return santri.program === tarif.targetValue;
       default: return true;
     }
   };
@@ -1002,7 +1055,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       pekerjaanIbu: 'Ibu Rumah Tangga',
       penghasilanIbu: 'Tidak Berpenghasilan',
       noHpOrtu: pendaftar.noHpOrtu,
-      jenisSantriAsuh: 'Bukan Asuh',
+      kategoriUtama: 'Santri',
+      tipeAsuh: 'Bukan Asuh',
+      program: 'Pelajar',
       tanggalDaftar: new Date().toISOString().split('T')[0],
       tahunAjaranId: getTahunAjaranAktif()?.id ?? ''
     };
