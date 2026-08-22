@@ -13,6 +13,7 @@ import {
   Briefcase, 
   CalendarCheck, 
   Wallet, 
+  CreditCard,
   UserPlus, 
   ShieldAlert, 
   ChevronDown, 
@@ -48,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onNavigate, isOpen,
     color: 'bg-[#1ABC9C] text-white'
   };
 
-const isTabAllowed = (tabId: string) => hasPermission(currentUser.role, tabId);
+ const isTabAllowed = (tabId: string) => hasPermission(currentUser.role, tabId === 'payment-management' ? 'keuangan' : tabId);
 
 const handleTabClick = (tabId: string) => {
     if (isTabAllowed(tabId)) {
@@ -229,9 +230,10 @@ const handleTabClick = (tabId: string) => {
           <div className="space-y-2">
             <p className="px-5 pt-1 text-sm font-extrabold text-sky-300/60 uppercase tracking-wider">Administrasi</p>
             <div className="space-y-1.5">
-              {renderNavItem('akademik', 'Presensi KBM Batch', <CalendarCheck className="w-6 h-6" />)}
-              {renderNavItem('keuangan', 'Keuangan & Syahriyah', <Wallet className="w-6 h-6" />)}
-              {renderNavItem('ppdb', 'PPDB (Mutasi NIS)', <UserPlus className="w-6 h-6" />, pendingPPDBCount, 'bg-blue-500 text-white')}
+               {renderNavItem('akademik', 'Presensi KBM Batch', <CalendarCheck className="w-6 h-6" />)}
+               {renderNavItem('keuangan', 'Keuangan & Syahriyah', <Wallet className="w-6 h-6" />)}
+               {renderNavItem('payment-management', 'Manajemen Pembayaran', <CreditCard className="w-6 h-6" />)}
+               {renderNavItem('ppdb', 'PPDB (Mutasi NIS)', <UserPlus className="w-6 h-6" />, pendingPPDBCount, 'bg-blue-500 text-white')}
               {renderNavItem('kepegawaian', 'Data Kepegawaian', <Briefcase className="w-6 h-6" />)}
             </div>
           </div>

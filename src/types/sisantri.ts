@@ -334,6 +334,23 @@ export interface BiayaMaster {
   nominalStandard?: number;
   kategori?: BiayaKategori;
   keterangan?: string;
+  kategoriPembayaran?: 'Rutin' | 'Insidental' | 'Sukarela';
+  wajib?: boolean;
+  aktif?: boolean;
+}
+
+export type TarifTargetScope = 'Semua Santri' | 'Unit Sekolah' | 'Unit Pesantren' | 'Kelas Sekolah' | 'Kelas Madin' | 'Santri Asuh';
+
+export interface TarifPembayaran {
+  id: string;
+  biayaMasterId: string;
+  targetScope: TarifTargetScope;
+  targetValue?: string;
+  nominal: number;
+  wajib: boolean;
+  aktif: boolean;
+  effectiveFrom?: string;
+  effectiveUntil?: string;
 }
 
 export interface TagihanKeuangan {
@@ -492,6 +509,11 @@ export interface TransaksiPembayaran {
   penerima?: string;
   penerimaBendahara?: string;
   catatan?: string;
+  statusVerifikasi?: 'Terverifikasi' | 'Menunggu Verifikasi' | 'Ditolak' | 'Otomatis';
+  buktiTransferUrl?: string;
+  verifiedBy?: string;
+  verifiedAt?: string;
+  appliedToTagihan?: boolean;
 }
 
 // ---------------- PEMASUKAN & DISTRIBUSI TYPES ---------------- //
@@ -502,7 +524,15 @@ export type KonteksKeuangan = BiayaKategori;
 // Urutan tampil konsisten: YAYASAN, MADIN, SEKOLAH, PESANTREN, MAKAN
 export const KONTEKS_KEUANGAN_ORDER: readonly KonteksKeuangan[] = ['YAYASAN', 'MADIN', 'SEKOLAH', 'PESANTREN', 'MAKAN'];
 
-export type PercentageMap = Record<KonteksKeuangan, number>;
+export type NominalMap = Record<KonteksKeuangan, number>;
+
+export const DEFAULT_SYAHRIAH_NOMINALS: NominalMap = {
+  YAYASAN: 100000,
+  MADIN: 75000,
+  SEKOLAH: 150000,
+  PESANTREN: 200000,
+  MAKAN: 250000
+};
 export type DistribusiStatus = 'Draft' | 'Aktif' | 'Arsip';
 
 // Status proses transaksi pemasukan — bisa dipantau & ditelusuri.
@@ -520,7 +550,7 @@ export interface DistribusiKeuanganConfig {
   version: string; // label versi berurutan: V-001, V-002, ...
   effectiveFrom: string; // tanggal mulai berlaku (YYYY-MM-DD)
   effectiveUntil?: string;
-  percentages: PercentageMap; // total harus 100
+  nominals: NominalMap; // total menjadi nominal akhir Syahriyah santri
   status: DistribusiStatus;
   createdBy: string;
   createdAt: string;
@@ -548,7 +578,7 @@ export interface Pemasukan {
     version: string;
     effectiveFrom: string;
     effectiveUntil?: string;
-    percentages: PercentageMap;
+    nominals: NominalMap;
   };
   status: PemasukanStatus;
   paidAt: string; // saat pembayaran diterima
@@ -558,12 +588,11 @@ export interface Pemasukan {
   createdAt: string;
 }
 
-// Hasil bagi satu pemasukan ke satu konteks keuangan (snapshot persentase+nominal).
+// Hasil bagi satu pemasukan ke satu konteks keuangan.
 export interface AlokasiPemasukan {
   id: string;
   pemasukanId: string;
   konteks: KonteksKeuangan;
-  persentase: number;
   nominal: number;
 }
 

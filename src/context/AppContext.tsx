@@ -19,6 +19,8 @@ import {
   Pegawai,
   Jabatan,
   BiayaMaster,
+  TarifPembayaran,
+  TarifTargetScope,
   TagihanKeuangan,
   TransaksiPembayaran,
   PendaftarPPDB,
@@ -29,7 +31,7 @@ import {
   PesertaTahfidz,
   DistribusiKeuanganConfig,
   DistribusiStatus,
-  PercentageMap,
+  NominalMap,
   Pemasukan,
   AlokasiPemasukan,
   AuditLog,
@@ -56,6 +58,7 @@ import {
   INITIAL_PEGAWAI,
   INITIAL_JABATAN,
   INITIAL_BIAYA_MASTER,
+  INITIAL_TARIF_PEMBAYARAN,
   INITIAL_TAGIHAN,
   INITIAL_TRANSAKSI,
   INITIAL_PENDAFTAR_PPDB,
@@ -71,6 +74,7 @@ import {
 import {
   validateDistribution,
   createPemasukanRecord as buildPemasukanRecord,
+  getConfigNominals,
   NewPemasukanInput
 } from '../services/distributionService';
 
@@ -178,16 +182,25 @@ interface AppContextType {
 
   // Keuangan
   biayaMasterList: BiayaMaster[];
+  addBiayaMaster: (item: Omit<BiayaMaster, 'id'>) => void;
+  updateBiayaMaster: (id: string, item: Partial<BiayaMaster>) => void;
+  deleteBiayaMaster: (id: string) => void;
+  tarifPembayaranList: TarifPembayaran[];
+  addTarifPembayaran: (item: Omit<TarifPembayaran, 'id'>) => void;
+  updateTarifPembayaran: (id: string, item: Partial<TarifPembayaran>) => void;
+  deleteTarifPembayaran: (id: string) => void;
   tagihanList: TagihanKeuangan[];
   transaksiList: TransaksiPembayaran[];
-  addBayarTagihan: (tagihanId: string, nominal: number, metode: TransaksiPembayaran['metodePembayaran'], catatan?: string) => void;
+  generateTagihan: (input: { santriId: string; biayaMasterId: string; periode: string; bulanKe?: number; tanggalJatuhTempo?: string }) => TagihanKeuangan | null;
+  addBayarTagihan: (tagihanId: string, nominal: number, metode: TransaksiPembayaran['metodePembayaran'], catatan?: string, buktiTransferUrl?: string) => TransaksiPembayaran | null;
+  verifikasiTransaksi: (id: string, status: 'Terverifikasi' | 'Ditolak', verifiedBy?: string) => boolean;
 
   // Pemasukan & Distribusi
   distribusiConfigList: DistribusiKeuanganConfig[];
   pemasukanList: Pemasukan[];
   alokasiList: AlokasiPemasukan[];
   getAktifDistribusiConfig: () => DistribusiKeuanganConfig | undefined;
-  saveDistribusiConfig: (input: { id?: string; name: string; effectiveFrom: string; effectiveUntil?: string; percentages: PercentageMap; status?: DistribusiStatus }) => { ok: boolean; error?: string; config?: DistribusiKeuanganConfig };
+  saveDistribusiConfig: (input: { id?: string; name: string; effectiveFrom: string; effectiveUntil?: string; nominals: NominalMap; status?: DistribusiStatus }) => { ok: boolean; error?: string; config?: DistribusiKeuanganConfig };
   activateDistribusiConfig: (id: string) => void;
   createPemasukan: (input: NewPemasukanInput) => { ok: boolean; error?: string; pemasukan?: Pemasukan; alokasi?: AlokasiPemasukan[] };
   getUnitKeyFromSantri: (santriId: string) => string | undefined;
@@ -269,7 +282,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [presensiList, setPresensiList] = useLocalStorage<PresensiRecord[]>('presensi', INITIAL_PRESENSI);
 
   // Keuangan
-  const [biayaMasterList] = useLocalStorage<BiayaMaster[]>('biayaMaster', INITIAL_BIAYA_MASTER);
+  const [biayaMasterList, setBiayaMasterList] = useLocalStorage<BiayaMaster[]>('biayaMaster', INITIAL_BIAYA_MASTER);
+  const [tarifPembayaranList, setTarifPembayaranList] = useLocalStorage<TarifPembayaran[]>('tarifPembayaran', INITIAL_TARIF_PEMBAYARAN);
   const [tagihanList, setTagihanList] = useLocalStorage<TagihanKeuangan[]>('tagihan', INITIAL_TAGIHAN);
   const [transaksiList, setTransaksiList] = useLocalStorage<TransaksiPembayaran[]>('transaksi', INITIAL_TRANSAKSI);
 
@@ -440,6 +454,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setKelasSekolahList(prev => prev.filter(k => k.id !== id));
   };
 
+  // Payment types and tariff rules
+  const addBiayaMaster = (item: Omit<BiayaMaster, 'id'>) => {
+    const newItem: BiayaMaster = { ...item, id: `biaya-${Date.now()}`, aktif: item.aktif ?? true };
+    setBiayaMasterList(prev => [...prev, newItem]);
+  };
+
+  const updateBiayaMaster = (id: string, item: Partial<BiayaMaster>) => {
+    setBiayaMasterList(prev => prev.map(b => b.id === id ? { ...b, ...item } : b));
+  };
+
+  const deleteBiayaMaster = (id: string) => {
+    setBiayaMasterList(prev => prev.filter(b => b.id !== id));
+  };
+
+  const addTarifPembayaran = (item: Omit<TarifPembayaran, 'id'>) => {
+    const newItem: TarifPembayaran = { ...item, id: `tarif-${Date.now()}` };
+    setTarifPembayaranList(prev => [...prev, newItem]);
+  };
+
+  const updateTarifPembayaran = (id: string, item: Partial<TarifPembayaran>) => {
+    setTarifPembayaranList(prev => prev.map(t => t.id === id ? { ...t, ...item } : t));
+  };
+
+  const deleteTarifPembayaran = (id: string) => {
+    setTarifPembayaranList(prev => prev.filter(t => t.id !== id));
+  };
+
   // Santri CRUD
   const addSantri = (santriData: Omit<Santri, 'id' | 'nis'>): Santri => {
     const newNis = generateNextNIS();
@@ -457,24 +498,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setSantriList(prev => [newSantri, ...prev]);
 
-    // Generate initial Syahriyah invoice for new active santri
+    // Generate one monthly invoice for each Syahriyah category.
     if (newSantri.status === 'Aktif') {
       const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
       const now = new Date();
       const currentMonthYear = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-      
-      const newTagihan: TagihanKeuangan = {
-        id: `tgh-${Date.now()}`,
+      const activeConfig = getAktifDistribusiConfig();
+      const configNominals = activeConfig ? getConfigNominals(activeConfig) : undefined;
+      const syahriyahCosts = biayaMasterList.filter(b => b.jenis === 'Syahriyah' && b.kategori);
+      const createdAt = Date.now();
+      const newTagihans: TagihanKeuangan[] = syahriyahCosts.map((biaya, index) => ({
+        id: `tgh-${createdAt}-${index}`,
         santriId: newSantri.id,
-        biayaMasterId: 'by-2',
+        biayaMasterId: biaya.id,
         bulanTahun: currentMonthYear,
-        nominalTagihan: 450000,
+        nominalTagihan: configNominals?.[biaya.kategori!] ?? biaya.nominal ?? 0,
         nominalTerbayar: 0,
         status: 'Belum Lunas',
         tanggalJatuhTempo: `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-10`,
         tahunAjaranId: getTahunAjaranAktif()?.id ?? ''
-      };
-      setTagihanList(prev => [...prev, newTagihan]);
+      }));
+      setTagihanList(prev => [...newTagihans, ...prev]);
     }
 
     return newSantri;
@@ -616,46 +660,106 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Keuangan
-  const addBayarTagihan = (tagihanId: string, nominal: number, metode: TransaksiPembayaran['metodePembayaran'], catatan?: string) => {
+  const isTarifMatch = (santri: Santri, tarif: TarifPembayaran): boolean => {
+    switch (tarif.targetScope) {
+      case 'Unit Sekolah': return santri.unitSekolahId === tarif.targetValue;
+      case 'Unit Pesantren': return santri.unitPesantrenId === tarif.targetValue;
+      case 'Kelas Sekolah': return santri.kelasSekolahId === tarif.targetValue;
+      case 'Kelas Madin': return santri.kelasMadinId === tarif.targetValue;
+      case 'Santri Asuh': return santri.jenisSantriAsuh === tarif.targetValue;
+      default: return true;
+    }
+  };
+
+  const generateTagihan = (input: { santriId: string; biayaMasterId: string; periode: string; bulanKe?: number; tanggalJatuhTempo?: string }): TagihanKeuangan | null => {
+    const santri = santriList.find(s => s.id === input.santriId);
+    const biaya = biayaMasterList.find(b => b.id === input.biayaMasterId);
+    if (!santri || !biaya || biaya.aktif === false || !biaya.nominal || biaya.nominal <= 0) return null;
+    if (tagihanList.some(t => t.santriId === input.santriId && t.biayaMasterId === input.biayaMasterId && t.bulanTahun === input.periode)) return null;
+
+    const tarif = tarifPembayaranList
+      .filter(t => t.biayaMasterId === input.biayaMasterId && t.aktif && isTarifMatch(santri, t))
+      .sort((a, b) => (a.targetScope === 'Semua Santri' ? 1 : 0) - (b.targetScope === 'Semua Santri' ? 1 : 0))[0];
+    const nominal = tarif?.nominal ?? biaya.nominal;
+    const [bulanPeriode, tahun] = input.periode.split(/\s+(?=\d{4}$)/);
+    const newTagihan: TagihanKeuangan = {
+      id: `tgh-${Date.now()}`,
+      santriId: input.santriId,
+      biayaMasterId: input.biayaMasterId,
+      noTagihan: `TG-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${(tagihanList.length + 1).toString().padStart(4, '0')}`,
+      bulanTahun: input.periode,
+      bulanPeriode,
+      tahunPeriode: tahun ? Number(tahun) : undefined,
+      bulanKe: input.bulanKe,
+      unitId: getUnitKeyFromSantri(input.santriId),
+      nominalTagihan: nominal,
+      nominalTerbayar: 0,
+      status: 'Belum Lunas',
+      tanggalJatuhTempo: input.tanggalJatuhTempo,
+      tahunAjaranId: getTahunAjaranAktif()?.id ?? ''
+    };
+    setTagihanList(prev => [newTagihan, ...prev]);
+    return newTagihan;
+  };
+
+  const applyPaymentToTagihan = (transaksi: TransaksiPembayaran): boolean => {
+    const tagihan = tagihanList.find(t => t.id === transaksi.tagihanId);
+    if (!tagihan || transaksi.nominal === undefined) return false;
+    const sisa = tagihan.nominalTagihan - tagihan.nominalTerbayar;
+    if (transaksi.nominal <= 0 || transaksi.nominal > sisa) return false;
+    const newTerbayar = tagihan.nominalTerbayar + transaksi.nominal;
+    const status: TagihanKeuangan['status'] = newTerbayar >= tagihan.nominalTagihan ? 'Lunas' : 'Sebagian';
+    setTagihanList(prev => prev.map(t => t.id === tagihan.id ? { ...t, nominalTerbayar: newTerbayar, status } : t));
+    return true;
+  };
+
+  // Pembayaran tunai langsung terverifikasi; non-tunai menunggu verifikasi bendahara.
+  const addBayarTagihan = (tagihanId: string, nominal: number, metode: TransaksiPembayaran['metodePembayaran'], catatan?: string, buktiTransferUrl?: string): TransaksiPembayaran | null => {
     const tagihan = tagihanList.find(t => t.id === tagihanId);
-    if (!tagihan) return;
-
-    const nowStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
-    const kwNumber = `KW-${nowStr}-${Math.floor(100 + Math.random() * 900)}`;
-
-    const newTx: TransaksiPembayaran = {
+    if (!tagihan || nominal <= 0 || nominal > tagihan.nominalTagihan - tagihan.nominalTerbayar) return null;
+    const now = new Date().toISOString();
+    const otomatisTerverifikasi = ['Cash', 'Tunai'].includes(metode);
+    const transaksi: TransaksiPembayaran = {
       id: `trx-${Date.now()}`,
       tagihanId,
       santriId: tagihan.santriId,
-      noKuitansi: kwNumber,
-      tanggal: new Date().toISOString().split('T')[0],
+      noKuitansi: `KW-${now.slice(0, 10).replace(/-/g, '')}-${Math.floor(100 + Math.random() * 900)}`,
+      tanggal: now.slice(0, 10),
       nominal,
       metodePembayaran: metode,
       penerima: currentUser.nama,
-      catatan
+      catatan,
+      buktiTransferUrl,
+      statusVerifikasi: otomatisTerverifikasi ? 'Terverifikasi' : 'Menunggu Verifikasi',
+      verifiedBy: otomatisTerverifikasi ? currentUser.nama : undefined,
+      verifiedAt: otomatisTerverifikasi ? now : undefined,
+      appliedToTagihan: false
     };
+    if (otomatisTerverifikasi && applyPaymentToTagihan(transaksi)) transaksi.appliedToTagihan = true;
+    setTransaksiList(prev => [transaksi, ...prev]);
+    return transaksi;
+  };
 
-    setTransaksiList(prev => [newTx, ...prev]);
-
-    // Update tagihan status
-    const newTerbayar = tagihan.nominalTerbayar + nominal;
-    let newStatus: TagihanKeuangan['status'] = 'Belum Lunas';
-    if (newTerbayar >= tagihan.nominalTagihan) {
-      newStatus = 'Lunas';
-    } else if (newTerbayar > 0) {
-      newStatus = 'Sebagian';
-    }
-
-    setTagihanList(prev => prev.map(t => t.id === tagihanId ? {
+  const verifikasiTransaksi = (id: string, status: 'Terverifikasi' | 'Ditolak', verifiedBy = currentUser.nama): boolean => {
+    const transaksi = transaksiList.find(t => t.id === id);
+    if (!transaksi || transaksi.statusVerifikasi === 'Terverifikasi' || transaksi.statusVerifikasi === 'Ditolak') return false;
+    const now = new Date().toISOString();
+    if (status === 'Terverifikasi' && !applyPaymentToTagihan(transaksi)) return false;
+    setTransaksiList(prev => prev.map(t => t.id === id ? {
       ...t,
-      nominalTerbayar: newTerbayar,
-      status: newStatus
+      statusVerifikasi: status,
+      verifiedBy,
+      verifiedAt: now,
+      appliedToTagihan: status === 'Terverifikasi'
     } : t));
+    return true;
   };
 
   // Pemasukan & Distribusi
-  const getAktifDistribusiConfig = (): DistribusiKeuanganConfig | undefined =>
-    distribusiConfigList.find(c => c.status === 'Aktif');
+  const getAktifDistribusiConfig = (): DistribusiKeuanganConfig | undefined => {
+    const active = distribusiConfigList.find(c => c.status === 'Aktif');
+    return active ? { ...active, nominals: getConfigNominals(active) } : undefined;
+  };
 
   // Resolusi unit santri (PONPES/SMP/MTS/MA/SMK/MADIN) — untuk snapshot & filter monitoring.
   const getUnitKeyFromSantri = (santriId: string): string | undefined => {
@@ -709,10 +813,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     name: string;
     effectiveFrom: string;
     effectiveUntil?: string;
-    percentages: PercentageMap;
+    nominals: NominalMap;
     status?: DistribusiStatus;
   }): { ok: boolean; error?: string; config?: DistribusiKeuanganConfig } => {
-    const validation = validateDistribution(input.percentages);
+    const validation = validateDistribution(input.nominals);
     if (!validation.valid) {
       return { ok: false, error: validation.errors.join(' ') };
     }
@@ -734,7 +838,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         name: input.name,
         effectiveFrom: input.effectiveFrom,
         effectiveUntil: input.effectiveUntil,
-        percentages: { ...input.percentages },
+        nominals: { ...input.nominals },
         status: targetStatus,
         updatedAt: nowIso
       };
@@ -746,7 +850,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         version: nextConfigVersion(),
         effectiveFrom: input.effectiveFrom,
         effectiveUntil: input.effectiveUntil,
-        percentages: { ...input.percentages },
+        nominals: { ...input.nominals },
         status: targetStatus,
         createdBy: currentUser.nama,
         createdAt: nowIso,
@@ -760,9 +864,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       entityType: 'DistribusiKeuanganConfig',
       entityId: config.id,
       entityLabel: config.name,
-      detail: `${existing ? `Perbarui konfigurasi ${config.name} (${config.version})` : `Buat konfigurasi baru ${config.name} (${config.version})`} — total distribusi ${validation.total.toFixed(2)}%, status ${targetStatus}.`,
-      before: existing ? { name: existing.name, percentages: existing.percentages, status: existing.status } : undefined,
-      after: { name: config.name, version: config.version, percentages: config.percentages, status: config.status }
+      detail: `${existing ? `Perbarui konfigurasi ${config.name} (${config.version})` : `Buat konfigurasi baru ${config.name} (${config.version})`} — total akhir Syahriyah Rp ${validation.total.toLocaleString('id-ID')}, status ${targetStatus}.`,
+      before: existing ? { name: existing.name, nominals: getConfigNominals(existing), status: existing.status } : undefined,
+      after: { name: config.name, version: config.version, nominals: config.nominals, status: config.status }
     });
     return { ok: true, config };
   };
@@ -1012,9 +1116,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         savePresensiBatch,
 
         biayaMasterList,
+        addBiayaMaster,
+        updateBiayaMaster,
+        deleteBiayaMaster,
+        tarifPembayaranList,
+        addTarifPembayaran,
+        updateTarifPembayaran,
+        deleteTarifPembayaran,
         tagihanList,
         transaksiList,
+        generateTagihan,
         addBayarTagihan,
+        verifikasiTransaksi,
 
         distribusiConfigList,
         pemasukanList,

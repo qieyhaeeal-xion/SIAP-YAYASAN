@@ -16,6 +16,7 @@ import {
   Pemasukan,
   AlokasiPemasukan
 } from '../../types/sisantri';
+import { getConfigNominals, sumNominal } from '../../services/distributionService';
 
 const KONTEKS_LABEL: Record<KonteksKeuangan, string> = {
   YAYASAN: 'Yayasan',
@@ -71,6 +72,8 @@ export const PemasukanDistribusi: React.FC = () => {
   const [catatan, setCatatan] = useState('');
 
   const aktifConfig = getAktifDistribusiConfig();
+  const activeNominals = aktifConfig ? getConfigNominals(aktifConfig) : undefined;
+  const totalSyahriyah = activeNominals ? sumNominal(activeNominals) : 0;
   const activeSantris = santriList.filter(s => s.status === 'Aktif');
 
   const alokasiByPemasukan = useMemo(() => {
@@ -94,11 +97,15 @@ export const PemasukanDistribusi: React.FC = () => {
     e.preventDefault();
     setError(null);
     if (!aktifConfig) {
-      setError('Tidak ada konfigurasi pembagian yang aktif. Buat di tab "Konfigurasi Pemasukan" terlebih dahulu.');
+      setError('Tidak ada konfigurasi nominal yang aktif. Buat di tab "Konfigurasi Pemasukan" terlebih dahulu.');
       return;
     }
     if (!santriId) { setError('Pilih santri terlebih dahulu.'); return; }
     if (!nominal || nominal <= 0) { setError('Nominal harus lebih dari 0.'); return; }
+    if (jenis === 'Syahriyah' && nominal !== totalSyahriyah) {
+      setError(`Nominal Syahriyah harus sama dengan total akhir ${rp(totalSyahriyah)}.`);
+      return;
+    }
 
     const res = createPemasukan({
       santriId,
@@ -126,7 +133,7 @@ export const PemasukanDistribusi: React.FC = () => {
       {/* Ringkasan distribusi per konteks */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {KONTEKS_KEUANGAN_ORDER.map(k => {
-          const pct = aktifConfig?.percentages[k] ?? 0;
+          const configuredNominal = activeNominals?.[k] ?? 0;
           const total = konteksTotals[k];
           const maxTotal = Math.max(1, ...KONTEKS_KEUANGAN_ORDER.map(x => konteksTotals[x]));
           const width = Math.max(4, (total / maxTotal) * 100);
@@ -136,7 +143,7 @@ export const PemasukanDistribusi: React.FC = () => {
                 {KONTEKS_LABEL[k]}
               </div>
               <div className={`mt-2 text-lg font-black ${KONTEKS_STYLE[k].text}`}>{rp(total)}</div>
-              <div className="text-[11px] text-gray-500 font-bold">Konfigurasi aktif {pct}%</div>
+              <div className="text-[11px] text-gray-500 font-bold">Konfigurasi aktif {rp(configuredNominal)}</div>
               <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                 <div className={`h-full rounded-full ${KONTEKS_STYLE[k].bar}`} style={{ width: `${width}%` }} />
               </div>
@@ -162,7 +169,11 @@ export const PemasukanDistribusi: React.FC = () => {
           </p>
         </div>
         <button
-          onClick={() => { setShowForm(v => !v); setError(null); }}
+          onClick={() => {
+            setShowForm(v => !v);
+            setError(null);
+            if (!showForm && jenis === 'Syahriyah' && totalSyahriyah > 0) setNominal(totalSyahriyah);
+          }}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-bold rounded-lg shadow transition-all"
         >
           <Plus className="w-4 h-4" /> {showForm ? 'Tutup Form' : 'Catat Pemasukan'}
@@ -174,7 +185,7 @@ export const PemasukanDistribusi: React.FC = () => {
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <div className="text-sm">
             <span className="font-extrabold">Belum ada konfigurasi pembagian aktif.</span>{' '}
-            Buka tab <span className="font-extrabold">"Konfigurasi Pemasukan"</span> untuk membuat & mengaktifkan aturan persentase sebelum mencatat pemasukan.
+            Buka tab <span className="font-extrabold">"Konfigurasi Pemasukan"</span> untuk membuat & mengaktifkan nominal Syahriyah sebelum mencatat pemasukan.
           </div>
         </div>
       )}
@@ -209,12 +220,19 @@ export const PemasukanDistribusi: React.FC = () => {
             <div>
               <label className="block text-xs font-bold text-gray-600 mb-1">Nominal *</label>
               <input type="number" min={0} value={nominal || ''} onChange={e => setNominal(Number(e.target.value))}
-                placeholder="cth. 500000"
+                placeholder="cth. 775000"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]" />
+              {jenis === 'Syahriyah' && aktifConfig && (
+                <p className="mt-1 text-[11px] font-bold text-emerald-700">Total akhir Syahriyah: {rp(totalSyahriyah)}</p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-600 mb-1">Jenis Pembayaran *</label>
-              <select value={jenis} onChange={e => setJenis(e.target.value)}
+              <select value={jenis} onChange={e => {
+                const value = e.target.value;
+                setJenis(value);
+                if (value === 'Syahriyah' && totalSyahriyah > 0) setNominal(totalSyahriyah);
+              }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]">
                 {JENIS_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
@@ -292,7 +310,6 @@ export const PemasukanDistribusi: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <span className="text-sm font-black text-[#1A5276]">{rp(a.nominal)}</span>
-                    <span className="ml-2 text-xs font-bold text-gray-400">{a.persentase}%</span>
                   </div>
                 </div>
               ))}
@@ -339,7 +356,7 @@ export const PemasukanDistribusi: React.FC = () => {
                   <div className="hidden sm:flex flex-wrap gap-1 max-w-[180px]">
                     {alokasi.slice(0, 3).map(a => (
                       <span key={a.id} className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold ${KONTEKS_STYLE[a.konteks].badge}`}>
-                        {KONTEKS_LABEL[a.konteks]} {a.persentase}%
+                         {KONTEKS_LABEL[a.konteks]} {rp(a.nominal)}
                       </span>
                     ))}
                     {alokasi.length > 3 && <span className="text-[9px] font-extrabold text-gray-400">+{alokasi.length - 3}</span>}
@@ -365,7 +382,7 @@ export const PemasukanDistribusi: React.FC = () => {
                             {KONTEKS_LABEL[a.konteks]}
                           </span>
                           <div className={`mt-1.5 text-sm font-black ${KONTEKS_STYLE[a.konteks].text}`}>{rp(a.nominal)}</div>
-                          <div className="text-[10px] text-gray-400 font-bold">{a.persentase}% dari nominal</div>
+                           <div className="text-[10px] text-gray-400 font-bold">Nominal konfigurasi</div>
                         </div>
                       ))}
                     </div>

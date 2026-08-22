@@ -157,14 +157,14 @@ summary        = agregasi rekapRows per kategori + grand total
 
 ## 5. Fitur Baru: Pemasukan & Distribusi (Tahap Pemasukan)
 
-Konsep: **satu pembayaran santri = satu `Pemasukan`** (identitas transaksi asli), lalu sistem membaginya ke **5 konteks keuangan yang berdiri sejajar** — YAYASAN, MADIN, SEKOLAH, PESANTREN, MAKAN — berdasarkan persentase konfigurasi yang **disnapshot** saat transaksi. Ini adalah lapisan ledger baru yang **aditif**: alur tagihan/syahriyah lama (`TagihanKeuangan`/`TransaksiPembayaran`) tidak diubah sama sekali.
+Konsep: **satu pembayaran santri = satu `Pemasukan`** (identitas transaksi asli), lalu sistem membaginya ke **5 konteks keuangan yang berdiri sejajar** — YAYASAN, MADIN, SEKOLAH, PESANTREN, MAKAN — berdasarkan nominal konfigurasi yang **disnapshot** saat transaksi. Ini adalah lapisan ledger baru yang **aditif**: alur tagihan/syahriyah lama (`TagihanKeuangan`/`TransaksiPembayaran`) tidak diubah sama sekali.
 
 ### 5.1 Desain Data (type + Prisma)
 
 - `KonteksKeuangan = BiayaKategori` (alias) + `KONTEKS_KEUANGAN_ORDER = [YAYASAN, MADIN, SEKOLAH, PESANTREN, MAKAN]` (urutan tampil konsisten).
-- `DistribusiKeuanganConfig` — name, `effectiveFrom`/`effectiveUntil` (berbasis periode agar histori aturan tersimpan), `percentages` (5 konteks), status `Draft | Aktif | Arsip`, createdBy, createdAt/updatedAt.
+- `DistribusiKeuanganConfig` — name, `effectiveFrom`/`effectiveUntil` (berbasis periode agar histori aturan tersimpan), `nominals` (5 konteks), status `Draft | Aktif | Arsip`, createdBy, createdAt/updatedAt.
 - `Pemasukan` — `noPemasukan` unik (`PMK-YYYYMMDD-0001`), santriId, tanggal, nominal, jenisPembayaran, metodePembayaran, periode, bulanKe, tahunAjaranId, catatan, `configId` + **`configSnapshot` beku**, createdBy, createdAt.
-- `AlokasiPemasukan` — pemasukanId, konteks, persentase, nominal; `@@unique([pemasukanId, konteks])` (1:5).
+- `AlokasiPemasukan` — pemasukanId, konteks, nominal; `@@unique([pemasukanId, konteks])` (1:5).
 - Prisma: enum `KonteksKeuangan` + 3 model + relasi `Santri.pemasukan` & `TahunAjaran.pemasukan`. SQL tersedia di `prisma/migration-pemasukan-distribusi.sql` (incremental; **apply ditunda** sampai `DATABASE_URL` tersedia).
 
 ### 5.2 Service Murni (`src/services/distributionService.ts`)
@@ -173,8 +173,8 @@ Domain logic dipisah agar testable & tidak bergantung UI/storage:
 
 | Fungsi | Peran |
 | --- | --- |
-| `validateDistribution` | Tolak negatif, >100%, total ≠ 100% (toleransi 0.01) |
-| `computeDistribution` | Hitung alokasi nominal; pembulatan **largest remainder** → total alokasi **selalu == nominal** |
+| `validateDistribution` | Tolak nominal negatif/non-bulat dan total akhir Rp 0 |
+| `computeDistribution` | Gunakan alokasi nominal tetap; total alokasi harus sama dengan nominal pembayaran |
 | `buildConfigSnapshot` | Bekukan konfigurasi saat transaksi (tidak pernah dihitung ulang) |
 | `createPemasukanRecord` | Use-case: input pembayaran + konfigurasi + seq → `Pemasukan` + 5 `AlokasiPemasukan` |
 
@@ -200,19 +200,19 @@ Domain logic dipisah agar testable & tidak bergantung UI/storage:
    - Riwayat pemasukan sebagai accordion: tiap baris menampilkan no, santri, nominal, badge konfigurasi snapshot; expand → rincian 5 alokasi.
    - Perintah menuju tab Konfigurasi bila belum ada konfigurasi aktif.
 2. **Konfigurasi Pemasukan** (`KonfigurasiPemasukan.tsx`):
-   - Form 5 input persentase dengan **validasi live** (total 100%) + periode berlaku + nama.
+    - Form 5 input nominal dengan **validasi live** (total akhir Syahriyah) + periode berlaku + nama.
    - Tombol "Simpan Konfigurasi" (otomatis Aktif & mengarsipkan yang lain) — hanya untuk admin_yayasan/admin_sistem.
-   - Tabel histori: nama, periode, 5 persen, total (valid/invalid), status, aksi "Aktifkan".
+    - Tabel histori: nama, periode, 5 nominal, total akhir, status, aksi "Aktifkan".
 
 ### 5.6 Data Demo (mock)
 
-- 2 konfigurasi: **Periode A** (Arsip, 15/15/25/25/20) & **Periode B** (Aktif, 10/15/30/25/20).
+- 2 konfigurasi: **Periode A** (Arsip) & **Periode B** (Aktif), masing-masing menyimpan nominal lima pos keuangan.
 - 3 pemasukan Agustus 2026 (snt-1/snt-2/snt-3) dibangun lewat `createPemasukanRecord` → Pemasukan + 15 Alokasi, semuanya memakai snapshot Periode B.
 
 ### 5.7 Test Case Utama
 
-1. `validateDistribution`: total 99.5 / 100.5 / negatif / >100 → ditolak; tepat 100 → diterima.
-2. `computeDistribution`: nominal Rp 500.000 × {10,15,30,25,20} → 50.000+75.000+150.000+125.000+100.000 = **500.000** (tidak pernah lebih/kurang).
+1. `validateDistribution`: nominal negatif/non-bulat atau total Rp 0 → ditolak; total nominal positif → diterima.
+2. `computeDistribution`: nominal pembayaran yang sama dengan total konfigurasi menghasilkan alokasi lima pos yang jumlahnya **sama persis**.
 3. Konfigurasi baru yang diaktifkan **tidak mengubah** snapshot pemasukan lama.
 4. `createPemasukan` menolak ketika tidak ada konfigurasi aktif.
 5. RBAC: pengurus dapat melihat tab pemasukan namun tombol ubah/aktifkan konfigurasi disabled.
@@ -254,7 +254,7 @@ Service `distributionService.verifyDistribution(nominal, alokasi)` memastikan **
 - **Uang dibagi ke mana**: 5 kartu konteks (YAYASAN/MADIN/SEKOLAH/PESANTREN/MAKAN) — dihitung dari data transaksi, bukan mock.
 - **Filter fungsional**: rentang cepat (Hari Ini/7 Hari/Bulan Ini), dari–sampai tanggal, unit, jenis pembayaran, status transaksi, konteks keuangan, operator pencatat, pencarian nama/no transaksi. Semua bekerja terhadap data sebenarnya.
 - **Riwayat**: tabel (tanggal, no transaksi, santri, unit, jenis, nominal, status, pencatat) + tombol **Detail**.
-- **Detail transaksi**: identitas lengkap (santri, unit, nominal, tanggal, status, metode, periode, pencatat, waktu bayar) + **Distribusi Transaksi** (5 baris + total) + **integritas terverifikasi** + **snapshot konfigurasi** (versi, nama, persentase).
+- **Detail transaksi**: identitas lengkap (santri, unit, nominal, tanggal, status, metode, periode, pencatat, waktu bayar) + **Distribusi Transaksi** (5 baris + total) + **integritas terverifikasi** + **snapshot konfigurasi** (versi, nama, nominal).
 - **Monitoring error**: panel merah "DISTRIBUSI GAGAL" menampilkan semua transaksi `FAILED` (no, santri, nominal, pesan error) → klik buka detail. Tidak ada silent failure.
 - **Audit trail**: panel bawah tab menampilkan log dengan sebelum/sesudah.
 
@@ -343,7 +343,7 @@ npx prisma migrate dev --name add_pemasukan_audit
 3. Sidebar → **Keuangan & Syahriyah** (sub-tab default: **Monitoring Pemasukan**).
 4. **Monitoring Pemasukan**: lihat ringkasan Total Pemasukan + 5 kartu distribusi (data aktual transaksi), panel error DISTRIBUSI GAGAL (ada 1 contoh FAILED), tabel riwayat dengan status — aktifkan filter (hari ini, unit, status, konteks, operator) → klik **Detail** salah satu baris → lihat perjalanan uang + distribusi + snapshot versi konfigurasi + audit trail di bawah.
 5. Buka **Pemasukan & Distribusi** → "Catat Pemasukan" → pilih santri + nominal → lihat modal distribusi otomatis + status DISTRIBUTED pada riwayat.
-6. Buka **Konfigurasi Pemasukan** → lihat kolom **Versi** (V-001, V-002) di histori → ubah persentase (total harus 100%) → Simpan → versi baru V-003 aktif, lama otomatis Arsip → buktikan transaksi lama tetap memakai snapshot lama.
+6. Buka **Konfigurasi Pemasukan** → lihat kolom **Versi** (V-001, V-002) di histori → ubah nominal lima pos → Simpan → versi baru V-003 aktif, lama otomatis Arsip → buktikan transaksi lama tetap memakai snapshot lama.
 7. Buka **Tagihan Santri** → cari/bayar tagihan seperti biasa (alur tahap 1 tidak berubah).
 8. Cek **Audit Trail** (bawah tab Monitoring): log CREATE_PAYMENT / UPDATE_DISTRIBUTION_CONFIG / DISTRIBUTION_FAILED dengan sebelum/sesudah.
 9. Untuk data demo segar: hapus key localStorage `sisantri_app_tagihan`, `sisantri_app_biayaMaster`, `sisantri_app_transaksi`, `sisantri_app_distribusiConfig`, `sisantri_app_pemasukan`, `sisantri_app_alokasiPemasukan`, `sisantri_app_auditLog`.

@@ -1,6 +1,7 @@
 import {
   KonteksKeuangan,
-  PercentageMap,
+  NominalMap,
+  DEFAULT_SYAHRIAH_NOMINALS,
   KONTEKS_KEUANGAN_ORDER,
   DistribusiKeuanganConfig,
   Pemasukan,
@@ -17,12 +18,11 @@ export interface DistributionValidation {
   valid: boolean;
   total: number;
   errors: string[];
-  items: { konteks: KonteksKeuangan; persentase: number }[];
+  items: { konteks: KonteksKeuangan; nominal: number }[];
 }
 
 export interface AlokasiResult {
   konteks: KonteksKeuangan;
-  persentase: number;
   nominal: number;
 }
 
@@ -39,68 +39,55 @@ export interface NewPemasukanInput {
   createdBy: string;
 }
 
-export function sumPercentage(percentages: PercentageMap): number {
-  return KONTEKS_KEUANGAN_ORDER.reduce((sum, k) => sum + (percentages[k] ?? 0), 0);
+export function getConfigNominals(config: { nominals?: NominalMap }): NominalMap {
+  return { ...DEFAULT_SYAHRIAH_NOMINALS, ...(config.nominals ?? {}) };
 }
 
-// Validasi aturan keamanan data:
-// - tidak ada persentase negatif
-// - tidak ada persentase > 100%
-// - total harus tepat 100% (toleransi float 0.01)
-export function validateDistribution(percentages: PercentageMap): DistributionValidation {
+export function sumNominal(nominals: NominalMap): number {
+  return KONTEKS_KEUANGAN_ORDER.reduce((sum, k) => sum + Math.floor(nominals[k] ?? 0), 0);
+}
+
+// Validasi aturan keamanan data: semua nominal harus bilangan bulat positif atau nol,
+// dan total akhir Syahriyah harus lebih dari nol.
+export function validateDistribution(nominals: NominalMap): DistributionValidation {
   const errors: string[] = [];
   for (const k of KONTEKS_KEUANGAN_ORDER) {
-    const v = percentages[k];
-    if (typeof v !== 'number' || Number.isNaN(v)) {
-      errors.push(`Persentase ${k} tidak valid.`);
+    const v = nominals[k];
+    if (typeof v !== 'number' || Number.isNaN(v) || !Number.isFinite(v)) {
+      errors.push(`Nominal ${k} tidak valid.`);
       continue;
     }
-    if (v < 0) errors.push(`Persentase ${k} tidak boleh negatif.`);
-    if (v > 100) errors.push(`Persentase ${k} tidak boleh melebihi 100%.`);
+    if (!Number.isInteger(v)) errors.push(`Nominal ${k} harus berupa bilangan bulat.`);
+    if (v < 0) errors.push(`Nominal ${k} tidak boleh negatif.`);
   }
-  const total = sumPercentage(percentages);
-  if (Math.abs(total - 100) > 0.01) {
-    errors.push(`Total persentase harus 100% (saat ini ${total.toFixed(2)}%).`);
+  const total = sumNominal(nominals);
+  if (total <= 0) {
+    errors.push('Total akhir Syahriyah harus lebih dari Rp 0.');
   }
   return {
     valid: errors.length === 0,
     total,
     errors,
-    items: KONTEKS_KEUANGAN_ORDER.map(k => ({ konteks: k, persentase: percentages[k] ?? 0 }))
+    items: KONTEKS_KEUANGAN_ORDER.map(k => ({ konteks: k, nominal: nominals[k] ?? 0 }))
   };
 }
 
-// Hitung alokasi nominal ke 5 konteks.
-// Pembulatan "largest remainder" menjamin TOTAL alokasi SELALU == nominal
-// (tidak pernah melebihi, tidak pernah kurang).
-export function computeDistribution(nominal: number, percentages: PercentageMap): AlokasiResult[] {
+// Alokasi memakai nominal tetap dari konfigurasi. Jika nominal pembayaran berbeda
+// dari total konfigurasi, verifikasi transaksi akan menandainya sebagai gagal.
+export function computeDistribution(nominal: number, nominals: NominalMap): AlokasiResult[] {
   const order = KONTEKS_KEUANGAN_ORDER;
   const safeNominal = Math.max(0, Math.floor(nominal));
-  const totalPct = sumPercentage(percentages);
+  const configuredNominals = getConfigNominals({ nominals });
+  const totalNominal = sumNominal(configuredNominals);
 
-  if (safeNominal === 0 || totalPct <= 0) {
-    return order.map(k => ({ konteks: k, persentase: percentages[k] ?? 0, nominal: 0 }));
+  if (safeNominal === 0 || totalNominal <= 0) {
+    return order.map(k => ({ konteks: k, nominal: 0 }));
   }
 
-  const exact = order.map(k => (safeNominal * (percentages[k] ?? 0)) / totalPct);
-  const result = order.map((k, i) => ({
+  return order.map(k => ({
     konteks: k,
-    persentase: percentages[k] ?? 0,
-    nominal: Math.floor(exact[i])
+    nominal: Math.floor(configuredNominals[k] ?? 0)
   }));
-
-  let remainder = safeNominal - result.reduce((a, r) => a + r.nominal, 0);
-  const byFrac = order
-    .map((k, i) => ({ i, frac: exact[i] - Math.floor(exact[i]) }))
-    .sort((a, b) => b.frac - a.frac);
-
-  let idx = 0;
-  while (remainder > 0) {
-    result[byFrac[idx % byFrac.length].i].nominal++;
-    remainder--;
-    idx++;
-  }
-  return result;
 }
 
 // Bekukan konfigurasi saat transaksi terjadi (snapshot).
@@ -110,7 +97,7 @@ export function buildConfigSnapshot(config: DistribusiKeuanganConfig) {
     version: config.version,
     effectiveFrom: config.effectiveFrom,
     effectiveUntil: config.effectiveUntil,
-    percentages: { ...config.percentages }
+    nominals: getConfigNominals(config)
   };
 }
 
@@ -148,7 +135,7 @@ export function createPemasukanRecord(
   const tanggal = input.tanggal || nowIso.slice(0, 10);
   const noPemasukan = `PMK-${tanggal.replace(/-/g, '')}-${seq.toString().padStart(4, '0')}`;
 
-  const alokasi = computeDistribution(input.nominal, config.percentages);
+  const alokasi = computeDistribution(input.nominal, getConfigNominals(config));
   const verification = verifyDistribution(input.nominal, alokasi);
   const id = `pmk-${Date.now()}`;
 
@@ -180,7 +167,6 @@ export function createPemasukanRecord(
     id: `${id}-alk-${i + 1}`,
     pemasukanId: id,
     konteks: a.konteks,
-    persentase: a.persentase,
     nominal: a.nominal
   }));
 

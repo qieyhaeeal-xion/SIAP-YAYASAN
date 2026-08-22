@@ -398,14 +398,40 @@ enum BiayaKategori {
 }
 
 model BiayaMaster {
-  id         String @id @default(cuid())
-  namaBiaya  String
-  jenis      String
-  nominal    Int
-  kategori   BiayaKategori @default(PESANTREN)
-  keterangan String?
+  id                 String @id @default(cuid())
+  kodeBiaya          String? @unique
+  namaBiaya          String
+  jenis              String
+  tipeFrekuensi      String?
+  nominal            Int
+  nominalStandard    Int?
+  kategori           BiayaKategori @default(PESANTREN)
+  kategoriPembayaran String @default("Rutin")
+  wajib              Boolean @default(true)
+  aktif              Boolean @default(true)
+  keterangan         String?
 
   tagihan TagihanKeuangan[]
+  tarif   TarifPembayaran[]
+}
+
+model TarifPembayaran {
+  id             String @id @default(cuid())
+  biayaMasterId  String
+  targetScope    String
+  targetValue    String?
+  nominal        Int
+  wajib          Boolean @default(true)
+  aktif          Boolean @default(true)
+  effectiveFrom  String?
+  effectiveUntil String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  biayaMaster BiayaMaster @relation(fields: [biayaMasterId], references: [id], onDelete: Cascade)
+
+  @@index([biayaMasterId])
+  @@index([targetScope, targetValue])
 }
 
 model TagihanKeuangan {
@@ -434,7 +460,7 @@ model TagihanKeuangan {
 // ── PEMASUKAN & DISTRIBUSI ────────────────────────────
 // Satu pembayaran santri = satu Pemasukan; dibagi ke 5 konteks keuangan
 // (YAYASAN/MADIN/SEKOLAH/PESANTREN/MAKAN) yang berdiri SEJAJAR,
-// berdasar persentase konfigurasi yang disnapshot saat transaksi.
+// berdasar nominal konfigurasi yang disnapshot saat transaksi.
 
 enum KonteksKeuangan {
   YAYASAN
@@ -450,11 +476,11 @@ model DistribusiKeuanganConfig {
   version         String @default("V-001") // label versi berurutan: V-001, V-002, ...
   effectiveFrom   String
   effectiveUntil  String?
-  yayasanPersen   Float  @default(0)
-  madinPersen     Float  @default(0)
-  sekolahPersen   Float  @default(0)
-  pesantrenPersen Float  @default(0)
-  makanPersen     Float  @default(0)
+  yayasanNominal   Int @default(0)
+  madinNominal     Int @default(0)
+  sekolahNominal   Int @default(0)
+  pesantrenNominal Int @default(0)
+  makanNominal     Int @default(0)
   status          String @default("Draft") // Draft | Aktif | Arsip
   createdBy       String
   createdAt       DateTime @default(now())
@@ -489,11 +515,11 @@ model Pemasukan {
   configName          String
   configEffectiveFrom String
   configEffectiveUntil String?
-  yayasanPersenSnapshot   Float
-  madinPersenSnapshot     Float
-  sekolahPersenSnapshot   Float
-  pesantrenPersenSnapshot Float
-  makanPersenSnapshot     Float
+  yayasanNominalSnapshot   Int
+  madinNominalSnapshot     Int
+  sekolahNominalSnapshot   Int
+  pesantrenNominalSnapshot Int
+  makanNominalSnapshot     Int
 
   createdBy  String
   createdAt  DateTime @default(now())
@@ -514,7 +540,6 @@ model AlokasiPemasukan {
   id          String @id @default(cuid())
   pemasukanId String
   konteks     KonteksKeuangan
-  persentase  Float
   nominal     Int
 
   pemasukan Pemasukan @relation(fields: [pemasukanId], references: [id], onDelete: Cascade)
@@ -552,6 +577,11 @@ model TransaksiPembayaran {
   metodePembayaran String
   penerima         String?
   catatan          String?
+  statusVerifikasi String @default("Terverifikasi")
+  buktiTransferUrl String?
+  verifiedBy       String?
+  verifiedAt       DateTime?
+  appliedToTagihan Boolean @default(false)
 
   tagihan TagihanKeuangan @relation(fields: [tagihanId], references: [id])
   santri  Santri          @relation(fields: [santriId], references: [id])

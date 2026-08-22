@@ -18,6 +18,7 @@ import {
   PemasukanStatus,
   AlokasiPemasukan
 } from '../../types/sisantri';
+import { getConfigNominals } from '../../services/distributionService';
 
 const KONTEKS_LABEL: Record<KonteksKeuangan, string> = {
   YAYASAN: 'Yayasan',
@@ -108,6 +109,7 @@ export const MonitoringPemasukan: React.FC = () => {
   );
 
   const detail = detailId ? pemasukanList.find(p => p.id === detailId) : undefined;
+  const detailNominals = detail ? getConfigNominals(detail.configSnapshot) : undefined;
 
   const effectiveRange = useMemo(() => {
     const now = new Date();
@@ -506,7 +508,6 @@ export const MonitoringPemasukan: React.FC = () => {
                       <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-extrabold ${KONTEKS_STYLE[a.konteks].badge}`}>
                         {KONTEKS_LABEL[a.konteks]}
                       </span>
-                      <span className="text-xs font-bold text-gray-500">{a.persentase}%</span>
                     </div>
                     <span className="text-sm font-black text-[#1A5276]">{rp(a.nominal)}</span>
                   </div>
@@ -528,7 +529,7 @@ export const MonitoringPemasukan: React.FC = () => {
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {KONTEKS_KEUANGAN_ORDER.map(k => (
                     <span key={k} className="text-[10px] font-extrabold text-gray-500 bg-white border border-gray-200 px-2 py-0.5 rounded">
-                      {KONTEKS_LABEL[k]} {detail.configSnapshot.percentages[k] ?? 0}%
+                      {KONTEKS_LABEL[k]} Rp {(detailNominals?.[k] ?? 0).toLocaleString('id-ID')}
                     </span>
                   ))}
                 </div>

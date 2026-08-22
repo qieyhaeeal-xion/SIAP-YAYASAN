@@ -20,6 +20,7 @@ import { KepengasuhanModule } from './components/kepengasuhan/KepengasuhanModule
 import { KepegawaianModule } from './components/kepegawaian/KepegawaianModule';
 import { AkademikModule } from './components/akademik/AkademikModule';
 import { KeuanganModule } from './components/keuangan/KeuanganModule';
+import { PaymentManagementModule } from './components/keuangan/PaymentManagementModule';
 import { PPDBModule } from './components/ppdb/PPDBModule';
 import { PortalWaliModule } from './components/wali/PortalWaliModule';
 import { SettingsModule } from './components/settings/SettingsModule';
@@ -38,13 +39,15 @@ const LoginPage: React.FC = () => {
   );
 };
 
-const AppLayout: React.FC = () => {
+const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard' }) => {
   const { currentUser } = useApp();
   const navigate = useNavigate();
-  const { tab = 'dashboard' } = useParams();
+  const { tab } = useParams();
+  const activeTab = tab || initialTab;
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
 
-  const handleNavigate = (t: string) => navigate('/app/' + t);
+  const handleNavigate = (t: string) => navigate(t === 'payment-management' ? '/manage/payment' : '/app/' + t);
+  const permissionTab = activeTab === 'payment-management' ? 'keuangan' : activeTab;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
@@ -58,8 +61,8 @@ const AppLayout: React.FC = () => {
       <div className="flex-1 flex overflow-hidden">
 
         {/* Collapsible Left Sidebar — drawer di mobile, statis di desktop */}
-        <Sidebar
-          activeTab={tab}
+          <Sidebar
+           activeTab={activeTab}
           onNavigate={handleNavigate}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
@@ -70,15 +73,15 @@ const AppLayout: React.FC = () => {
           <div className="max-w-screen-xl mx-auto space-y-6 w-full flex-1">
 
             {/* RBAC Permission Check Guard */}
-            {!hasPermission(currentUser.role, tab) ? (
+             {!hasPermission(currentUser.role, permissionTab) ? (
               <div className="bg-white rounded-2xl shadow-lg border border-amber-200 p-6 text-center max-w-xl mx-auto my-8 animate-in fade-in zoom-in-95 duration-200 space-y-4">
                 <div className="w-16 h-16 rounded-2xl bg-amber-100 border border-amber-300 text-amber-600 flex items-center justify-center mx-auto shadow-inner">
                   <Lock className="w-8 h-8" />
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-lg font-black text-gray-900">Akses Ditolak (Unauthorized)</h3>
-                  <p className="text-xs text-gray-600">
-                    Role akun Anda <span className="font-extrabold text-[#1A5276] uppercase">[{currentUser.role.replace('_', ' ')}]</span> tidak memiliki wewenang untuk mengakses modul <span className="font-bold text-[#1ABC9C]">"{tab}"</span>.
+                     <p className="text-xs text-gray-600">
+                     Role akun Anda <span className="font-extrabold text-[#1A5276] uppercase">[{currentUser.role.replace('_', ' ')}]</span> tidak memiliki wewenang untuk mengakses modul <span className="font-bold text-[#1ABC9C]">"{activeTab}"</span>.
                   </p>
                 </div>
 
@@ -111,37 +114,38 @@ const AppLayout: React.FC = () => {
               </div>
             ) : (
               <>
-                {tab === 'dashboard' && <DashboardModule onNavigateTab={handleNavigate} />}
+                 {activeTab === 'dashboard' && <DashboardModule onNavigateTab={handleNavigate} />}
 
                 {/* Kesantrian Sub-modules */}
-                {tab === 'sub-pesantren' && <SubPesantren />}
-                {tab === 'sub-madin' && <SubMadin />}
-                {tab === 'sub-sekolah' && <SubSekolah />}
-                {tab === 'data-santri' && <DataSantriModule />}
-                {tab === 'tahfidz' && <TahfidzModule />}
-                {tab === 'nadhoman' && <NadhomanModule />}
-                {tab === 'alumni' && <AlumniModule />}
+                 {activeTab === 'sub-pesantren' && <SubPesantren />}
+                 {activeTab === 'sub-madin' && <SubMadin />}
+                 {activeTab === 'sub-sekolah' && <SubSekolah />}
+                 {activeTab === 'data-santri' && <DataSantriModule />}
+                 {activeTab === 'tahfidz' && <TahfidzModule />}
+                 {activeTab === 'nadhoman' && <NadhomanModule />}
+                 {activeTab === 'alumni' && <AlumniModule />}
+                 {activeTab === 'payment-management' && <PaymentManagementModule />}
 
                 {/* Kepengasuhan Sub-modules */}
-                {tab === 'kepengasuhan' && <KepengasuhanModule />}
+                 {activeTab === 'kepengasuhan' && <KepengasuhanModule />}
 
                 {/* Kepegawaian */}
-                {tab === 'kepegawaian' && <KepegawaianModule />}
+                 {activeTab === 'kepegawaian' && <KepegawaianModule />}
 
                 {/* Akademik & Presensi */}
-                {tab === 'akademik' && <AkademikModule />}
+                 {activeTab === 'akademik' && <AkademikModule />}
 
                 {/* Keuangan & Syahriyah */}
-                {tab === 'keuangan' && <KeuanganModule />}
+                 {activeTab === 'keuangan' && <KeuanganModule />}
 
                 {/* PPDB */}
-                {tab === 'ppdb' && <PPDBModule />}
+                 {activeTab === 'ppdb' && <PPDBModule />}
 
                 {/* Portal Wali Santri */}
-                {tab === 'portal-wali' && <PortalWaliModule />}
+                 {activeTab === 'portal-wali' && <PortalWaliModule />}
 
                 {/* Pengaturan & RBAC */}
-                {tab === 'pengaturan' && <SettingsModule />}
+                 {activeTab === 'pengaturan' && <SettingsModule />}
               </>
             )}
 
@@ -165,6 +169,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/app" element={<AppLayout />} />
           <Route path="/app/:tab" element={<AppLayout />} />
+          <Route path="/manage/payment" element={<AppLayout initialTab="payment-management" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

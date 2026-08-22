@@ -26,6 +26,7 @@ import {
   TahunAjaran,
   PesertaTahfidz,
   BiayaKategori,
+  TarifPembayaran,
   bulanKeLabel,
   DistribusiKeuanganConfig,
   Pemasukan,
@@ -519,13 +520,26 @@ export const INITIAL_PEGAWAI: Pegawai[] = [
 ];
 
 export const INITIAL_BIAYA_MASTER: BiayaMaster[] = [
-  { id: 'by-1', kodeBiaya: 'BG-PANGKAL', namaBiaya: 'Uang Pangkal & Pendaftaran', jenis: 'Tahunan', tipeFrekuensi: 'Sekali / Tahunan', nominal: 2500000, nominalStandard: 2500000, kategori: 'YAYASAN', keterangan: 'Dibayar sekali saat masuk' },
-  { id: 'by-yayasan', kodeBiaya: 'BG-YAYASAN', namaBiaya: 'Syahriyah Yayasan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 100000, nominalStandard: 100000, kategori: 'YAYASAN', keterangan: 'Iuran keuangan yayasan bulanan' },
-  { id: 'by-sekolah', kodeBiaya: 'BG-SEKOLAH', namaBiaya: 'SPP Sekolah', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 150000, nominalStandard: 150000, kategori: 'SEKOLAH', keterangan: 'SPP pendidikan formal (MTs/MA/SMK)' },
-  { id: 'by-pesantren', kodeBiaya: 'BG-PESANTREN', namaBiaya: 'Syahriyah Pesantren', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 200000, nominalStandard: 200000, kategori: 'PESANTREN', keterangan: 'SPP kepesantrenan & asrama' },
-  { id: 'by-makan', kodeBiaya: 'BG-MAKAN', namaBiaya: 'Uang Makan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 250000, nominalStandard: 250000, kategori: 'MAKAN', keterangan: 'Biaya konsumsi santri bulanan' },
-  { id: 'by-madin', kodeBiaya: 'BG-MADIN', namaBiaya: 'Syahriyah Madin', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 75000, nominalStandard: 75000, kategori: 'MADIN', keterangan: 'SPP diniyah (Madin)' },
-  { id: 'by-4', kodeBiaya: 'BG-SERAGAM', namaBiaya: 'Seragam & Perlengkapan Kitab', jenis: 'Non-Syahriyah', tipeFrekuensi: 'Tahunan', nominal: 750000, nominalStandard: 750000, kategori: 'PESANTREN', keterangan: 'Paket kitab matan & seragam pesantren' },
+  { id: 'by-1', kodeBiaya: 'BG-PANGKAL', namaBiaya: 'Uang Pangkal & Pendaftaran', jenis: 'Tahunan', tipeFrekuensi: 'Sekali / Tahunan', nominal: 2500000, nominalStandard: 2500000, kategori: 'YAYASAN', kategoriPembayaran: 'Insidental', wajib: true, keterangan: 'Dibayar sekali saat masuk' },
+  { id: 'by-yayasan', kodeBiaya: 'BG-YAYASAN', namaBiaya: 'Syahriyah Yayasan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 100000, nominalStandard: 100000, kategori: 'YAYASAN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'Iuran keuangan yayasan bulanan' },
+  { id: 'by-sekolah', kodeBiaya: 'BG-SEKOLAH', namaBiaya: 'SPP Sekolah', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 150000, nominalStandard: 150000, kategori: 'SEKOLAH', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP pendidikan formal (MTs/MA/SMK)' },
+  { id: 'by-pesantren', kodeBiaya: 'BG-PESANTREN', namaBiaya: 'Syahriyah Pesantren', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 200000, nominalStandard: 200000, kategori: 'PESANTREN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP kepesantrenan & asrama' },
+  { id: 'by-makan', kodeBiaya: 'BG-MAKAN', namaBiaya: 'Uang Makan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 250000, nominalStandard: 250000, kategori: 'MAKAN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'Biaya konsumsi santri bulanan' },
+  { id: 'by-madin', kodeBiaya: 'BG-MADIN', namaBiaya: 'Syahriyah Madin', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 75000, nominalStandard: 75000, kategori: 'MADIN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP diniyah (Madin)' },
+  { id: 'by-4', kodeBiaya: 'BG-SERAGAM', namaBiaya: 'Seragam & Perlengkapan Kitab', jenis: 'Non-Syahriyah', tipeFrekuensi: 'Tahunan', nominal: 750000, nominalStandard: 750000, kategori: 'PESANTREN', kategoriPembayaran: 'Insidental', wajib: true, keterangan: 'Paket kitab matan & seragam pesantren' },
+];
+
+export const INITIAL_TARIF_PEMBAYARAN: TarifPembayaran[] = [
+  {
+    id: 'tarif-asuh-sekolah',
+    biayaMasterId: 'by-sekolah',
+    targetScope: 'Santri Asuh',
+    targetValue: 'ASUH 1',
+    nominal: 75000,
+    wajib: true,
+    aktif: true,
+    effectiveFrom: '2026-01-01'
+  }
 ];
 
 // ── Rekap Syahriyah: 5 kategori (YAYASAN/SEKOLAH/PESANTREN/MAKAN/MADIN) per santri per bulan ──
@@ -643,7 +657,7 @@ export const INITIAL_DISTRIBUSI_CONFIG: DistribusiKeuanganConfig[] = [
     version: 'V-001',
     effectiveFrom: '2025-07-01',
     effectiveUntil: '2025-12-31',
-    percentages: { YAYASAN: 15, MADIN: 15, SEKOLAH: 25, PESANTREN: 25, MAKAN: 20 },
+    nominals: { YAYASAN: 100000, MADIN: 75000, SEKOLAH: 125000, PESANTREN: 200000, MAKAN: 250000 },
     status: 'Arsip',
     createdBy: 'K.H. Mukhtar Syafaat',
     createdAt: '2025-06-15T08:00:00.000Z',
@@ -654,7 +668,7 @@ export const INITIAL_DISTRIBUSI_CONFIG: DistribusiKeuanganConfig[] = [
     name: 'Periode B — Syahriyah 2026',
     version: 'V-002',
     effectiveFrom: '2026-01-01',
-    percentages: { YAYASAN: 10, MADIN: 15, SEKOLAH: 30, PESANTREN: 25, MAKAN: 20 },
+    nominals: { YAYASAN: 100000, MADIN: 75000, SEKOLAH: 150000, PESANTREN: 200000, MAKAN: 250000 },
     status: 'Aktif',
     createdBy: 'K.H. Mukhtar Syafaat',
     createdAt: '2025-12-20T09:30:00.000Z',
@@ -673,9 +687,9 @@ function buildMockPemasukan(): { pemasukan: Pemasukan[]; alokasi: AlokasiPemasuk
   if (!aktif) return { pemasukan: [], alokasi: [] };
 
   const samples: Omit<NewPemasukanInput, 'createdBy'>[] = [
-    { santriId: 'snt-1', tanggal: '2026-08-05', nominal: 500000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Transfer Bank', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526', catatan: 'Transfer BSI' },
-    { santriId: 'snt-2', tanggal: '2026-08-07', nominal: 450000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Tunai', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526' },
-    { santriId: 'snt-3', tanggal: '2026-08-09', nominal: 600000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'E-Wallet (QRIS)', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526' }
+    { santriId: 'snt-1', tanggal: '2026-08-05', nominal: 775000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Transfer Bank', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526', catatan: 'Transfer BSI' },
+    { santriId: 'snt-2', tanggal: '2026-08-07', nominal: 775000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Tunai', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526' },
+    { santriId: 'snt-3', tanggal: '2026-08-09', nominal: 775000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'E-Wallet (QRIS)', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526' }
   ];
 
   const pemasukan: Pemasukan[] = [];
@@ -692,14 +706,14 @@ function buildMockPemasukan(): { pemasukan: Pemasukan[]; alokasi: AlokasiPemasuk
     name: 'Periode Rusak (uji error)',
     version: 'V-900',
     effectiveFrom: '2026-08-01',
-    percentages: { YAYASAN: 10, MADIN: 15, SEKOLAH: 30, PESANTREN: 25, MAKAN: 19.5 },
+    nominals: { YAYASAN: 100000, MADIN: 75000, SEKOLAH: 150000, PESANTREN: 200000, MAKAN: 249000 },
     status: 'Draft',
     createdBy: 'K.H. Mukhtar Syafaat',
     createdAt: '2026-08-01T08:00:00.000Z',
     updatedAt: '2026-08-01T08:00:00.000Z'
   };
   const failedRec = createPemasukanRecord(
-    { santriId: 'snt-1', tanggal: '2026-08-10', nominal: 500000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Tunai', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526', createdBy: 'K.H. Mukhtar Syafaat' },
+    { santriId: 'snt-1', tanggal: '2026-08-10', nominal: 775000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Tunai', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526', createdBy: 'K.H. Mukhtar Syafaat' },
     failedConfig,
     99,
     'MA'
@@ -724,8 +738,8 @@ export const INITIAL_AUDIT_LOG: AuditLog[] = [
     entityLabel: _pemasukanMock[0]?.noPemasukan ?? 'PMK-0000',
     actorId: 'usr-1',
     actorName: 'K.H. Mukhtar Syafaat',
-    detail: 'Pencatatan pembayaran Syahriyah Rp 500.000 a.n. Ahmad Fauzi (MA) - distribusi otomatis ke 5 keuangan.',
-    after: { status: 'DISTRIBUTED', nominal: 500000, unit: 'MA' },
+    detail: 'Pencatatan pembayaran Syahriyah Rp 775.000 a.n. Ahmad Fauzi (MA) - distribusi otomatis ke 5 keuangan.',
+    after: { status: 'DISTRIBUTED', nominal: 775000, unit: 'MA' },
     createdAt: '2026-08-05T08:00:00.000Z'
   },
   {
@@ -736,8 +750,8 @@ export const INITIAL_AUDIT_LOG: AuditLog[] = [
     entityLabel: _pemasukanMock[1]?.noPemasukan ?? 'PMK-0000',
     actorId: 'usr-1',
     actorName: 'K.H. Mukhtar Syafaat',
-    detail: 'Pencatatan pembayaran Syahriyah Rp 450.000 a.n. Ahmad Fauzi (SMK) - distribusi otomatis ke 5 keuangan.',
-    after: { status: 'DISTRIBUTED', nominal: 450000, unit: 'SMK' },
+    detail: 'Pencatatan pembayaran Syahriyah Rp 775.000 a.n. Ahmad Fauzi (SMK) - distribusi otomatis ke 5 keuangan.',
+    after: { status: 'DISTRIBUTED', nominal: 775000, unit: 'SMK' },
     createdAt: '2026-08-07T09:15:00.000Z'
   },
   {
@@ -749,7 +763,7 @@ export const INITIAL_AUDIT_LOG: AuditLog[] = [
     actorId: 'usr-1',
     actorName: 'K.H. Mukhtar Syafaat',
     detail: _pemasukanMock[3]?.distribusiError ?? 'Distribusi gagal: total alokasi tidak sesuai nominal pembayaran. Transaksi disimpan dengan status FAILED untuk ditinjau.',
-    after: { status: 'FAILED', nominal: 500000, error: _pemasukanMock[3]?.distribusiError },
+    after: { status: 'FAILED', nominal: 775000, error: _pemasukanMock[3]?.distribusiError },
     createdAt: '2026-08-10T10:00:00.000Z'
   }
 ];

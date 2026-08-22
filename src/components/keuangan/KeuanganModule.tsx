@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Wallet, Plus, CheckCircle, Search, X } from 'lucide-react';
 import { TransaksiPembayaran, TagihanKeuangan } from '../../types/sisantri';
@@ -9,6 +9,7 @@ import { MonitoringPemasukan } from './MonitoringPemasukan';
 export const KeuanganModule: React.FC = () => {
   const {
     tagihanList,
+    biayaMasterList,
     addBayarTagihan,
     getSantriNameById
   } = useApp();
@@ -21,6 +22,7 @@ export const KeuanganModule: React.FC = () => {
   const [nominalBayar, setNominalBayar] = useState(0);
   const [metodePembayaran, setMetodePembayaran] = useState<TransaksiPembayaran['metodePembayaran']>('Cash');
   const [catatanPembayaran, setCatatanPembayaran] = useState('');
+  const [buktiTransferUrl, setBuktiTransferUrl] = useState('');
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -29,20 +31,39 @@ export const KeuanganModule: React.FC = () => {
     setNominalBayar(t.nominalTagihan - t.nominalTerbayar);
     setMetodePembayaran('Cash');
     setCatatanPembayaran('Pembayaran Syahriyah');
+    setBuktiTransferUrl('');
     setShowBayarModal(true);
   };
 
   const handleProcessBayar = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTagihan) return;
-    addBayarTagihan(selectedTagihan.id, nominalBayar, metodePembayaran, catatanPembayaran);
-    setShowBayarModal(false);
+    const result = addBayarTagihan(selectedTagihan.id, nominalBayar, metodePembayaran, catatanPembayaran, buktiTransferUrl || undefined);
+    if (result) setShowBayarModal(false);
   };
 
   const filteredTagihan = tagihanList.filter(t => {
     const sName = getSantriNameById(t.santriId).toLowerCase();
     return sName.includes(searchQuery.toLowerCase()) || (t.noTagihan || '').toLowerCase().includes(searchQuery.toLowerCase());
   });
+
+  const syahriyahRecap = useMemo(() => {
+    const grouped = new Map<string, { santriId: string; periode: string; totalTagihan: number; totalTerbayar: number }>();
+    for (const tagihan of filteredTagihan) {
+      const biaya = biayaMasterList.find(b => b.id === tagihan.biayaMasterId);
+      if (biaya?.jenis !== 'Syahriyah') continue;
+      const periode = tagihan.bulanTahun || `${tagihan.bulanPeriode || '-'} ${tagihan.tahunPeriode || ''}`.trim();
+      const key = `${tagihan.santriId}-${periode}`;
+      const current = grouped.get(key) || { santriId: tagihan.santriId, periode, totalTagihan: 0, totalTerbayar: 0 };
+      current.totalTagihan += tagihan.nominalTagihan;
+      current.totalTerbayar += tagihan.nominalTerbayar;
+      grouped.set(key, current);
+    }
+    return [...grouped.values()].sort((a, b) => a.periode.localeCompare(b.periode) || getSantriNameById(a.santriId).localeCompare(getSantriNameById(b.santriId)));
+  }, [filteredTagihan, biayaMasterList, getSantriNameById]);
+
+  const totalRekapTagihan = syahriyahRecap.reduce((sum, row) => sum + row.totalTagihan, 0);
+  const totalRekapTerbayar = syahriyahRecap.reduce((sum, row) => sum + row.totalTerbayar, 0);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
@@ -107,6 +128,59 @@ export const KeuanganModule: React.FC = () => {
                 className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#1ABC9C]"
               />
               <Search className="w-5 h-5 absolute left-3.5 top-3 text-gray-400" />
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 className="font-extrabold text-lg text-[#1A5276]">Total Akhir Syahriyah Santri</h3>
+                <p className="text-xs text-gray-500">Gabungan seluruh komponen Syahriyah per santri dan periode.</p>
+              </div>
+              <div className="text-left sm:text-right">
+                <p className="text-xs font-bold text-gray-500">TOTAL TAGIHAN TERFILTER</p>
+                <p className="text-xl font-black text-emerald-700">Rp {totalRekapTagihan.toLocaleString('id-ID')}</p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto rounded-lg border border-emerald-200 bg-white">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="bg-emerald-700 text-white font-bold uppercase tracking-wider text-xs">
+                    <th className="p-3">Santri</th>
+                    <th className="p-3">Periode</th>
+                    <th className="p-3 text-right">Total Akhir</th>
+                    <th className="p-3 text-right">Terbayar</th>
+                    <th className="p-3 text-right">Sisa</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {syahriyahRecap.map(row => (
+                    <tr key={`${row.santriId}-${row.periode}`} className="hover:bg-emerald-50 transition-colors">
+                      <td className="p-3 font-extrabold text-[#1A5276]">{getSantriNameById(row.santriId)}</td>
+                      <td className="p-3 text-gray-600">{row.periode}</td>
+                      <td className="p-3 text-right font-black text-[#1A5276]">Rp {row.totalTagihan.toLocaleString('id-ID')}</td>
+                      <td className="p-3 text-right font-bold text-emerald-700">Rp {row.totalTerbayar.toLocaleString('id-ID')}</td>
+                      <td className="p-3 text-right font-bold text-rose-600">Rp {(row.totalTagihan - row.totalTerbayar).toLocaleString('id-ID')}</td>
+                    </tr>
+                  ))}
+                  {syahriyahRecap.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="p-6 text-center text-gray-400">Belum ada tagihan Syahriyah.</td>
+                    </tr>
+                  )}
+                </tbody>
+                {syahriyahRecap.length > 0 && (
+                  <tfoot>
+                    <tr className="bg-[#1A5276] text-white font-black">
+                      <td colSpan={2} className="p-3">TOTAL KESELURUHAN</td>
+                      <td className="p-3 text-right">Rp {totalRekapTagihan.toLocaleString('id-ID')}</td>
+                      <td className="p-3 text-right">Rp {totalRekapTerbayar.toLocaleString('id-ID')}</td>
+                      <td className="p-3 text-right">Rp {(totalRekapTagihan - totalRekapTerbayar).toLocaleString('id-ID')}</td>
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
             </div>
           </div>
 
@@ -225,6 +299,19 @@ export const KeuanganModule: React.FC = () => {
                   className="w-full px-3 py-2 border rounded-lg"
                 />
               </div>
+
+              {metodePembayaran !== 'Cash' && (
+                <div>
+                  <label className="block font-bold mb-1">URL Bukti Transfer</label>
+                  <input
+                    type="url"
+                    value={buktiTransferUrl}
+                    onChange={e => setBuktiTransferUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="w-full px-3 py-2 border rounded-lg"
+                  />
+                </div>
+              )}
 
               <div className="flex justify-end gap-2 pt-2 border-t">
                 <button type="button" onClick={() => setShowBayarModal(false)} className="px-3 py-1.5 bg-gray-100 font-bold rounded-lg">BATAL</button>

@@ -1,11 +1,44 @@
 -- SIAP - Migrasi Pemasukan & Distribusi (tahap pemasukan)
 -- Konsep: 1 pembayaran santri = 1 Pemasukan, dibagi ke 5 konteks keuangan SEJAJAR
---         (YAYASAN/MADIN/SEKOLAH/PESANTREN/MAKAN) berdasar persentase konfigurasi
+--         (YAYASAN/MADIN/SEKOLAH/PESANTREN/MAKAN) berdasar nominal konfigurasi
 --         yang disnapshot saat transaksi.
 -- Sifat:  incremental & backward-compatible (hanya menambah tabel, tidak mengubah data lama).
 -- Cara apply (setelah DATABASE_URL tersedia):
 --   npx prisma db execute --file prisma/migration-pemasukan-distribusi.sql --schema prisma/schema.prisma
 --   atau jalankan via psql / Supabase SQL Editor.
+
+-- 0) Metadata jenis pembayaran dan tarif sasaran
+ALTER TABLE "BiayaMaster" ADD COLUMN IF NOT EXISTS "kategoriPembayaran" TEXT NOT NULL DEFAULT 'Rutin';
+ALTER TABLE "BiayaMaster" ADD COLUMN IF NOT EXISTS "wajib" BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE "BiayaMaster" ADD COLUMN IF NOT EXISTS "aktif" BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE "BiayaMaster" ADD COLUMN IF NOT EXISTS "kodeBiaya" TEXT;
+ALTER TABLE "BiayaMaster" ADD COLUMN IF NOT EXISTS "tipeFrekuensi" TEXT;
+ALTER TABLE "BiayaMaster" ADD COLUMN IF NOT EXISTS "nominalStandard" INTEGER;
+CREATE UNIQUE INDEX IF NOT EXISTS "BiayaMaster_kodeBiaya_key" ON "BiayaMaster"("kodeBiaya");
+
+ALTER TABLE "TransaksiPembayaran" ADD COLUMN IF NOT EXISTS "statusVerifikasi" TEXT NOT NULL DEFAULT 'Terverifikasi';
+ALTER TABLE "TransaksiPembayaran" ADD COLUMN IF NOT EXISTS "buktiTransferUrl" TEXT;
+ALTER TABLE "TransaksiPembayaran" ADD COLUMN IF NOT EXISTS "verifiedBy" TEXT;
+ALTER TABLE "TransaksiPembayaran" ADD COLUMN IF NOT EXISTS "verifiedAt" TIMESTAMP(3);
+ALTER TABLE "TransaksiPembayaran" ADD COLUMN IF NOT EXISTS "appliedToTagihan" BOOLEAN NOT NULL DEFAULT TRUE;
+
+CREATE TABLE IF NOT EXISTS "TarifPembayaran" (
+  "id" TEXT NOT NULL,
+  "biayaMasterId" TEXT NOT NULL,
+  "targetScope" TEXT NOT NULL,
+  "targetValue" TEXT,
+  "nominal" INTEGER NOT NULL,
+  "wajib" BOOLEAN NOT NULL DEFAULT TRUE,
+  "aktif" BOOLEAN NOT NULL DEFAULT TRUE,
+  "effectiveFrom" TEXT,
+  "effectiveUntil" TEXT,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL,
+  CONSTRAINT "TarifPembayaran_pkey" PRIMARY KEY ("id")
+);
+ALTER TABLE "TarifPembayaran" ADD CONSTRAINT "TarifPembayaran_biayaMasterId_fkey" FOREIGN KEY ("biayaMasterId") REFERENCES "BiayaMaster"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+CREATE INDEX IF NOT EXISTS "TarifPembayaran_biayaMasterId_idx" ON "TarifPembayaran"("biayaMasterId");
+CREATE INDEX IF NOT EXISTS "TarifPembayaran_targetScope_targetValue_idx" ON "TarifPembayaran"("targetScope", "targetValue");
 
 -- 1) Enum konteks keuangan
 CREATE TYPE "KonteksKeuangan" AS ENUM ('YAYASAN', 'MADIN', 'SEKOLAH', 'PESANTREN', 'MAKAN');
@@ -16,11 +49,11 @@ CREATE TABLE "DistribusiKeuanganConfig" (
   "name" TEXT NOT NULL,
   "effectiveFrom" TEXT NOT NULL,
   "effectiveUntil" TEXT,
-  "yayasanPersen" DOUBLE PRECISION NOT NULL DEFAULT 0,
-  "madinPersen" DOUBLE PRECISION NOT NULL DEFAULT 0,
-  "sekolahPersen" DOUBLE PRECISION NOT NULL DEFAULT 0,
-  "pesantrenPersen" DOUBLE PRECISION NOT NULL DEFAULT 0,
-  "makanPersen" DOUBLE PRECISION NOT NULL DEFAULT 0,
+  "yayasanNominal" INTEGER NOT NULL DEFAULT 0,
+  "madinNominal" INTEGER NOT NULL DEFAULT 0,
+  "sekolahNominal" INTEGER NOT NULL DEFAULT 0,
+  "pesantrenNominal" INTEGER NOT NULL DEFAULT 0,
+  "makanNominal" INTEGER NOT NULL DEFAULT 0,
   "status" TEXT NOT NULL DEFAULT 'Draft',
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -45,11 +78,11 @@ CREATE TABLE "Pemasukan" (
   "configName" TEXT NOT NULL,
   "configEffectiveFrom" TEXT NOT NULL,
   "configEffectiveUntil" TEXT,
-  "yayasanPersenSnapshot" DOUBLE PRECISION NOT NULL,
-  "madinPersenSnapshot" DOUBLE PRECISION NOT NULL,
-  "sekolahPersenSnapshot" DOUBLE PRECISION NOT NULL,
-  "pesantrenPersenSnapshot" DOUBLE PRECISION NOT NULL,
-  "makanPersenSnapshot" DOUBLE PRECISION NOT NULL,
+  "yayasanNominalSnapshot" INTEGER NOT NULL,
+  "madinNominalSnapshot" INTEGER NOT NULL,
+  "sekolahNominalSnapshot" INTEGER NOT NULL,
+  "pesantrenNominalSnapshot" INTEGER NOT NULL,
+  "makanNominalSnapshot" INTEGER NOT NULL,
   "createdBy" TEXT NOT NULL,
   "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "Pemasukan_pkey" PRIMARY KEY ("id")
@@ -60,7 +93,6 @@ CREATE TABLE "AlokasiPemasukan" (
   "id" TEXT NOT NULL,
   "pemasukanId" TEXT NOT NULL,
   "konteks" "KonteksKeuangan" NOT NULL,
-  "persentase" DOUBLE PRECISION NOT NULL,
   "nominal" INTEGER NOT NULL,
   CONSTRAINT "AlokasiPemasukan_pkey" PRIMARY KEY ("id")
 );

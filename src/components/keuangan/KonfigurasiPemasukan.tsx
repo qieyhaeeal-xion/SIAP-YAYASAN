@@ -14,9 +14,10 @@ import {
 import {
   KonteksKeuangan,
   KONTEKS_KEUANGAN_ORDER,
-  PercentageMap
+  NominalMap,
+  DEFAULT_SYAHRIAH_NOMINALS
 } from '../../types/sisantri';
-import { validateDistribution } from '../../services/distributionService';
+import { getConfigNominals, sumNominal, validateDistribution } from '../../services/distributionService';
 
 const KONTEKS_LABEL: Record<KonteksKeuangan, string> = {
   YAYASAN: 'Yayasan',
@@ -34,7 +35,7 @@ const KONTEKS_COLOR: Record<KonteksKeuangan, string> = {
   MAKAN: 'text-amber-600'
 };
 
-const DEFAULT_PERCENTAGES: PercentageMap = { YAYASAN: 10, MADIN: 15, SEKOLAH: 30, PESANTREN: 25, MAKAN: 20 };
+const formatRp = (value: number) => `Rp ${value.toLocaleString('id-ID')}`;
 
 const statusBadge: Record<string, string> = {
   Aktif: 'bg-emerald-100 text-emerald-800',
@@ -51,19 +52,19 @@ export const KonfigurasiPemasukan: React.FC = () => {
   const [name, setName] = useState(activeConfig?.name ?? '');
   const [effectiveFrom, setEffectiveFrom] = useState(activeConfig?.effectiveFrom ?? '2026-01-01');
   const [effectiveUntil, setEffectiveUntil] = useState(activeConfig?.effectiveUntil ?? '');
-  const [percentages, setPercentages] = useState<PercentageMap>(activeConfig?.percentages ?? { ...DEFAULT_PERCENTAGES });
+  const [nominals, setNominals] = useState<NominalMap>(getConfigNominals(activeConfig ?? { nominals: DEFAULT_SYAHRIAH_NOMINALS }));
   const [feedback, setFeedback] = useState<{ ok: boolean; message: string } | null>(null);
 
-  const validation = useMemo(() => validateDistribution(percentages), [percentages]);
+  const validation = useMemo(() => validateDistribution(nominals), [nominals]);
   const isDirty = activeConfig
     ? activeConfig.name !== name ||
       activeConfig.effectiveFrom !== effectiveFrom ||
       (activeConfig.effectiveUntil ?? '') !== effectiveUntil ||
-      KONTEKS_KEUANGAN_ORDER.some(k => activeConfig.percentages[k] !== percentages[k])
+      KONTEKS_KEUANGAN_ORDER.some(k => getConfigNominals(activeConfig)[k] !== nominals[k])
     : true;
 
-  const setPct = (konteks: KonteksKeuangan, value: number) => {
-    setPercentages(prev => ({ ...prev, [konteks]: value }));
+  const setNominal = (konteks: KonteksKeuangan, value: number) => {
+    setNominals(prev => ({ ...prev, [konteks]: value }));
   };
 
   const handleSave = () => {
@@ -81,7 +82,7 @@ export const KonfigurasiPemasukan: React.FC = () => {
       name: name.trim(),
       effectiveFrom: effectiveFrom || new Date().toISOString().slice(0, 10),
       effectiveUntil: effectiveUntil || undefined,
-      percentages,
+      nominals,
       status: 'Aktif'
     });
     setFeedback(
@@ -115,7 +116,7 @@ export const KonfigurasiPemasukan: React.FC = () => {
             Konfigurasi Pembagian Pemasukan
           </h3>
           <p className="text-sm text-[#566573] mt-1">
-            Atur persentase pembagian satu pembayaran santri ke 5 keuangan utama (YAYASAN · MADIN · SEKOLAH · PESANTREN · MAKAN). Total harus 100%.
+            Atur nominal pembagian Syahriyah santri ke 5 keuangan utama (YAYASAN · MADIN · SEKOLAH · PESANTREN · MAKAN). Total nominal menjadi total akhir Syahriyah santri.
           </p>
         </div>
         {isAdmin ? (
@@ -175,7 +176,7 @@ export const KonfigurasiPemasukan: React.FC = () => {
           </div>
         </div>
 
-        {/* Input persentase */}
+        {/* Input nominal */}
         <div className="space-y-3">
           {KONTEKS_KEUANGAN_ORDER.map(k => (
             <div key={k} className="flex items-center gap-3">
@@ -186,17 +187,16 @@ export const KonfigurasiPemasukan: React.FC = () => {
                 <input
                   type="number"
                   min={0}
-                  max={100}
-                  step={0.5}
-                  value={percentages[k] ?? 0}
-                  onChange={e => setPct(k, Number(e.target.value))}
+                  step={1000}
+                  value={nominals[k] ?? 0}
+                  onChange={e => setNominal(k, Number(e.target.value))}
                   disabled={!isAdmin}
                   className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-lg text-sm font-black text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C] disabled:bg-gray-50 disabled:text-gray-400"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-extrabold text-gray-400">%</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-extrabold text-gray-400">Rp</span>
               </div>
               <div className="hidden sm:block w-40 text-right text-sm font-bold text-gray-500">
-                {Math.round((percentages[k] ?? 0) * 100) / 100}%
+                {formatRp(nominals[k] ?? 0)}
               </div>
             </div>
           ))}
@@ -205,9 +205,9 @@ export const KonfigurasiPemasukan: React.FC = () => {
         {/* Total & validasi */}
         <div className="mt-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-gray-200 bg-gray-50">
           <div className="flex items-center gap-3">
-            <span className="text-sm font-extrabold text-gray-600">TOTAL</span>
+            <span className="text-sm font-extrabold text-gray-600">TOTAL AKHIR SYAHRIYAH SANTRI</span>
             <span className={`text-xl font-black ${validation.valid ? 'text-emerald-600' : 'text-rose-600'}`}>
-              {validation.total.toFixed(2)}%
+              {formatRp(validation.total)}
             </span>
             {validation.valid ? (
               <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700">
@@ -261,8 +261,9 @@ export const KonfigurasiPemasukan: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-gray-200">
               {sortedConfigs.map(c => {
-                const total = KONTEKS_KEUANGAN_ORDER.reduce((a, k) => a + (c.percentages[k] ?? 0), 0);
-                const valid = Math.abs(total - 100) <= 0.01;
+                const configNominals = getConfigNominals(c);
+                const total = sumNominal(configNominals);
+                const valid = total > 0;
                 return (
                   <tr key={c.id} className="hover:bg-sky-50 transition-colors">
                     <td className="p-3">
@@ -274,11 +275,11 @@ export const KonfigurasiPemasukan: React.FC = () => {
                     </td>
                     {KONTEKS_KEUANGAN_ORDER.map(k => (
                       <td key={k} className="p-3 text-center font-bold text-gray-700">
-                        {c.percentages[k] ?? 0}%
+                        {formatRp(configNominals[k] ?? 0)}
                       </td>
                     ))}
                     <td className={`p-3 text-center font-black ${valid ? 'text-emerald-600' : 'text-rose-600'}`}>
-                      {total.toFixed(1)}%
+                      {formatRp(total)}
                     </td>
                     <td className="p-3 text-gray-500 text-xs">{c.createdBy}</td>
                     <td className="p-3 text-center">
