@@ -20,7 +20,6 @@ import { KepengasuhanModule } from './components/kepengasuhan/KepengasuhanModule
 import { KepegawaianModule } from './components/kepegawaian/KepegawaianModule';
 import { AkademikModule } from './components/akademik/AkademikModule';
 import { KeuanganModule } from './components/keuangan/KeuanganModule';
-import { PaymentManagementModule } from './components/keuangan/PaymentManagementModule';
 import { PPDBModule } from './components/ppdb/PPDBModule';
 import { PortalWaliModule } from './components/wali/PortalWaliModule';
 import { SettingsModule } from './components/settings/SettingsModule';
@@ -46,7 +45,7 @@ const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard'
   const activeTab = tab || initialTab;
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
 
-  const handleNavigate = (t: string) => navigate(t === 'payment-management' ? '/manage/payment' : '/app/' + t);
+  const handleNavigate = (t: string) => navigate(t === 'payment-management' || t === 'keuangan' ? '/manage/payment' : '/app/' + t);
   const permissionTab = activeTab === 'payment-management' ? 'keuangan' : activeTab;
 
   return (
@@ -124,7 +123,7 @@ const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard'
                  {activeTab === 'tahfidz' && <TahfidzModule />}
                  {activeTab === 'nadhoman' && <NadhomanModule />}
                  {activeTab === 'alumni' && <AlumniModule />}
-                 {activeTab === 'payment-management' && <PaymentManagementModule />}
+                 {activeTab === 'payment-management' && <KeuanganModule defaultSubTab="manajemen" />}
 
                 {/* Kepengasuhan Sub-modules */}
                  {activeTab === 'kepengasuhan' && <KepengasuhanModule />}

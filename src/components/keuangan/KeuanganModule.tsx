@@ -5,8 +5,9 @@ import { TransaksiPembayaran, TagihanKeuangan } from '../../types/sisantri';
 import { PemasukanDistribusi } from './PemasukanDistribusi';
 import { KonfigurasiPemasukan } from './KonfigurasiPemasukan';
 import { MonitoringPemasukan } from './MonitoringPemasukan';
+import { PaymentManagementModule } from './PaymentManagementModule';
 
-export const KeuanganModule: React.FC = () => {
+export const KeuanganModule: React.FC<{ defaultSubTab?: 'monitoring' | 'tagihan' | 'pemasukan' | 'konfigurasi' | 'manajemen' }> = ({ defaultSubTab = 'monitoring' }) => {
   const {
     tagihanList,
     biayaMasterList,
@@ -14,7 +15,7 @@ export const KeuanganModule: React.FC = () => {
     getSantriNameById
   } = useApp();
 
-  const [activeTabSub, setActiveTabSub] = useState<'monitoring' | 'tagihan' | 'pemasukan' | 'konfigurasi'>('monitoring');
+  const [activeTabSub, setActiveTabSub] = useState<'monitoring' | 'tagihan' | 'pemasukan' | 'konfigurasi' | 'manajemen'>(defaultSubTab);
 
   // Modal Pembayaran
   const [showBayarModal, setShowBayarModal] = useState(false);
@@ -81,6 +82,14 @@ export const KeuanganModule: React.FC = () => {
         {/* Sub Navigation Pills */}
         <div className="flex flex-wrap items-center gap-2 bg-gray-100 p-1.5 rounded-lg">
           <button
+            onClick={() => setActiveTabSub('manajemen')}
+            className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
+              activeTabSub === 'manajemen' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Manajemen Pembayaran
+          </button>
+          <button
             onClick={() => setActiveTabSub('monitoring')}
             className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${
               activeTabSub === 'monitoring' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'
@@ -116,6 +125,8 @@ export const KeuanganModule: React.FC = () => {
       </div>
 
       {/* 1. TAGIHAN SANTRI TAB */}
+      {activeTabSub === 'manajemen' && <PaymentManagementModule embedded />}
+
       {activeTabSub === 'tagihan' && (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

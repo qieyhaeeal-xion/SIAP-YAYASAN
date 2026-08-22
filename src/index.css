@@ -14,3 +14,21 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+@layer components {
+  .input {
+    @apply w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#1ABC9C] focus:ring-2 focus:ring-[#1ABC9C]/25 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400;
+  }
+
+  .button-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-[#1A5276] px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:bg-[#2E86C1] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C] focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300;
+  }
+
+  .button-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-100 px-4 py-2.5 text-sm font-extrabold text-gray-700 transition hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2;
+  }
+
+  .icon-button {
+    @apply inline-flex min-h-8 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-extrabold shadow-sm transition hover:border-sky-300 hover:bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-200;
+  }
+}

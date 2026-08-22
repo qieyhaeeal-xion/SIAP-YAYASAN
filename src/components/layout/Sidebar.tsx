@@ -12,7 +12,6 @@ import {
   HeartPulse, 
   Briefcase, 
   CalendarCheck, 
-  Wallet, 
   CreditCard,
   UserPlus, 
   ShieldAlert, 
@@ -231,8 +230,7 @@ const handleTabClick = (tabId: string) => {
             <p className="px-5 pt-1 text-sm font-extrabold text-sky-300/60 uppercase tracking-wider">Administrasi</p>
             <div className="space-y-1.5">
                {renderNavItem('akademik', 'Presensi KBM Batch', <CalendarCheck className="w-6 h-6" />)}
-               {renderNavItem('keuangan', 'Keuangan & Syahriyah', <Wallet className="w-6 h-6" />)}
-               {renderNavItem('payment-management', 'Manajemen Pembayaran', <CreditCard className="w-6 h-6" />)}
+               {renderNavItem('payment-management', 'Keuangan & Manajemen Pembayaran', <CreditCard className="w-6 h-6" />)}
                {renderNavItem('ppdb', 'PPDB (Mutasi NIS)', <UserPlus className="w-6 h-6" />, pendingPPDBCount, 'bg-blue-500 text-white')}
               {renderNavItem('kepegawaian', 'Data Kepegawaian', <Briefcase className="w-6 h-6" />)}
             </div>
