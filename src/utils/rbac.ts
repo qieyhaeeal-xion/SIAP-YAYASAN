@@ -79,7 +79,7 @@ export const MODULE_PERMISSIONS: ModulePermission[] = [
   },
   {
     id: 'kepengasuhan',
-    label: 'Kepengasuhan & Ketertiban',
+    label: 'Kepengasuhan',
     category: 'Kepengasuhan',
     allowedRoles: ['admin_yayasan', 'admin_sistem', 'pengurus', 'guru'],
     writableRoles: ['admin_yayasan', 'admin_sistem', 'pengurus', 'guru'],
@@ -105,7 +105,15 @@ export const MODULE_PERMISSIONS: ModulePermission[] = [
   },
   {
     id: 'konseling',
-    label: 'Konseling & Kunjungan',
+    label: 'Konseling',
+    category: 'Kepengasuhan',
+    allowedRoles: ['admin_yayasan', 'admin_sistem', 'pengurus', 'guru'],
+    writableRoles: ['admin_yayasan', 'admin_sistem', 'pengurus', 'guru'],
+    deletableRoles: ['admin_yayasan', 'admin_sistem']
+  },
+  {
+    id: 'kunjungan',
+    label: 'Kunjungan Santri',
     category: 'Kepengasuhan',
     allowedRoles: ['admin_yayasan', 'admin_sistem', 'pengurus', 'guru'],
     writableRoles: ['admin_yayasan', 'admin_sistem', 'pengurus', 'guru'],

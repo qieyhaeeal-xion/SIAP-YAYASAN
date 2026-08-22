@@ -1,0 +1,204 @@
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: Blokagung, Tegalsari, Banyuwangi
+      - generic [ref=e12]: (0333) 845123 / 0812-3456-7890
+    - generic [ref=e15]: 22 Agu 2026 · 13.18.16 WIB
+  - navigation [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e27]:
+        - generic [ref=e28]:
+          - text: SIAP
+          - generic [ref=e29]: Mukhtar Syafaat
+        - paragraph [ref=e30]: Sistem Informasi Administrasi Pesantren
+      - generic [ref=e31]:
+        - button "Portal Wali" [ref=e32]
+        - button "Masuk SIAP" [ref=e36]
+      - button [ref=e41]
+  - banner [ref=e43]:
+    - generic [ref=e44]:
+      - generic [ref=e45]:
+        - generic [ref=e46]: Sistem Informasi Administrasi Pesantren
+        - heading "Pondok Pesantren Mukhtar Syafaat" [level=1] [ref=e51]
+        - paragraph [ref=e52]: Mewujudkan generasi santri unggul ber-Akhlakul Karimah, fasih Al-Qur'an & Kitab Salaf, terintegrasi pendidikan formal (SMP, MTs, MA, SMK) serta Madrasah Diniyah Ula, Wustho, Ulya.
+        - generic [ref=e53]:
+          - button "BUKA SIAP DASHBOARD UTAMA" [ref=e54]
+          - button "DAFTAR PPDB SANTRI BARU" [ref=e58]
+      - generic [ref=e64]:
+        - generic [ref=e70]:
+          - heading "Portal Multi-Akses" [level=3] [ref=e71]
+          - paragraph [ref=e72]: Silakan pilih role untuk masuk
+        - generic [ref=e73]:
+          - button "1. Portal Admin & Bendahara Manajemen Santri, Keuangan, PPDB & Pegawai" [ref=e74]:
+            - generic [ref=e81]:
+              - generic [ref=e82]: 1. Portal Admin & Bendahara
+              - generic [ref=e83]: Manajemen Santri, Keuangan, PPDB & Pegawai
+          - button "2. Portal Guru & Ustadz Input Setoran Tahfidz, Nadhoman & Absensi" [ref=e86]:
+            - generic [ref=e92]:
+              - generic [ref=e93]: 2. Portal Guru & Ustadz
+              - generic [ref=e94]: Input Setoran Tahfidz, Nadhoman & Absensi
+          - button "3. Portal Orang Tua / Wali Cek Hafalan, Sakit UKS, Izin Pulang & Tagihan" [ref=e97]:
+            - generic [ref=e102]:
+              - generic [ref=e103]: 3. Portal Orang Tua / Wali
+              - generic [ref=e104]: Cek Hafalan, Sakit UKS, Izin Pulang & Tagihan
+  - generic [ref=e108]:
+    - generic [ref=e109]:
+      - generic [ref=e110]: 550+
+      - generic [ref=e111]: Santri Aktif Putra & Putri
+    - generic [ref=e112]:
+      - generic [ref=e113]: 12 Unit
+      - generic [ref=e114]: Kompleks Asrama Pesantren
+    - generic [ref=e115]:
+      - generic [ref=e116]: 5 Lembaga
+      - generic [ref=e117]: Sekolah Formal (TK/PAUD, MTs, MA, SMK, SMP)
+    - generic [ref=e118]:
+      - generic [ref=e119]: 3 Marhalah
+      - generic [ref=e120]: Madrasah Diniyah (Ula, Wustho, Ulya)
+  - generic [ref=e122]:
+    - generic [ref=e123]:
+      - generic [ref=e124]: Integrasi Tiga Layanan
+      - heading "Portal Akses Terpadu SIAP" [level=2] [ref=e125]
+      - paragraph [ref=e126]: Aplikasi dirancang secara spesifik sesuai peran pengguna untuk kenyamanan, efisiensi, dan akurasi data.
+    - generic [ref=e127]:
+      - generic [ref=e128]:
+        - generic [ref=e129]:
+          - generic [ref=e135]:
+            - heading "1. Portal Admin & Pengelola" [level=3] [ref=e136]
+            - paragraph [ref=e137]: Akses penuh untuk staf tata usaha, bendahara, & pengasuhan.
+          - list [ref=e138]:
+            - listitem [ref=e139]:
+              - generic [ref=e143]: 8 Section Biodata Santri + Auto NIS
+            - listitem [ref=e144]:
+              - generic [ref=e148]: Tagihan & Transaksi Kuitansi Syahriyah
+            - listitem [ref=e149]:
+              - generic [ref=e153]: PPDB & Fitur Mutasi Santri Baru
+            - listitem [ref=e154]:
+              - generic [ref=e158]: Manajemen Kepegawaian & Master Data
+        - button "MASUK SEBAGAI ADMIN" [ref=e159]
+      - generic [ref=e160]:
+        - generic [ref=e161]:
+          - generic [ref=e166]:
+            - heading "2. Portal Guru & Ustadz" [level=3] [ref=e167]
+            - paragraph [ref=e168]: Kemudahan pencatatan setoran & kehadiran harian santri.
+          - list [ref=e169]:
+            - listitem [ref=e170]:
+              - generic [ref=e174]: Batch Presensi Kelas Formal & Madin
+            - listitem [ref=e175]:
+              - generic [ref=e179]: Input Setoran Tahfidz Juz 1-30
+            - listitem [ref=e180]:
+              - generic [ref=e184]: Pencatatan Hafalan Kitab Nadhoman
+            - listitem [ref=e185]:
+              - generic [ref=e189]: Jurnal Konseling & Bimbingan Santri
+        - button "MASUK SEBAGAI GURU / USTADZ" [ref=e190]
+      - generic [ref=e191]:
+        - generic [ref=e192]:
+          - generic [ref=e196]:
+            - heading "3. Portal Orang Tua / Wali" [level=3] [ref=e197]
+            - paragraph [ref=e198]: Transparansi perkembangan putra/putri langsung di HP.
+          - list [ref=e199]:
+            - listitem [ref=e200]:
+              - generic [ref=e204]: Monitoring Real-Time Hafalan Qur'an
+            - listitem [ref=e205]:
+              - generic [ref=e209]: Riwayat Kesehatan & Perawatan UKS
+            - listitem [ref=e210]:
+              - generic [ref=e214]: Status Perizinan Keluar & Pulang
+            - listitem [ref=e215]:
+              - generic [ref=e219]: Rincian Tagihan & Download Kuitansi
+        - button "MASUK PORTAL WALI SANTRI" [ref=e220]
+  - generic [ref=e222]:
+    - generic [ref=e223]:
+      - generic [ref=e224]: Kurikulum Pesantren
+      - heading "Program Unggulan Pesantren Mukhtar Syafaat" [level=2] [ref=e225]
+      - paragraph [ref=e226]: Pendidikan komprehensif mengawinkan tradisi Salafiyah dan ilmu pengetahuan formal secara berkesinambungan.
+    - generic [ref=e227]:
+      - generic [ref=e228]:
+        - heading "Tahfidzul Qur'an 30 Juz" [level=3] [ref=e232]
+        - paragraph [ref=e233]: Program bimbingan hafalan Al-Qur'an secara terstruktur dengan pengujian kelancaran tajwid, makhraj, serta murojaah berkala.
+      - generic [ref=e234]:
+        - heading "Setoran Kitab Nadhoman" [level=3] [ref=e239]
+        - paragraph [ref=e240]: "Hafalan bait matan klasik: Amtsilatu Tashrifiyah (Tata Bahasa), Al-Qusyairiyah (Terjemah Kitab Al-Jurumiyah) Matan Al-Imriti (Gramatika), hingga Alfiyah Ibn Malik (1000 Bait)."
+      - generic [ref=e241]:
+        - heading "Madrasah Diniyah Salafiyah" [level=3] [ref=e248]
+        - paragraph [ref=e249]: Pendidikan Diniyah berjenjang Ula, Wustho, dan Ulya mendalami Fiqih, Nahwu, Shorof, Akhlaq, Tasawuf, dan Hadits An-Nawawi.
+  - generic [ref=e251]:
+    - generic [ref=e253]:
+      - generic [ref=e254]: PPDB T.A. 2026/2027
+      - heading "Formulir Pendaftaran PPDB Santri Baru" [level=3] [ref=e255]
+      - paragraph [ref=e256]: Pondok Pesantren Mukhtar Syafaat Banyuwangi
+    - generic [ref=e257]:
+      - generic [ref=e258]:
+        - generic [ref=e259]:
+          - generic [ref=e260]: Nama Lengkap Calon Santri *
+          - textbox "e.g. Ahmad Rayhan Fitri" [ref=e261]
+        - generic [ref=e262]:
+          - generic [ref=e263]: Jenis Kelamin *
+          - combobox [ref=e264]:
+            - option "Laki-laki (Putera)" [selected]
+            - option "Perempuan (Puteri)"
+      - generic [ref=e265]:
+        - generic [ref=e266]:
+          - generic [ref=e267]: Tempat Lahir *
+          - textbox "e.g. Banyuwangi" [ref=e268]
+        - generic [ref=e269]:
+          - generic [ref=e270]: Tanggal Lahir *
+          - textbox [ref=e271]
+      - generic [ref=e272]:
+        - generic [ref=e273]:
+          - generic [ref=e274]: Nama Orang Tua / Wali *
+          - textbox "e.g. H. Mansur Syafi'i" [ref=e275]
+        - generic [ref=e276]:
+          - generic [ref=e277]: No HP WhatsApp Ortu *
+          - textbox "e.g. 081234567890" [ref=e278]
+      - generic [ref=e279]:
+        - generic [ref=e280]: Alamat Lengkap *
+        - textbox "Dusun, Desa, Kecamatan, Kabupaten..." [ref=e281]
+      - generic [ref=e282]:
+        - generic [ref=e283]:
+          - generic [ref=e284]: Unit Pesantren
+          - combobox [ref=e285]:
+            - option "Pusat As-Syafa'at" [selected]
+            - option "Kompleks Al-Mukhtar"
+            - option "Kompleks Nurul Huda"
+        - generic [ref=e286]:
+          - generic [ref=e287]: Pilihan Sekolah Formal
+          - combobox [ref=e288]:
+            - option "MTs Mukhtar Syafaat" [selected]
+            - option "MA Mukhtar Syafaat"
+            - option "SMK Mukhtar Syafaat"
+        - generic [ref=e289]:
+          - generic [ref=e290]: Marhalah Madin
+          - combobox [ref=e291]:
+            - option "Madrasah Diniyah Ula (Dasar)" [selected]
+            - option "Madrasah Diniyah Wustho (Menengah)"
+            - option "Madrasah Diniyah Ulya (Tinggi)"
+      - button "KIRIM PENDAFTARAN PPDB SANTRI BARU" [ref=e292]
+  - contentinfo [ref=e297]:
+    - generic [ref=e298]:
+      - generic [ref=e299]:
+        - generic [ref=e300]: SIAP Mukhtar Syafaat
+        - paragraph [ref=e304]: Sistem Informasi Manajemen Pesantren modern terintegrasi untuk pengelolaan santri, akademik, tahfidz, kesehatan, perizinan, dan keuangan syahriyah.
+      - generic [ref=e305]:
+        - heading "Unit Pendidikan" [level=4] [ref=e306]
+        - list [ref=e307]:
+          - listitem [ref=e308]: Pondok Pesantren Putra & Putri
+          - listitem [ref=e309]: Madrasah Diniyah Ula, Wustho, Ulya
+          - listitem [ref=e310]: SMP Mukhtar Syafaat
+          - listitem [ref=e311]: MTs Mukhtar Syafaat
+          - listitem [ref=e312]: MA Mukhtar Syafaat
+          - listitem [ref=e313]: SMK Mukhtar Syafaat
+      - generic [ref=e314]:
+        - heading "Kontak & Lokasi" [level=4] [ref=e315]
+        - list [ref=e316]:
+          - listitem [ref=e317]: Jl. Pesantren No. 01 Blokagung, Tegalsari
+          - listitem [ref=e318]: Kabupaten Banyuwangi, Jawa Timur
+          - listitem [ref=e319]: "Telepon: (0333) 845123"
+          - listitem [ref=e320]: "WhatsApp: 0812-3456-7890"
+      - generic [ref=e321]:
+        - heading "Akses Portal" [level=4] [ref=e322]
+        - generic [ref=e323]:
+          - button "Portal Wali Santri" [ref=e324]
+          - button "Portal Guru / Ustadz" [ref=e325]
+          - button "Portal Admin Sistem" [ref=e326]
+    - generic [ref=e327]:
+      - paragraph [ref=e328]: © 2026 Pondok Pesantren Mukhtar Syafaat. All rights reserved.
+      - generic [ref=e329]: Media Yayasan Mukhtar Syafa'at

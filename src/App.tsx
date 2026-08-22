@@ -16,16 +16,24 @@ import { TahfidzModule } from './components/kesantrian/TahfidzModule';
 import { NadhomanModule } from './components/kesantrian/NadhomanModule';
 import { AlumniModule } from './components/kesantrian/AlumniModule';
 
-import { KepengasuhanModule } from './components/kepengasuhan/KepengasuhanModule';
+import { KepengasuhanModule, type KepengasuhanSubTab } from './components/kepengasuhan/KepengasuhanModule';
 import { KepegawaianModule } from './components/kepegawaian/KepegawaianModule';
 import { AkademikModule } from './components/akademik/AkademikModule';
-import { KeuanganModule } from './components/keuangan/KeuanganModule';
+import { KeuanganModule, type KeuanganSubTab } from './components/keuangan/KeuanganModule';
 import { PPDBModule } from './components/ppdb/PPDBModule';
 import { PortalWaliModule } from './components/wali/PortalWaliModule';
 import { SettingsModule } from './components/settings/SettingsModule';
 
 import { ShieldAlert, Lock, ArrowLeft, UserCheck } from 'lucide-react';
 import { hasPermission, getFirstAllowedTab, ROLE_DETAILS } from './utils/rbac';
+
+const FINANCE_ROUTE_BY_SUBTAB: Record<KeuanganSubTab, string> = {
+  ringkasan: 'keuangan-ringkasan',
+  jenis: 'keuangan-jenis',
+  pemasukan: 'keuangan-pemasukan'
+};
+
+const FINANCE_ROUTES = Object.values(FINANCE_ROUTE_BY_SUBTAB);
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -45,11 +53,15 @@ const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard'
   const activeTab = tab || initialTab;
   const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 768);
 
-  const handleNavigate = (t: string) => navigate(t === 'payment-management' || t === 'keuangan' ? '/manage/payment' : '/app/' + t);
-  const permissionTab = activeTab === 'payment-management' ? 'keuangan' : activeTab;
+  const handleNavigate = (t: string) => navigate(
+    t === 'payment-management' || t === 'keuangan'
+      ? '/app/keuangan-ringkasan'
+      : '/app/' + t
+  );
+  const permissionTab = activeTab === 'payment-management' || activeTab.startsWith('keuangan-') ? 'keuangan' : activeTab;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans text-gray-900">
+    <div className="flex h-screen flex-col overflow-hidden bg-gray-50 font-sans text-gray-900">
 
       {/* Top Header */}
       <Header
@@ -57,7 +69,7 @@ const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard'
         onOpenLoginModal={() => navigate('/login')}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
 
         {/* Collapsible Left Sidebar — drawer di mobile, statis di desktop */}
           <Sidebar
@@ -68,7 +80,7 @@ const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard'
         />
 
         {/* Main Content Viewport */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-6 bg-[#F4F6F7] flex flex-col justify-between min-w-0">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col justify-between overflow-y-auto overscroll-contain bg-[#F4F6F7] p-4 sm:p-6 lg:p-6">
           <div className="max-w-screen-xl mx-auto space-y-6 w-full flex-1">
 
             {/* RBAC Permission Check Guard */}
@@ -123,10 +135,22 @@ const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard'
                  {activeTab === 'tahfidz' && <TahfidzModule />}
                  {activeTab === 'nadhoman' && <NadhomanModule />}
                  {activeTab === 'alumni' && <AlumniModule />}
-                 {activeTab === 'payment-management' && <KeuanganModule defaultSubTab="manajemen" />}
+                  {FINANCE_ROUTES.includes(activeTab) && (
+                    <KeuanganModule
+                      key={activeTab}
+                      defaultSubTab={Object.entries(FINANCE_ROUTE_BY_SUBTAB).find(([, route]) => route === activeTab)?.[0] as KeuanganSubTab}
+                      onNavigateTab={subTab => handleNavigate(FINANCE_ROUTE_BY_SUBTAB[subTab])}
+                    />
+                  )}
 
-                {/* Kepengasuhan Sub-modules */}
-                 {activeTab === 'kepengasuhan' && <KepengasuhanModule />}
+                 {/* Keamanan, kesehatan, kepengasuhan, and kunjungan */}
+                  {activeTab === 'kepengasuhan' && <KepengasuhanModule showSubTabs />}
+                  {(['perizinan', 'kesehatan', 'konseling', 'kunjungan'] as string[]).includes(activeTab) && (
+                    <KepengasuhanModule
+                      key={activeTab}
+                      defaultSubTab={activeTab as KepengasuhanSubTab}
+                    />
+                  )}
 
                 {/* Kepegawaian */}
                  {activeTab === 'kepegawaian' && <KepegawaianModule />}
@@ -134,10 +158,7 @@ const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard'
                 {/* Akademik & Presensi */}
                  {activeTab === 'akademik' && <AkademikModule />}
 
-                {/* Keuangan & Syahriyah */}
-                 {activeTab === 'keuangan' && <KeuanganModule />}
-
-                {/* PPDB */}
+                 {/* PPDB */}
                  {activeTab === 'ppdb' && <PPDBModule />}
 
                 {/* Portal Wali Santri */}
@@ -168,7 +189,9 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/app" element={<AppLayout />} />
           <Route path="/app/:tab" element={<AppLayout />} />
-          <Route path="/manage/payment" element={<AppLayout initialTab="payment-management" />} />
+          <Route path="/app/keuangan" element={<Navigate to="/app/keuangan-ringkasan" replace />} />
+          <Route path="/app/payment-management" element={<Navigate to="/app/keuangan-ringkasan" replace />} />
+          <Route path="/manage/payment" element={<Navigate to="/app/keuangan-ringkasan" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
