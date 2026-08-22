@@ -760,12 +760,20 @@ export const DataSantriModule: React.FC = () => {
                     <input type="text" required value={formData.namaAyah || ''} onChange={e => setFormData({ ...formData, namaAyah: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
                   </div>
                   <div>
+                    <label className="block font-bold text-gray-700 mb-1">NIK Ayah</label>
+                    <input type="text" inputMode="numeric" value={formData.nikAyah || ''} onChange={e => setFormData({ ...formData, nikAyah: e.target.value })} placeholder="NIK Ayah" className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
+                  </div>
+                  <div>
                     <label className="block font-bold text-gray-700 mb-1">Pekerjaan Ayah</label>
                     <input type="text" value={formData.pekerjaanAyah || ''} onChange={e => setFormData({ ...formData, pekerjaanAyah: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
                   </div>
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">Nama Ibu Kandung *</label>
                     <input type="text" required value={formData.namaIbu || ''} onChange={e => setFormData({ ...formData, namaIbu: e.target.value })} className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">NIK Ibu</label>
+                    <input type="text" inputMode="numeric" value={formData.nikIbu || ''} onChange={e => setFormData({ ...formData, nikIbu: e.target.value })} placeholder="NIK Ibu" className="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg" />
                   </div>
                   <div>
                     <label className="block font-bold text-gray-700 mb-1">Pekerjaan Ibu</label>
