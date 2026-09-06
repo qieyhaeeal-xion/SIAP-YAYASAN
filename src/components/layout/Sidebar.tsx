@@ -20,7 +20,6 @@ import {
   UserPlus, 
   ShieldAlert, 
   ChevronDown,
-  UserCheck2,
   Lock,
   Settings,
   Eye,
@@ -267,7 +266,7 @@ const handleTabClick = (tabId: string) => {
          {/* SECTION: KEPENGASUHAN */}
          {(isTabAllowed('konseling') || showAllMenus) && (
            <SidebarSection label="Kepengasuhan" isOpen={openKepengasuhan} onToggle={() => setOpenKepengasuhan(!openKepengasuhan)}>
-             {renderNavItem('konseling', 'Konseling', <UserCheck2 className="h-[18px] w-[18px]" />)}
+             {renderNavItem('konseling', 'Konseling', <UserCheck className="h-[18px] w-[18px]" />)}
            </SidebarSection>
          )}
 
@@ -298,7 +297,6 @@ const handleTabClick = (tabId: string) => {
              <span className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-sky-300/65">Lainnya</span>
            </div>
            <div className="space-y-1 pt-0.5">
-           {renderNavItem('portal-wali', 'Portal Wali Santri', <UserCheck2 className="h-[18px] w-[18px]" />)}
            {renderNavItem('pengaturan', 'Pengaturan & RBAC', <Settings className="h-[18px] w-[18px]" />)}
            </div>
          </section>

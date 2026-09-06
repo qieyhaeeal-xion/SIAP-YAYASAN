@@ -941,10 +941,7 @@ export const INITIAL_PENDAFTAR_PPDB: PendaftarPPDB[] = [
 ];
 
 export const INITIAL_USERS: UserProfile[] = [
-  { id: 'usr-1', username: 'admin', nama: 'K.H. Mukhtar Syafaat (Admin Yayasan)', role: 'admin_yayasan', email: 'yayasan@mukhtarsyafaat.ac.id' },
-  { id: 'usr-2', username: 'pengurus', nama: 'Ust. Ahmad Fauzi (Pengurus Pesantren)', role: 'pengurus', email: 'pengurus@mukhtarsyafaat.ac.id' },
-  { id: 'usr-3', username: 'guru_halim', nama: 'Ust. Abdul Halim, S.Pd.I (Guru / Ustadz)', role: 'guru', email: 'guru@mukhtarsyafaat.ac.id' },
-  { id: 'usr-4', username: 'walisyafiq', nama: 'H. Abdullah Mahmud (Wali Santri Farhan)', role: 'wali_santri', email: 'wali@gmail.com', santriIdAssociated: 'snt-1' }
+  { id: 'usr-1', username: 'admin', nama: 'K.H. Mukhtar Syafaat (Admin Yayasan)', role: 'admin_yayasan', email: 'yayasan@mukhtarsyafaat.ac.id' }
 ];
 
 export const INITIAL_PRESENSI: PresensiRecord[] = [

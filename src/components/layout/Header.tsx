@@ -1,39 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { UserRole } from '../../types/sisantri';
 import { 
   Bell, 
   Search, 
-  UserCheck, 
-  LogOut, 
   Globe, 
   ShieldCheck, 
   Menu, 
-  X,
-  BookOpen,
-  ChevronDown
+  BookOpen
 } from 'lucide-react';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
-  onOpenLoginModal: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModal }) => {
+export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
-  const { currentUser, switchRole, perizinanList } = useApp();
-  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const { currentUser, perizinanList } = useApp();
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
 
   const pendingPermitsCount = perizinanList.filter(p => p.statusApproval === 'Menunggu Persetujuan').length;
-
-  const rolesList: { role: UserRole; label: string }[] = [
-    { role: 'admin_yayasan', label: 'Admin Yayasan (Utama)' },
-    { role: 'pengurus', label: 'Pengurus Pesantren' },
-    { role: 'guru', label: 'Guru / Ustadz' },
-    { role: 'wali_santri', label: 'Wali Santri' },
-  ];
 
   return (
     <header className="bg-[#1A5276] text-white shadow-md border-b border-[#2E86C1] sticky top-0 z-30">
@@ -129,65 +115,18 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, onOpenLoginModa
             )}
           </div>
 
-          {/* Role Switcher & Profile */}
-          <div className="relative">
-            <button
-              onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-              className="flex items-center gap-2 sm:gap-3 pl-2 pr-1.5 sm:pl-3 sm:pr-2.5 py-1.5 sm:py-2 rounded-xl hover:bg-[#2E86C1] transition-colors border border-white/20 bg-white/5 shrink-0"
-            >
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#1ABC9C] flex items-center justify-center font-bold text-sm text-white">
-                {currentUser.nama.charAt(0)}
+          {/* Super Admin Profile */}
+          <div className="flex items-center gap-2 sm:gap-3 pl-2 pr-1.5 sm:pl-3 sm:pr-2.5 py-1.5 sm:py-2 rounded-xl border border-white/20 bg-white/5 shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#1ABC9C] flex items-center justify-center font-bold text-sm text-white">
+              {currentUser.nama.charAt(0)}
+            </div>
+            <div className="text-left hidden lg:block">
+              <div className="text-sm font-bold leading-tight truncate max-w-44">{currentUser.nama}</div>
+              <div className="text-xs text-sky-200 font-medium capitalize flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#1ABC9C]" />
+                Super Admin
               </div>
-              <div className="text-left hidden lg:block">
-                <div className="text-sm font-bold leading-tight truncate max-w-44">{currentUser.nama}</div>
-                <div className="text-xs text-sky-200 font-medium capitalize flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#1ABC9C]" />
-                  {currentUser.role.replace('_', ' ')}
-                </div>
-              </div>
-              <ChevronDown className="w-5 h-5 text-sky-200 hidden sm:block" />
-            </button>
-
-            {/* Role Dropdown */}
-            {showRoleDropdown && (
-              <div className="absolute right-0 mt-2 w-56 bg-white text-[#1C2833] rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                <div className="px-3 py-1.5 border-b border-gray-100 mb-1">
-                  <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Ganti Role Akses (Demo)</p>
-                  <p className="text-xs font-semibold text-[#1A5276] truncate">{currentUser.nama}</p>
-                </div>
-                <div className="max-h-56 overflow-y-auto">
-                  {rolesList.map(r => (
-                    <button
-                      key={r.role}
-                      onClick={() => {
-                        switchRole(r.role);
-                        setShowRoleDropdown(false);
-                      }}
-                      className={`w-full text-left px-3 py-1.5 text-xs flex items-center justify-between hover:bg-[#D6EAF8] transition-colors ${
-                        currentUser.role === r.role ? 'font-bold text-[#1A5276] bg-sky-50' : 'text-gray-700'
-                      }`}
-                    >
-                      <span>{r.label}</span>
-                      {currentUser.role === r.role && (
-                        <span className="w-2 h-2 rounded-full bg-[#1ABC9C]" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-                <div className="border-t border-gray-100 pt-1 mt-1 px-1">
-                  <button
-                    onClick={() => {
-                      setShowRoleDropdown(false);
-                      onOpenLoginModal();
-                    }}
-                    className="w-full text-left px-3 py-1.5 text-xs text-rose-600 font-semibold hover:bg-rose-50 rounded flex items-center gap-1.5"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    Portal Login Modal
-                  </button>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
 
         </div>

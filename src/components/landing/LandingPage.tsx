@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { LoginModal, RoleCategory } from '../auth/LoginModal';
+import { LoginModal } from '../auth/LoginModal';
 import {
   BookOpen,
   GraduationCap,
@@ -11,7 +11,6 @@ import {
   Sparkles,
   ArrowRight,
   CheckCircle2,
-  HeartHandshake,
   MapPin,
   Phone,
   Mail,
@@ -36,7 +35,6 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
 
   // Login Modal state
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [loginCategory, setLoginCategory] = useState<RoleCategory>('admin');
 
   // Mobile Menu
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -85,10 +83,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
   const [unitSekolahPilihanId, setUnitSekolahPilihanId] = useState(unitSekolahList[0]?.id || '');
   const [marhalahPilihanId, setMarhalahPilihanId] = useState(marhalahList[0]?.id || '');
 
-  const openLogin = (category: RoleCategory = 'admin') => {
-    setLoginCategory(category);
-    setIsLoginModalOpen(true);
-  };
+  const openLogin = () => setIsLoginModalOpen(true);
 
   const handlePpdbSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,7 +157,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
 
           {/* Desktop Nav Links */}
           <div className="hidden lg:flex items-center gap-8 text-sm sm:text-base font-extrabold text-[#1C2833]">
-            <a href="#portal-roles" className="hover:text-[#2E86C1] transition-colors py-1">Portal Akses</a>
+            <a href="#portal-roles" className="hover:text-[#2E86C1] transition-colors py-1">Akses Sistem</a>
             <a href="#program" className="hover:text-[#2E86C1] transition-colors py-1">Program Unggulan</a>
             <a href="#ppdb" className="hover:text-[#2E86C1] transition-colors py-1">PPDB Online</a>
           </div>
@@ -170,14 +165,14 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
           {/* Action CTA Buttons */}
           <div className="hidden sm:flex items-center gap-3">
             <button
-              onClick={() => openLogin('wali')}
+              onClick={openLogin}
               className="px-5 py-2.5 border-2 border-[#1A5276] text-[#1A5276] hover:bg-sky-50 font-black text-xs sm:text-sm rounded-2xl transition-all flex items-center gap-2"
             >
-              <HeartHandshake className="w-4 h-4 text-[#1ABC9C]" />
-              <span>Portal Wali</span>
+              <Lock className="w-4 h-4 text-[#1ABC9C]" />
+              <span>Login Super Admin</span>
             </button>
             <button
-              onClick={() => openLogin('admin')}
+                   onClick={openLogin}
               className="px-5 py-2.5 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-black text-xs sm:text-sm rounded-2xl transition-all shadow-md hover:shadow-lg flex items-center gap-2"
             >
               <Lock className="w-4 h-4 text-[#1ABC9C]" />
@@ -203,25 +198,13 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
               <a href="#program" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 rounded-xl hover:bg-sky-50 transition-colors">Program Unggulan</a>
               <a href="#ppdb" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 rounded-xl hover:bg-sky-50 transition-colors">PPDB Online</a>
             </div>
-            <div className="grid grid-cols-1 min-[420px]:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-1 gap-2.5">
               <button
-                onClick={() => { openLogin('admin'); setIsMobileMenuOpen(false); }}
+                onClick={() => { openLogin(); setIsMobileMenuOpen(false); }}
                 className="p-3 bg-sky-50 text-[#1A5276] rounded-xl text-xs sm:text-sm font-extrabold text-center border border-sky-200"
-              >
-                Login Admin
-              </button>
-              <button
-                onClick={() => { openLogin('guru'); setIsMobileMenuOpen(false); }}
-                className="p-3 bg-sky-50 text-[#1A5276] rounded-xl text-xs sm:text-sm font-extrabold text-center border border-sky-200"
-              >
-                Login Guru
-              </button>
-              <button
-                onClick={() => { openLogin('wali'); setIsMobileMenuOpen(false); }}
-                className="p-3 bg-[#1ABC9C] text-white rounded-xl text-xs sm:text-sm font-extrabold text-center shadow"
-              >
-                Portal Wali
-              </button>
+               >
+                 Login Super Admin
+               </button>
             </div>
           </div>
         )}
@@ -277,15 +260,14 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
                   </div>
                   <div>
                     <h3 className="font-black text-lg sm:text-xl">Portal Multi-Akses</h3>
-                    <p className="text-xs sm:text-sm text-sky-200">Silakan pilih role untuk masuk</p>
+                    <p className="text-xs sm:text-sm text-sky-200">Akses khusus Admin Yayasan</p>
                   </div>
                 </div>
               </div>
 
-              {/* 3 Role Entry Cards */}
-              <div className="space-y-3">
+               <div className="space-y-3">
                 <button
-                  onClick={() => openLogin('admin')}
+                   onClick={openLogin}
                   className="w-full p-3 sm:p-3.5 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/15 transition-all text-left flex items-center justify-between gap-2 group"
                 >
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0">
@@ -302,42 +284,7 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-sky-200 group-hover:translate-x-1 transition-transform shrink-0" />
                 </button>
 
-                <button
-                  onClick={() => openLogin('guru')}
-                  className="w-full p-3 sm:p-3.5 bg-white/10 hover:bg-white/20 rounded-2xl border border-white/15 transition-all text-left flex items-center justify-between gap-2 group"
-                >
-                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#1A5276] flex items-center justify-center text-white font-bold shrink-0">
-                      <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-[#1ABC9C]" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs sm:text-sm font-black text-white group-hover:text-[#1ABC9C] transition-colors leading-snug">
-                        2. Portal Guru & Ustadz
-                      </div>
-                      <div className="text-[11px] sm:text-xs text-sky-200 mt-0.5 leading-snug">Input Setoran Tahfidz, Nadhoman & Absensi</div>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-sky-200 group-hover:translate-x-1 transition-transform shrink-0" />
-                </button>
-
-                <button
-                  onClick={() => openLogin('wali')}
-                  className="w-full p-3 sm:p-3.5 bg-[#1ABC9C] hover:bg-[#16a085] rounded-2xl text-white transition-all text-left flex items-center justify-between gap-2 shadow-xl group"
-                >
-                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold shrink-0">
-                      <HeartHandshake className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-xs sm:text-sm font-black text-white leading-snug">
-                        3. Portal Orang Tua / Wali
-                      </div>
-                      <div className="text-[11px] sm:text-xs text-teal-100 mt-0.5 leading-snug">Cek Hafalan, Sakit UKS, Izin Pulang & Tagihan</div>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-x-1 transition-transform shrink-0" />
-                </button>
-              </div>
+               </div>
 
             </div>
           </div>
@@ -367,19 +314,19 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
         </div>
       </section>
 
-      {/* Role Portal Overview Section */}
+      {/* System Access Overview Section */}
       <section id="portal-roles" className="py-10 sm:py-14 lg:py-16 px-4 sm:px-6 bg-white border-b border-gray-100">
         <div className="container mx-auto max-w-screen-xl space-y-8 sm:space-y-10">
 
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="text-xs sm:text-sm font-extrabold text-[#1ABC9C] uppercase tracking-wider bg-teal-50 px-4 py-1.5 rounded-full border border-teal-200 inline-block">
-              Integrasi Tiga Layanan
+              Integrasi Layanan
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-4xl xl:text-4xl font-black text-[#1A5276]">
               Portal Akses Terpadu SIAP
             </h2>
             <p className="text-sm sm:text-base lg:text-lg text-[#566573] leading-relaxed">
-              Aplikasi dirancang secara spesifik sesuai peran pengguna untuk kenyamanan, efisiensi, dan akurasi data.
+              Aplikasi terpusat untuk pengelolaan pesantren yang nyaman, efisien, dan akurat.
             </p>
           </div>
 
@@ -416,86 +363,10 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
               </div>
 
               <button
-                onClick={() => openLogin('admin')}
+                 onClick={openLogin}
                 className="w-full mt-8 py-4 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-black text-sm sm:text-base rounded-2xl transition-all text-center shadow-lg hover:shadow-xl"
               >
                 MASUK SEBAGAI ADMIN
-              </button>
-            </div>
-
-            {/* Guru Card */}
-            <div className="bg-[#F8FAFC] p-5 sm:p-6 rounded-3xl border border-gray-200 hover:border-[#2E86C1] transition-all hover:shadow-xl flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#2E86C1] text-white flex items-center justify-center font-bold shadow-lg">
-                  <GraduationCap className="w-7 h-7 text-[#1ABC9C]" />
-                </div>
-                <div>
-                  <h3 className="font-black text-xl sm:text-2xl text-[#1A5276]">2. Portal Guru & Ustadz</h3>
-                  <p className="text-xs sm:text-sm text-[#566573] mt-2 leading-relaxed">Kemudahan pencatatan setoran & kehadiran harian santri.</p>
-                </div>
-                <ul className="space-y-3 text-xs sm:text-sm text-gray-700 pt-2 font-medium">
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
-                    <span>Batch Presensi Kelas Formal & Madin</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
-                    <span>Input Setoran Tahfidz Juz 1-30</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
-                    <span>Pencatatan Hafalan Kitab Nadhoman</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
-                    <span>Jurnal Konseling & Bimbingan Santri</span>
-                  </li>
-                </ul>
-              </div>
-
-              <button
-                onClick={() => openLogin('guru')}
-                className="w-full mt-8 py-4 bg-[#2E86C1] hover:bg-sky-600 text-white font-black text-sm sm:text-base rounded-2xl transition-all text-center shadow-lg hover:shadow-xl"
-              >
-                MASUK SEBAGAI GURU / USTADZ
-              </button>
-            </div>
-
-            {/* Wali Card */}
-            <div className="bg-[#F8FAFC] p-5 sm:p-6 rounded-3xl border border-gray-200 hover:border-[#1ABC9C] transition-all hover:shadow-xl flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#1ABC9C] text-white flex items-center justify-center font-bold shadow-lg">
-                  <HeartHandshake className="w-7 h-7" />
-                </div>
-                <div>
-                  <h3 className="font-black text-xl sm:text-2xl text-[#1A5276]">3. Portal Orang Tua / Wali</h3>
-                  <p className="text-xs sm:text-sm text-[#566573] mt-2 leading-relaxed">Transparansi perkembangan putra/putri langsung di HP.</p>
-                </div>
-                <ul className="space-y-3 text-xs sm:text-sm text-gray-700 pt-2 font-medium">
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
-                    <span>Monitoring Real-Time Hafalan Qur'an</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
-                    <span>Riwayat Kesehatan & Perawatan UKS</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
-                    <span>Status Perizinan Keluar & Pulang</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#1ABC9C] shrink-0" />
-                    <span>Rincian Tagihan & Download Kuitansi</span>
-                  </li>
-                </ul>
-              </div>
-
-              <button
-                onClick={() => openLogin('wali')}
-                className="w-full mt-8 py-4 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-black text-sm sm:text-base rounded-2xl transition-all text-center shadow-lg hover:shadow-xl"
-              >
-                MASUK PORTAL WALI SANTRI
               </button>
             </div>
 
@@ -772,24 +643,12 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
           <div>
             <h4 className="font-black text-sm sm:text-base text-[#1ABC9C] uppercase tracking-wider mb-4">Akses Portal</h4>
             <div className="space-y-3">
-              <button
-                onClick={() => openLogin('wali')}
-                className="w-full py-3 bg-[#1ABC9C] hover:bg-[#16a085] font-black text-white rounded-xl transition-colors text-center block shadow"
-              >
-                Portal Wali Santri
-              </button>
-              <button
-                onClick={() => openLogin('guru')}
-                className="w-full py-3 bg-[#2E86C1] hover:bg-sky-600 font-black text-white rounded-xl transition-colors text-center block shadow"
-              >
-                Portal Guru / Ustadz
-              </button>
-              <button
-                onClick={() => openLogin('admin')}
-                className="w-full py-3 bg-white/10 hover:bg-white/20 font-black text-white rounded-xl transition-colors text-center block border border-white/20"
-              >
-                Portal Admin Sistem
-              </button>
+               <button
+                  onClick={openLogin}
+                 className="w-full py-3 bg-[#1ABC9C] hover:bg-[#16a085] font-black text-white rounded-xl transition-colors text-center block shadow"
+               >
+                 Portal Admin Yayasan
+               </button>
             </div>
           </div>
 
@@ -803,12 +662,11 @@ export const LandingPage: React.FC<LandingPageProps> = () => {
         </div>
       </footer>
 
-      {/* Login Modal with Role Support */}
+      {/* Login Modal Super Admin */}
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onSuccessLogin={() => navigate('/app')}
-        initialRoleCategory={loginCategory}
       />
 
     </div>

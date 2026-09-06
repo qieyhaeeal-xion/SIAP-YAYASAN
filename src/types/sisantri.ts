@@ -1,11 +1,6 @@
 // Type definitions for SiSantri - SIM Pesantren Mukhtar Syafaat
 
-export type UserRole = 
-  | 'admin_yayasan'
-  | 'pengurus'
-  | 'guru'
-  | 'wali_santri'
-  | 'admin_sistem'; // alias backward-compatibility untuk admin_yayasan
+export type UserRole = 'admin_yayasan';
 
 export interface UserProfile {
   id: string;
@@ -15,7 +10,6 @@ export interface UserProfile {
   avatar?: string;
   email?: string;
   noHp?: string;
-  santriIdAssociated?: string; // For Wali Santri role
 }
 
 // ---------------- TAHUN AJARAN TYPES ---------------- //

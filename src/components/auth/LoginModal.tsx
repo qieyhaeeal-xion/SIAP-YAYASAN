@@ -7,64 +7,36 @@ import {
   Key, 
   ArrowRight, 
   BookOpen, 
-  GraduationCap, 
-  HeartHandshake, 
-  Building2,
   CheckCircle2
 } from 'lucide-react';
-
-export type RoleCategory = 'yayasan' | 'pengurus' | 'guru' | 'wali' | 'admin';
-
-// Username demo otomatis mengikuti role yang dipilih
-const USERNAME_BY_CATEGORY: Record<RoleCategory, string> = {
-  yayasan: 'admin',
-  pengurus: 'pengurus',
-  guru: 'guru_halim',
-  wali: 'walisyafiq',
-  admin: 'admin',
-};
 
 interface LoginModalProps {
   isOpen?: boolean;
   onClose: () => void;
   onSuccessLogin?: () => void;
-  initialRoleCategory?: RoleCategory;
 }
 
 export const LoginModal: React.FC<LoginModalProps> = ({ 
   isOpen = true, 
   onClose,
   onSuccessLogin,
-  initialRoleCategory = 'yayasan'
 }) => {
   const { setCurrentUser } = useApp();
-  const [activeTab, setActiveTab] = useState<RoleCategory>(initialRoleCategory);
   
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('123456');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Sync tab with initialRoleCategory when opened
   useEffect(() => {
     if (isOpen) {
-      const normalizedCat: RoleCategory = initialRoleCategory === 'admin' ? 'yayasan' : initialRoleCategory;
-      setActiveTab(normalizedCat);
-      setUsername(USERNAME_BY_CATEGORY[normalizedCat]);
+      setUsername('admin');
       setPassword('123456');
       setErrorMessage('');
     }
-  }, [isOpen, initialRoleCategory]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
-
-  const handleTabSelect = (category: RoleCategory) => {
-    const normalizedCat: RoleCategory = category === 'admin' ? 'yayasan' : category;
-    setActiveTab(normalizedCat);
-    setUsername(USERNAME_BY_CATEGORY[normalizedCat]);
-    setPassword('123456');
-    setErrorMessage('');
-  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +66,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <BookOpen className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
             <div>
-              <h3 className="font-black text-xl sm:text-2xl leading-tight">Portal Login SIAP</h3>
+              <h3 className="font-black text-xl sm:text-2xl leading-tight">Portal Login Super Admin</h3>
               <p className="text-xs sm:text-sm text-sky-200">Pondok Pesantren Mukhtar Syafaat</p>
             </div>
           </div>
@@ -103,61 +75,6 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0"
           >
             <X className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-        </div>
-
-        {/* Category Tabs: Yayasan | Pengurus | Guru | Wali */}
-        <div className="bg-sky-50/80 border-b border-sky-100 p-2 sm:p-3 grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={() => handleTabSelect('yayasan')}
-            className={`py-2.5 sm:py-3 px-1 rounded-xl text-xs sm:text-sm font-extrabold flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all ${
-              activeTab === 'yayasan'
-                ? 'bg-[#1A5276] text-white shadow-md'
-                : 'text-gray-600 hover:bg-sky-100'
-            }`}
-          >
-            <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-[#1ABC9C]" />
-            <span>Yayasan</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleTabSelect('pengurus')}
-            className={`py-2.5 sm:py-3 px-1 rounded-xl text-xs sm:text-sm font-extrabold flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all ${
-              activeTab === 'pengurus'
-                ? 'bg-[#1A5276] text-white shadow-md'
-                : 'text-gray-600 hover:bg-sky-100'
-            }`}
-          >
-            <HeartHandshake className="w-5 h-5 sm:w-6 sm:h-6 text-[#1ABC9C]" />
-            <span>Pengurus</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleTabSelect('guru')}
-            className={`py-2.5 sm:py-3 px-1 rounded-xl text-xs sm:text-sm font-extrabold flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all ${
-              activeTab === 'guru'
-                ? 'bg-[#1A5276] text-white shadow-md'
-                : 'text-gray-600 hover:bg-sky-100'
-            }`}
-          >
-            <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-[#1ABC9C]" />
-            <span>Guru</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleTabSelect('wali')}
-            className={`py-2.5 sm:py-3 px-1 rounded-xl text-xs sm:text-sm font-extrabold flex flex-col items-center justify-center gap-1 sm:gap-2 transition-all ${
-              activeTab === 'wali'
-                ? 'bg-[#1A5276] text-white shadow-md'
-                : 'text-gray-600 hover:bg-sky-100'
-            }`}
-          >
-            <User className="w-5 h-5 sm:w-6 sm:h-6 text-[#1ABC9C]" />
-            <span>Wali Santri</span>
           </button>
         </div>
 
@@ -175,7 +92,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 required
-                placeholder="Masukkan username..."
+                placeholder="Masukkan username Super Admin..."
                 className="w-full pl-10 sm:pl-11 pr-3 py-3.5 sm:py-4 border border-gray-300 rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-[#1ABC9C] focus:border-transparent outline-none font-semibold text-gray-800 placeholder:text-gray-400"
               />
               <User className="w-5 h-5 text-gray-400 absolute left-3 sm:left-4 top-1/2 -translate-y-1/2" />
@@ -201,11 +118,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           {/* Feature Highlight Pill */}
           <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs sm:text-sm text-emerald-800 flex items-center gap-2.5 sm:gap-3">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-            <span>
-              {activeTab === 'yayasan' && 'Modul Keuangan, Santri, Presensi, Kepegawaian & PPDB Mutasi'}
-              {activeTab === 'guru' && 'Input Presensi Batch, Setoran Tahfidz, Kitab Nadhoman & Konseling'}
-              {activeTab === 'wali' && 'Portal Real-Time Monitoring Hafalan, Kesehatan, Izin & Syahriyah'}
-            </span>
+            <span>Akses Penuh Manajemen SIM Pesantren (Super Admin Yayasan)</span>
           </div>
 
           {errorMessage && (

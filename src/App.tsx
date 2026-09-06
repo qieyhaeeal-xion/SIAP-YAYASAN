@@ -21,10 +21,9 @@ import { KepegawaianModule } from './components/kepegawaian/KepegawaianModule';
 import { AkademikModule } from './components/akademik/AkademikModule';
 import { KeuanganModule, type KeuanganSubTab } from './components/keuangan/KeuanganModule';
 import { PPDBModule } from './components/ppdb/PPDBModule';
-import { PortalWaliModule } from './components/wali/PortalWaliModule';
 import { SettingsModule } from './components/settings/SettingsModule';
 
-import { ShieldAlert, Lock, ArrowLeft, UserCheck } from 'lucide-react';
+import { ShieldAlert, Lock, ArrowLeft } from 'lucide-react';
 import { hasPermission, getFirstAllowedTab, ROLE_DETAILS } from './utils/rbac';
 
 const FINANCE_ROUTE_BY_SUBTAB: Record<KeuanganSubTab, string> = {
@@ -66,7 +65,6 @@ const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard'
       {/* Top Header */}
       <Header
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        onOpenLoginModal={() => navigate('/login')}
       />
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
@@ -114,13 +112,6 @@ const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard'
                     <ArrowLeft className="w-4 h-4" />
                     Kembali ke Modul Diizinkan
                   </button>
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="w-full sm:w-auto px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2"
-                  >
-                    <UserCheck className="w-4 h-4 text-[#1ABC9C]" />
-                    Ganti Role Akses (Demo)
-                  </button>
                 </div>
               </div>
             ) : (
@@ -160,9 +151,6 @@ const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard'
 
                  {/* PPDB */}
                  {activeTab === 'ppdb' && <PPDBModule />}
-
-                {/* Portal Wali Santri */}
-                 {activeTab === 'portal-wali' && <PortalWaliModule />}
 
                 {/* Pengaturan & RBAC */}
                  {activeTab === 'pengaturan' && <SettingsModule />}

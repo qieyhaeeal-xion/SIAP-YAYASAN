@@ -29,7 +29,6 @@ import {
   TransaksiPembayaran,
   PendaftarPPDB,
   UserProfile,
-  UserRole,
   PresensiRecord,
   TahunAjaran,
   PesertaTahfidz,
@@ -84,14 +83,17 @@ import {
   getConfigNominals,
   NewPemasukanInput
 } from '../services/distributionService';
-import { getCurrentUser as getAuthenticatedUser } from '../services/authService';
+import { getCurrentUser as getAuthenticatedUser, renameAdminPassword, saveAuthenticatedUser } from '../services/authService';
 
 interface AppContextType {
   // Mode & Auth
   currentUser: UserProfile;
   setCurrentUser: (user: UserProfile) => void;
-  switchRole: (role: UserRole) => void;
   users: UserProfile[];
+  updateCurrentUserProfile: (updates: Partial<Pick<UserProfile, 'nama' | 'username' | 'email' | 'noHp'>>) => void;
+  addAdminAccount: (account: Omit<UserProfile, 'id' | 'role'>) => void;
+  updateAdminAccount: (id: string, updates: Partial<Omit<UserProfile, 'id' | 'role'>>) => void;
+  deleteAdminAccount: (id: string) => boolean;
 
   // Tahun Ajaran
   tahunAjaranList: TahunAjaran[];
@@ -264,8 +266,39 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
 }
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [users] = useLocalStorage<UserProfile[]>('users', INITIAL_USERS);
+  const [storedUsers, setStoredUsers] = useLocalStorage<UserProfile[]>('users', INITIAL_USERS);
+  const users = storedUsers.filter(user => user.role === 'admin_yayasan');
   const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USERS[0]);
+
+  useEffect(() => {
+    if (storedUsers.some(user => user.role !== 'admin_yayasan')) {
+      setStoredUsers(prev => prev.filter(user => user.role === 'admin_yayasan'));
+    }
+  }, [storedUsers, setStoredUsers]);
+
+  const updateCurrentUserProfile = (updates: Partial<Pick<UserProfile, 'nama' | 'username' | 'email' | 'noHp'>>) => {
+    const updatedUser = { ...currentUser, ...updates, role: 'admin_yayasan' as const };
+    if (updates.username) renameAdminPassword(currentUser.username, updates.username);
+    setCurrentUser(updatedUser);
+    setStoredUsers(prev => prev.map(user => user.id === updatedUser.id ? updatedUser : user));
+    saveAuthenticatedUser(updatedUser);
+  };
+
+  const addAdminAccount = (account: Omit<UserProfile, 'id' | 'role'>) => {
+    const newAccount: UserProfile = { ...account, id: `usr-${Date.now()}`, role: 'admin_yayasan' };
+    setStoredUsers(prev => [...prev.filter(user => user.role === 'admin_yayasan'), newAccount]);
+  };
+
+  const updateAdminAccount = (id: string, updates: Partial<Omit<UserProfile, 'id' | 'role'>>) => {
+    setStoredUsers(prev => prev.map(user => user.id === id ? { ...user, ...updates, role: 'admin_yayasan' } : user));
+    if (currentUser.id === id) updateCurrentUserProfile(updates);
+  };
+
+  const deleteAdminAccount = (id: string): boolean => {
+    if (id === currentUser.id || id === 'usr-1') return false;
+    setStoredUsers(prev => prev.filter(user => user.id !== id));
+    return true;
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -457,20 +490,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const nextSeq = existingNisNumbers.length > 0 ? Math.max(...existingNisNumbers) + 1 : 1;
     return `${yearPrefix}${nextSeq.toString().padStart(4, '0')}`;
-  };
-
-  const switchRole = (role: UserRole) => {
-    const found = users.find(u => u.role === role);
-    if (found) {
-      setCurrentUser(found);
-    } else {
-      setCurrentUser({
-        id: `usr-${role}`,
-        username: role,
-        nama: `User ${role.replace('_', ' ').toUpperCase()}`,
-        role: role
-      });
-    }
   };
 
   // Tahun Ajaran CRUD
@@ -1404,8 +1423,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         currentUser,
         setCurrentUser,
-        switchRole,
         users,
+        updateCurrentUserProfile,
+        addAdminAccount,
+        updateAdminAccount,
+        deleteAdminAccount,
 
         tahunAjaranList,
         addTahunAjaran,
