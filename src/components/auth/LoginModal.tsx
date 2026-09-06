@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { getApiErrorMessage } from '../../services/api/client';
-import { login } from '../../services/api/authService';
+import { login } from '../../services/authService';
 import { 
   X, 
   User, 
@@ -78,7 +77,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       onClose();
       onSuccessLogin?.();
     } catch (error) {
-      setErrorMessage(getApiErrorMessage(error, 'Login gagal. Pastikan backend dan database aktif.'));
+      setErrorMessage(error instanceof Error ? error.message : 'Login gagal.');
     } finally {
       setIsSubmitting(false);
     }

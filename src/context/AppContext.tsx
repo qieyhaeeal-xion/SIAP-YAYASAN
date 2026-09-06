@@ -84,7 +84,7 @@ import {
   getConfigNominals,
   NewPemasukanInput
 } from '../services/distributionService';
-import { getCurrentUser as getAuthenticatedUser } from '../services/api/authService';
+import { getCurrentUser as getAuthenticatedUser } from '../services/authService';
 
 interface AppContextType {
   // Mode & Auth
