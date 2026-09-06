@@ -1,13 +1,12 @@
 import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { verifyToken, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { pick, requireFields, HttpError } from '../middleware/validate';
 import { withUniqueNip } from '../utils/generators';
+import { prisma } from '../lib/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 router.use(verifyToken);
 
 const requireKepegawaian = requireRole('admin_sistem', 'bendahara');

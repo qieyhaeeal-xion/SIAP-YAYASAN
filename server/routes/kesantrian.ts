@@ -1,12 +1,11 @@
 ﻿import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { verifyToken } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { pick, requireFields, HttpError } from '../middleware/validate';
+import { prisma } from '../lib/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 router.use(verifyToken);
 
 // Whitelist field per model — menutup celah mass-assignment

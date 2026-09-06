@@ -28,6 +28,7 @@ export interface AlokasiResult {
 
 export interface NewPemasukanInput {
   santriId: string;
+  biayaMasterId?: string;
   tanggal: string;
   nominal: number;
   jenisPembayaran: string;
@@ -36,6 +37,8 @@ export interface NewPemasukanInput {
   bulanKe?: number;
   tahunAjaranId?: string;
   catatan?: string;
+  // Dipakai saat pembayaran mengikuti rincian tagihan santri, bukan tarif global.
+  distribusiNominals?: NominalMap;
   createdBy: string;
 }
 
@@ -91,13 +94,13 @@ export function computeDistribution(nominal: number, nominals: NominalMap): Alok
 }
 
 // Bekukan konfigurasi saat transaksi terjadi (snapshot).
-export function buildConfigSnapshot(config: DistribusiKeuanganConfig) {
+export function buildConfigSnapshot(config: DistribusiKeuanganConfig, nominals = getConfigNominals(config)) {
   return {
     name: config.name,
     version: config.version,
     effectiveFrom: config.effectiveFrom,
     effectiveUntil: config.effectiveUntil,
-    nominals: getConfigNominals(config)
+    nominals
   };
 }
 
@@ -135,7 +138,8 @@ export function createPemasukanRecord(
   const tanggal = input.tanggal || nowIso.slice(0, 10);
   const noPemasukan = `PMK-${tanggal.replace(/-/g, '')}-${seq.toString().padStart(4, '0')}`;
 
-  const alokasi = computeDistribution(input.nominal, getConfigNominals(config));
+  const distributionNominals = input.distribusiNominals ?? getConfigNominals(config);
+  const alokasi = computeDistribution(input.nominal, distributionNominals);
   const verification = verifyDistribution(input.nominal, alokasi);
   const id = `pmk-${Date.now()}`;
 
@@ -143,6 +147,7 @@ export function createPemasukanRecord(
     id,
     noPemasukan,
     santriId: input.santriId,
+    biayaMasterId: input.biayaMasterId,
     unitId,
     tanggal,
     nominal: Math.floor(input.nominal),
@@ -154,7 +159,7 @@ export function createPemasukanRecord(
     catatan: input.catatan,
     configId: config.id,
     configVersion: config.version,
-    configSnapshot: buildConfigSnapshot(config),
+    configSnapshot: buildConfigSnapshot(config, distributionNominals),
     status: verification.status,
     paidAt: nowIso,
     distributedAt: verification.ok ? nowIso : undefined,

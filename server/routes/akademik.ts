@@ -1,13 +1,12 @@
 import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { verifyToken, AuthRequest } from '../middleware/auth';
 import { requireAkademik } from '../middleware/rbac';
 import { apiLimiter } from '../middleware/rateLimit';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { pick, requireFields, HttpError } from '../middleware/validate';
+import { prisma } from '../lib/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 router.use(apiLimiter);
 router.use(verifyToken);
 
@@ -63,7 +62,7 @@ router.get('/presensi', asyncHandler(async (req: AuthRequest, res: Response) => 
     include: {
       santri: { select: { id: true, nis: true, namaLengkap: true } }
     },
-    orderBy: [{ tanggal: 'desc' }, { createdAt: 'desc' }]
+    orderBy: { tanggal: 'desc' }
   });
   res.json({ success: true, data });
 }));

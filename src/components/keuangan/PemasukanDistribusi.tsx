@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   Plus,
@@ -14,9 +14,11 @@ import {
   KonteksKeuangan,
   KONTEKS_KEUANGAN_ORDER,
   Pemasukan,
-  AlokasiPemasukan
+  AlokasiPemasukan,
+  TagihanKeuangan,
+  BULAN_KE_LABEL
 } from '../../types/sisantri';
-import { getConfigNominals, sumNominal } from '../../services/distributionService';
+import { getConfigNominals } from '../../services/distributionService';
 
 const KONTEKS_LABEL: Record<KonteksKeuangan, string> = {
   YAYASAN: 'Yayasan',
@@ -34,10 +36,22 @@ const KONTEKS_STYLE: Record<KonteksKeuangan, { badge: string; bar: string; text:
   MAKAN: { badge: 'bg-amber-100 text-amber-800', bar: 'bg-amber-500', text: 'text-amber-700' }
 };
 
-const JENIS_OPTIONS = ['Syahriyah', 'Uang Gedung', 'Seragam', 'Kitab', 'Ujian', 'Lainnya'];
 const METODE_OPTIONS = ['Tunai', 'Transfer Bank', 'E-Wallet (QRIS)', 'Giro'];
 
 const rp = (n: number) => 'Rp ' + n.toLocaleString('id-ID');
+
+const normalizePeriode = (value: unknown) => String(value ?? '').replace(/\s+/g, ' ').trim().toLocaleLowerCase('id-ID');
+
+const getTagihanPeriode = (tagihan: TagihanKeuangan) => {
+  if (tagihan.bulanTahun) return tagihan.bulanTahun.replace(/\s+/g, ' ').trim();
+
+  const rawBulan = String(tagihan.bulanPeriode ?? tagihan.bulanKe ?? '').trim();
+  const bulanKe = Number(rawBulan);
+  const bulan = Number.isInteger(bulanKe) && bulanKe >= 1 && bulanKe <= 12
+    ? BULAN_KE_LABEL[bulanKe - 1]
+    : rawBulan;
+  return `${bulan} ${tagihan.tahunPeriode ?? ''}`.replace(/\s+/g, ' ').trim();
+};
 
 const STATUS_STYLE: Record<Pemasukan['status'], string> = {
   PENDING: 'bg-gray-100 text-gray-600',
@@ -51,9 +65,12 @@ export const PemasukanDistribusi: React.FC = () => {
     pemasukanList,
     alokasiList,
     santriList,
+    tagihanList,
+    biayaMasterList,
     getSantriNameById,
     createPemasukan,
     getAktifDistribusiConfig,
+    getNominalBiayaSantri,
     currentUser
   } = useApp();
 
@@ -66,15 +83,63 @@ export const PemasukanDistribusi: React.FC = () => {
   const [santriId, setSantriId] = useState('');
   const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
   const [nominal, setNominal] = useState(0);
-  const [jenis, setJenis] = useState('Syahriyah');
+  const [biayaMasterId, setBiayaMasterId] = useState('');
   const [metode, setMetode] = useState('Tunai');
-  const [periode, setPeriode] = useState('Agustus 2026');
+  const [periode, setPeriode] = useState('');
   const [catatan, setCatatan] = useState('');
 
   const aktifConfig = getAktifDistribusiConfig();
   const activeNominals = aktifConfig ? getConfigNominals(aktifConfig) : undefined;
-  const totalSyahriyah = activeNominals ? sumNominal(activeNominals) : 0;
   const activeSantris = santriList.filter(s => s.status === 'Aktif');
+  const activePaymentTypes = biayaMasterList.filter(item => item.aktif !== false);
+  const selectedPaymentType = activePaymentTypes.find(item => item.id === biayaMasterId);
+
+  const availablePeriodes = useMemo(() => {
+    const seen = new Set<string>();
+    return tagihanList
+      .filter(tagihan => tagihan.santriId === santriId && tagihan.nominalTagihan > tagihan.nominalTerbayar)
+      .map(getTagihanPeriode)
+      .filter(label => {
+        const key = normalizePeriode(label);
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }, [santriId, tagihanList]);
+
+  useEffect(() => {
+    if (!santriId) {
+      if (periode) setPeriode('');
+      return;
+    }
+
+    const selectedPeriodExists = availablePeriodes.some(
+      availablePeriode => normalizePeriode(availablePeriode) === normalizePeriode(periode)
+    );
+    if (!selectedPeriodExists) setPeriode(availablePeriodes[0] || '');
+  }, [availablePeriodes, periode, santriId]);
+
+  const selectedNominalTarif = biayaMasterId && santriId
+    ? getNominalBiayaSantri(santriId, biayaMasterId)
+    : 0;
+  const selectedNominalTerbayar = useMemo(
+    () => tagihanList
+      .filter(tagihan => tagihan.santriId === santriId && tagihan.biayaMasterId === biayaMasterId && normalizePeriode(getTagihanPeriode(tagihan)) === normalizePeriode(periode))
+      .reduce((total, tagihan) => total + tagihan.nominalTerbayar, 0),
+    [biayaMasterId, periode, santriId, tagihanList]
+  );
+  const selectedNominalRemaining = Math.max(0, selectedNominalTarif - selectedNominalTerbayar);
+
+  const selectedDistributionNominals = useMemo(() => {
+    const totals: Record<KonteksKeuangan, number> = { YAYASAN: 0, MADIN: 0, SEKOLAH: 0, PESANTREN: 0, MAKAN: 0 };
+    const kategori = selectedPaymentType?.kategori as KonteksKeuangan | undefined;
+    if (kategori) totals[kategori] = selectedNominalRemaining;
+    return totals;
+  }, [selectedNominalRemaining, selectedPaymentType]);
+
+  useEffect(() => {
+    setNominal(selectedNominalRemaining);
+  }, [selectedNominalRemaining]);
 
   const alokasiByPemasukan = useMemo(() => {
     const map: Record<string, AlokasiPemasukan[]> = {};
@@ -101,26 +166,33 @@ export const PemasukanDistribusi: React.FC = () => {
       return;
     }
     if (!santriId) { setError('Pilih santri terlebih dahulu.'); return; }
+    if (!selectedPaymentType) { setError('Pilih jenis pembayaran terlebih dahulu.'); return; }
     if (!nominal || nominal <= 0) { setError('Nominal harus lebih dari 0.'); return; }
-    if (jenis === 'Syahriyah' && nominal !== totalSyahriyah) {
-      setError(`Nominal Syahriyah harus sama dengan total akhir ${rp(totalSyahriyah)}.`);
+    if (selectedNominalTarif <= 0) {
+      setError('Jenis pembayaran ini tidak berlaku untuk status santri yang dipilih.');
+      return;
+    }
+    if (nominal !== selectedNominalRemaining) {
+      setError(`Nominal pembayaran harus sama dengan tarif tersisa ${rp(selectedNominalRemaining)}.`);
       return;
     }
 
     const res = createPemasukan({
       santriId,
+      biayaMasterId,
       tanggal,
       nominal,
-      jenisPembayaran: jenis,
+      jenisPembayaran: selectedPaymentType.namaBiaya,
       metodePembayaran: metode,
       periode,
       catatan: catatan || undefined,
+      distribusiNominals: selectedDistributionNominals,
       createdBy: currentUser.nama
     });
     if (!res.ok) { setError(res.error || 'Gagal mencatat pemasukan.'); return; }
     setResult({ pemasukan: res.pemasukan!, alokasi: res.alokasi! });
     setShowForm(false);
-    setSantriId(''); setNominal(0); setJenis('Syahriyah'); setMetode('Tunai'); setPeriode('Agustus 2026'); setCatatan('');
+    setSantriId(''); setBiayaMasterId(''); setNominal(0); setMetode('Tunai'); setPeriode(''); setCatatan('');
   };
 
   const sortedPemasukan = useMemo(
@@ -172,7 +244,6 @@ export const PemasukanDistribusi: React.FC = () => {
           onClick={() => {
             setShowForm(v => !v);
             setError(null);
-            if (!showForm && jenis === 'Syahriyah' && totalSyahriyah > 0) setNominal(totalSyahriyah);
           }}
           className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-bold rounded-lg shadow transition-all"
         >
@@ -219,24 +290,46 @@ export const PemasukanDistribusi: React.FC = () => {
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-600 mb-1">Nominal *</label>
-              <input type="number" min={0} value={nominal || ''} onChange={e => setNominal(Number(e.target.value))}
+              <input type="number" min={0} readOnly={Boolean(selectedPaymentType)} value={nominal || ''} onChange={e => setNominal(Number(e.target.value))}
                 placeholder="cth. 775000"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]" />
-              {jenis === 'Syahriyah' && aktifConfig && (
-                <p className="mt-1 text-[11px] font-bold text-emerald-700">Total akhir Syahriyah: {rp(totalSyahriyah)}</p>
+                className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C] ${selectedPaymentType ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`} />
+              {selectedPaymentType && (
+                <p className="mt-1 text-[11px] font-bold text-emerald-700">Nominal otomatis dari jenis pembayaran dan tarif santri.</p>
               )}
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-600 mb-1">Jenis Pembayaran *</label>
-              <select value={jenis} onChange={e => {
-                const value = e.target.value;
-                setJenis(value);
-                if (value === 'Syahriyah' && totalSyahriyah > 0) setNominal(totalSyahriyah);
-              }}
+              <select value={biayaMasterId} onChange={e => setBiayaMasterId(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]">
-                {JENIS_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                <option value="">— Pilih Jenis Pembayaran —</option>
+                {activePaymentTypes.map(item => (
+                  <option key={item.id} value={item.id}>{item.namaBiaya} - {rp(item.nominal || 0)}</option>
+                ))}
               </select>
             </div>
+            {selectedPaymentType && santriId && (
+              <div className="sm:col-span-2 lg:col-span-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
+                <p className="text-[11px] font-black uppercase tracking-wider text-emerald-800">Rincian {selectedPaymentType.namaBiaya} · {periode || 'Pilih periode'}</p>
+                {selectedNominalTarif > 0 ? (
+                  <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-5">
+                    <div className="rounded-lg border border-emerald-100 bg-white p-2">
+                      <p className="text-[10px] font-bold text-gray-500">Tarif jenis pembayaran</p>
+                      <p className="mt-1 text-sm font-black text-[#1A5276]">{rp(selectedNominalTarif)}</p>
+                    </div>
+                    <div className="rounded-lg border border-emerald-100 bg-white p-2">
+                      <p className="text-[10px] font-bold text-gray-500">Sudah dibayar</p>
+                      <p className="mt-1 text-sm font-black text-[#1A5276]">{rp(selectedNominalTerbayar)}</p>
+                    </div>
+                    <div className="rounded-lg border border-emerald-100 bg-white p-2">
+                      <p className="text-[10px] font-bold text-gray-500">Sisa pembayaran</p>
+                      <p className="mt-1 text-sm font-black text-[#1A5276]">{rp(selectedNominalRemaining)}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-xs font-bold text-amber-700">Jenis pembayaran ini tidak berlaku untuk status santri yang dipilih.</p>
+                )}
+              </div>
+            )}
             <div>
               <label className="block text-xs font-bold text-gray-600 mb-1">Metode Pembayaran *</label>
               <select value={metode} onChange={e => setMetode(e.target.value)}
@@ -246,9 +339,14 @@ export const PemasukanDistribusi: React.FC = () => {
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-600 mb-1">Periode *</label>
-              <input type="text" value={periode} onChange={e => setPeriode(e.target.value)}
-                placeholder="cth. Agustus 2026"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]" />
+              <select value={periode} onChange={e => setPeriode(e.target.value)} disabled={!santriId || availablePeriodes.length === 0}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C] disabled:bg-gray-100 disabled:cursor-not-allowed">
+                <option value="">{santriId ? '— Pilih Periode —' : '— Pilih Santri Terlebih Dahulu —'}</option>
+                {availablePeriodes.map(option => <option key={normalizePeriode(option)} value={option}>{option}</option>)}
+              </select>
+              {santriId && availablePeriodes.length === 0 && (
+                <p className="mt-1 text-[11px] font-bold text-amber-700">Tidak ada periode dengan tagihan tersisa.</p>
+              )}
             </div>
             <div className="sm:col-span-2 lg:col-span-3">
               <label className="block text-xs font-bold text-gray-600 mb-1">Catatan (opsional)</label>

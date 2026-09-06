@@ -11,6 +11,7 @@ import { keuanganRouter } from './routes/keuangan';
 import { ppdbRouter } from './routes/ppdb';
 import { usersRouter } from './routes/users';
 import { akademikRouter } from './routes/akademik';
+import { kepegawaianRouter } from './routes/kepegawaian';
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use('/api/keuangan', keuanganRouter);
 app.use('/api/ppdb', ppdbRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/akademik', akademikRouter);
+app.use('/api/kepegawaian', kepegawaianRouter);
 
 // ─── Global Error Handler ─────────────────────────────
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

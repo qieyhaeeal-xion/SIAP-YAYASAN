@@ -22,6 +22,10 @@ import {
   TarifPembayaran,
   TarifTargetScope,
   TagihanKeuangan,
+  TagihanGenerationInput,
+  TagihanGenerationPreview,
+  TagihanGenerationResult,
+  TagihanPreviewItem,
   TransaksiPembayaran,
   PendaftarPPDB,
   UserProfile,
@@ -35,7 +39,9 @@ import {
   Pemasukan,
   AlokasiPemasukan,
   AuditLog,
-  AuditAction
+  AuditAction,
+  BULAN_KE_LABEL,
+  JenjangSekolah
 } from '../types/sisantri';
 
 import {
@@ -49,6 +55,7 @@ import {
   INITIAL_JURUSAN,
   INITIAL_KELAS_SEKOLAH,
   INITIAL_SANTRI,
+  INITIAL_DEMO_STATUS_SANTRI,
   INITIAL_SETORAN_TAHFIDZ,
   INITIAL_SETORAN_NADHOMAN,
   INITIAL_KESEHATAN_UKS,
@@ -77,6 +84,7 @@ import {
   getConfigNominals,
   NewPemasukanInput
 } from '../services/distributionService';
+import { getCurrentUser as getAuthenticatedUser } from '../services/api/authService';
 
 interface AppContextType {
   // Mode & Auth
@@ -182,7 +190,7 @@ interface AppContextType {
 
   // Keuangan
   biayaMasterList: BiayaMaster[];
-  addBiayaMaster: (item: Omit<BiayaMaster, 'id'>) => void;
+  addBiayaMaster: (item: Omit<BiayaMaster, 'id'>) => BiayaMaster;
   updateBiayaMaster: (id: string, item: Partial<BiayaMaster>) => void;
   deleteBiayaMaster: (id: string) => void;
   tarifPembayaranList: TarifPembayaran[];
@@ -192,6 +200,10 @@ interface AppContextType {
   tagihanList: TagihanKeuangan[];
   transaksiList: TransaksiPembayaran[];
   generateTagihan: (input: { santriId: string; biayaMasterId: string; periode: string; bulanKe?: number; tanggalJatuhTempo?: string }) => TagihanKeuangan | null;
+  getNominalBiayaSantri: (santriId: string, biayaMasterId: string) => number;
+  getTagihanPreview: (santri: Partial<Santri>) => TagihanPreviewItem[];
+  previewGenerateTagihan: (input: TagihanGenerationInput) => TagihanGenerationPreview | null;
+  generateTagihanMassal: (input: TagihanGenerationInput) => TagihanGenerationResult | null;
   addBayarTagihan: (tagihanId: string, nominal: number, metode: TransaksiPembayaran['metodePembayaran'], catatan?: string, buktiTransferUrl?: string) => TransaksiPembayaran | null;
   verifikasiTransaksi: (id: string, status: 'Terverifikasi' | 'Ditolak', verifiedBy?: string) => boolean;
 
@@ -220,9 +232,14 @@ interface AppContextType {
   getSantriNameById: (id: string) => string;
 }
 
+type SantriFinanceProfile = Pick<Santri, 'kategoriUtama'> & Partial<Pick<Santri,
+  'tipeAsuh' | 'golonganAsuh' | 'program' | 'unitPesantrenId' | 'unitSekolahId' | 'kelasSekolahId' | 'kelasMadinId'
+>>;
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_PREFIX = 'sisantri_app_';
+const DEMO_FINANCE_SEED_VERSION = 1;
 
 function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -248,7 +265,17 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [users] = useLocalStorage<UserProfile[]>('users', INITIAL_USERS);
-  const [currentUser, setCurrentUser] = useLocalStorage<UserProfile>('currentUser', INITIAL_USERS[0]);
+  const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USERS[0]);
+
+  useEffect(() => {
+    let mounted = true;
+    getAuthenticatedUser().then(user => {
+      if (mounted && user) setCurrentUser(user);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Master data state
   const [unitsPesantren, setUnitsPesantren] = useLocalStorage<UnitPesantren[]>('unitsPesantren', INITIAL_UNITS_PESANTREN);
@@ -262,7 +289,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [kelasSekolahList, setKelasSekolahList] = useLocalStorage<KelasSekolah[]>('kelasSekolahList', INITIAL_KELAS_SEKOLAH);
 
   // Core Santri state
-  const [santriList, setSantriList] = useLocalStorage<Santri[]>('santriList', INITIAL_SANTRI);
+  const [santriDemoSeedVersion, setSantriDemoSeedVersion] = useLocalStorage<number>('santriDemoSeedVersion', 0);
+  const [santriList, setSantriList] = useLocalStorage<Santri[]>('santriList', [...INITIAL_SANTRI, ...INITIAL_DEMO_STATUS_SANTRI]);
 
   // Tahfidz & Nadhoman
   const [setoranTahfidzList, setSetoranTahfidzList] = useLocalStorage<SetoranTahfidz[]>('setoranTahfidz', INITIAL_SETORAN_TAHFIDZ);
@@ -283,7 +311,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Keuangan
   const [biayaMasterList, setBiayaMasterList] = useLocalStorage<BiayaMaster[]>('biayaMaster', INITIAL_BIAYA_MASTER);
+  const [statusDemoSeedVersion, setStatusDemoSeedVersion] = useLocalStorage<number>('statusDemoSeedVersion', 0);
   const [tarifPembayaranList, setTarifPembayaranList] = useLocalStorage<TarifPembayaran[]>('tarifPembayaran', INITIAL_TARIF_PEMBAYARAN);
+  const [tarifDemoSeedVersion, setTarifDemoSeedVersion] = useLocalStorage<number>('tarifDemoSeedVersion', 0);
   const [tagihanList, setTagihanList] = useLocalStorage<TagihanKeuangan[]>('tagihan', INITIAL_TAGIHAN);
   const [transaksiList, setTransaksiList] = useLocalStorage<TransaksiPembayaran[]>('transaksi', INITIAL_TRANSAKSI);
 
@@ -351,6 +381,69 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     });
   }, []);
+
+  // Tambahkan jenis pembayaran demo baru ke browser lama tanpa menggandakan data.
+  useEffect(() => {
+    if (statusDemoSeedVersion >= 1) return;
+
+    setBiayaMasterList(prev => {
+      const existingIds = new Set(prev.map(item => item.id));
+      const demoItems = INITIAL_BIAYA_MASTER.filter(item =>
+        item.id.startsWith('by-demo-status-') && !existingIds.has(item.id)
+      );
+      return demoItems.length > 0 ? [...prev, ...demoItems] : prev;
+    });
+    setStatusDemoSeedVersion(1);
+  }, [statusDemoSeedVersion]);
+
+  // Tambahkan aturan tarif demo hierarkis ke browser lama tanpa menggandakan data.
+  useEffect(() => {
+    if (tarifDemoSeedVersion >= 1) return;
+
+    setTarifPembayaranList(prev => {
+      const existingIds = new Set(prev.map(item => item.id));
+      const demoItems = INITIAL_TARIF_PEMBAYARAN.filter(item =>
+        item.id.startsWith('tarif-demo-') && !existingIds.has(item.id)
+      );
+      return demoItems.length > 0 ? [...prev, ...demoItems] : prev;
+    });
+    setTarifDemoSeedVersion(1);
+  }, [tarifDemoSeedVersion]);
+
+  // Tambahkan santri demo status ke browser lama tanpa menggandakan data.
+  useEffect(() => {
+    if (santriDemoSeedVersion >= 1) return;
+
+    setSantriList(prev => {
+      const existingIds = new Set(prev.map(item => item.id));
+      const demoItems = INITIAL_DEMO_STATUS_SANTRI.filter(item => !existingIds.has(item.id));
+      return demoItems.length > 0 ? [...prev, ...demoItems] : prev;
+    });
+    setSantriDemoSeedVersion(1);
+  }, [santriDemoSeedVersion]);
+
+  // Refresh tagihan demo lama agar santri demo baru ikut memiliki tagihan belum lunas.
+  useEffect(() => {
+    const financeSeedVersion = Number(window.localStorage.getItem(`${STORAGE_PREFIX}demoFinanceSeedVersion`) || 0);
+    if (financeSeedVersion >= DEMO_FINANCE_SEED_VERSION) return;
+
+    const demoSantriIds = new Set(INITIAL_TAGIHAN.map(tagihan => tagihan.santriId));
+    const demoPemasukanIds = new Set(
+      pemasukanList
+        .filter(pemasukan => demoSantriIds.has(pemasukan.santriId))
+        .map(pemasukan => pemasukan.id)
+    );
+
+    setTagihanList(prev => [
+      ...INITIAL_TAGIHAN,
+      ...prev.filter(tagihan => !demoSantriIds.has(tagihan.santriId))
+    ]);
+    setTransaksiList(prev => prev.filter(transaksi => !demoSantriIds.has(transaksi.santriId)));
+    setPemasukanList(prev => prev.filter(pemasukan => !demoSantriIds.has(pemasukan.santriId)));
+    setAlokasiList(prev => prev.filter(alokasi => !demoPemasukanIds.has(alokasi.pemasukanId)));
+    setAuditLogList(prev => prev.filter(log => !demoPemasukanIds.has(log.entityId)));
+    window.localStorage.setItem(`${STORAGE_PREFIX}demoFinanceSeedVersion`, String(DEMO_FINANCE_SEED_VERSION));
+  }, [pemasukanList]);
 
   // AUTO NIS GENERATOR
   // Format 6 digit: 2 digit tahun masuk + 4 digit sequence (e.g., 260001, 260002...)
@@ -505,9 +598,122 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Payment types and tariff rules
-  const addBiayaMaster = (item: Omit<BiayaMaster, 'id'>) => {
+  const isBiayaTargetMatch = (santri: SantriFinanceProfile, biaya: BiayaMaster): boolean => {
+    if (biaya.targetKategoriUtama && santri.kategoriUtama !== biaya.targetKategoriUtama) return false;
+    if (biaya.targetTipeAsuh && santri.tipeAsuh !== biaya.targetTipeAsuh) return false;
+    if (biaya.targetGolonganAsuh && santri.golonganAsuh !== biaya.targetGolonganAsuh) return false;
+    if (biaya.targetProgram && santri.program !== biaya.targetProgram) return false;
+    if (biaya.targetUnitPesantrenId && santri.unitPesantrenId !== biaya.targetUnitPesantrenId) return false;
+    if (biaya.targetUnitSekolahId && santri.unitSekolahId !== biaya.targetUnitSekolahId) return false;
+    return true;
+  };
+
+  const getJenjangSekolah = (santri: SantriFinanceProfile): JenjangSekolah | undefined => {
+    const kodeSekolah = unitSekolahList.find(unit => unit.id === santri.unitSekolahId)?.kodeSekolah?.toUpperCase();
+    if (!kodeSekolah) return undefined;
+    if (kodeSekolah === 'MTS' || kodeSekolah === 'SMP') return 'SMP';
+    if (kodeSekolah === 'MA' || kodeSekolah === 'SMA' || kodeSekolah === 'SMK') return 'SLTA';
+    return undefined;
+  };
+
+  const isTarifMatch = (santri: SantriFinanceProfile, tarif: TarifPembayaran): boolean => {
+    const hasHierarchicalTarget = Boolean(
+      tarif.targetKategoriUtama ||
+      tarif.targetTipeAsuh ||
+      tarif.targetGolonganAsuh ||
+      tarif.targetProgram ||
+      tarif.targetJenjangSekolah ||
+      tarif.targetUnitPesantrenId ||
+      tarif.targetUnitSekolahId
+    );
+
+    if (hasHierarchicalTarget) {
+      if (tarif.targetKategoriUtama && santri.kategoriUtama !== tarif.targetKategoriUtama) return false;
+      if (tarif.targetTipeAsuh && santri.tipeAsuh !== tarif.targetTipeAsuh) return false;
+      if (tarif.targetGolonganAsuh && santri.golonganAsuh !== tarif.targetGolonganAsuh) return false;
+      if (tarif.targetProgram && santri.program !== tarif.targetProgram) return false;
+      if (tarif.targetJenjangSekolah && getJenjangSekolah(santri) !== tarif.targetJenjangSekolah) return false;
+      if (tarif.targetUnitPesantrenId && santri.unitPesantrenId !== tarif.targetUnitPesantrenId) return false;
+      if (tarif.targetUnitSekolahId && santri.unitSekolahId !== tarif.targetUnitSekolahId) return false;
+      return true;
+    }
+
+    switch (tarif.targetScope) {
+      case 'Unit Sekolah': return santri.unitSekolahId === tarif.targetValue;
+      case 'Unit Pesantren': return santri.unitPesantrenId === tarif.targetValue;
+      case 'Kelas Sekolah': return santri.kelasSekolahId === tarif.targetValue;
+      case 'Kelas Madin': return santri.kelasMadinId === tarif.targetValue;
+      case 'Kategori Utama': return santri.kategoriUtama === tarif.targetValue;
+      case 'Tipe Asuh': return santri.tipeAsuh === tarif.targetValue;
+      case 'Golongan Asuh': return santri.golonganAsuh === tarif.targetValue;
+      case 'Program': return santri.program === tarif.targetValue;
+      case 'Jenjang Sekolah': return getJenjangSekolah(santri) === tarif.targetValue;
+      default: return true;
+    }
+  };
+
+  const getTarifSpecificity = (tarif: TarifPembayaran): number => {
+    const dimensions = [
+      tarif.targetKategoriUtama,
+      tarif.targetTipeAsuh,
+      tarif.targetGolonganAsuh,
+      tarif.targetProgram,
+      tarif.targetJenjangSekolah,
+      tarif.targetUnitPesantrenId,
+      tarif.targetUnitSekolahId
+    ];
+    const hierarchicalSpecificity = dimensions.filter(Boolean).length;
+    return hierarchicalSpecificity > 0 ? hierarchicalSpecificity : tarif.targetScope === 'Semua Santri' ? 0 : 1;
+  };
+
+  const getApplicableNominal = (santri: SantriFinanceProfile, biaya: BiayaMaster): number => {
+    const tarif = tarifPembayaranList
+      .filter(t => t.biayaMasterId === biaya.id && t.aktif && isTarifMatch(santri, t))
+      .sort((a, b) => getTarifSpecificity(b) - getTarifSpecificity(a))[0];
+    const hasHierarchicalRules = tarifPembayaranList.some(t =>
+      t.biayaMasterId === biaya.id && t.id.startsWith('tarif-demo-')
+    );
+    if (!tarif && hasHierarchicalRules) return 0;
+    return tarif?.nominal ?? biaya.nominal ?? 0;
+  };
+
+  const getNominalBiayaSantri = (santriId: string, biayaMasterId: string): number => {
+    const santri = santriList.find(item => item.id === santriId);
+    const biaya = biayaMasterList.find(item => item.id === biayaMasterId);
+    if (!santri || santri.status !== 'Aktif' || !biaya || biaya.aktif === false || !isBiayaTargetMatch(santri, biaya)) return 0;
+    return getApplicableNominal(santri, biaya);
+  };
+
+  const getAcademicYearStart = (tahunAjaran: TahunAjaran): number => {
+    const year = Number(tahunAjaran.kodeTahunAjaran.slice(0, 4));
+    return Number.isFinite(year) ? year : new Date().getFullYear();
+  };
+
+  const getPeriodInfo = (tahunAjaran: TahunAjaran, bulanKe: number) => {
+    const startYear = getAcademicYearStart(tahunAjaran);
+    const calendarYear = bulanKe <= 6 ? startYear + 1 : startYear;
+    const monthNumber = bulanKe <= 6 ? bulanKe : bulanKe - 6;
+    return {
+      bulanKe,
+      bulanTahun: `${BULAN_KE_LABEL[bulanKe - 1]} ${calendarYear}`,
+      tanggalJatuhTempo: `${calendarYear}-${monthNumber.toString().padStart(2, '0')}-10`
+    };
+  };
+
+  const getGenerationPeriods = (biaya: BiayaMaster, tahunAjaran: TahunAjaran, bulanMulai: number, bulanSelesai: number) => {
+    if (bulanMulai < 1 || bulanSelesai > 12 || bulanMulai > bulanSelesai) return [];
+    const isRecurring = biaya.jenis === 'Syahriyah' || biaya.tipeFrekuensi === 'Bulanan' || biaya.tipeFrekuensi === 'Periodik';
+    const months = isRecurring ? Array.from({ length: bulanSelesai - bulanMulai + 1 }, (_, index) => bulanMulai + index) : [bulanMulai];
+    return months.map(month => getPeriodInfo(tahunAjaran, month));
+  };
+
+  const getTagihanPeriodKey = (tagihan: TagihanKeuangan, tahunAjaranId: string): string =>
+    `${tagihan.tahunAjaranId || tahunAjaranId}:${tagihan.bulanKe ?? tagihan.bulanTahun ?? ''}`;
+
+  const addBiayaMaster = (item: Omit<BiayaMaster, 'id'>): BiayaMaster => {
     const newItem: BiayaMaster = { ...item, id: `biaya-${Date.now()}`, aktif: item.aktif ?? true };
     setBiayaMasterList(prev => [...prev, newItem]);
+    return newItem;
   };
 
   const updateBiayaMaster = (id: string, item: Partial<BiayaMaster>) => {
@@ -531,6 +737,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTarifPembayaranList(prev => prev.filter(t => t.id !== id));
   };
 
+  const getTagihanPreview = (santri: Partial<Santri>): TagihanPreviewItem[] => {
+    if (santri.status && santri.status !== 'Aktif') return [];
+    if (!santri.kategoriUtama) return [];
+
+    const profile = santri as SantriFinanceProfile;
+    return biayaMasterList
+      .filter(biaya =>
+        biaya.jenis === 'Syahriyah' &&
+        biaya.aktif !== false &&
+        biaya.wajib !== false &&
+        !biaya.id.startsWith('by-demo-status-') &&
+        isBiayaTargetMatch(profile, biaya)
+      )
+      .map(biaya => ({
+        biayaMasterId: biaya.id,
+        namaBiaya: biaya.namaBiaya,
+        kategori: biaya.kategori,
+        nominal: getApplicableNominal(profile, biaya),
+        wajib: biaya.wajib !== false
+      }))
+      .filter(item => item.nominal > 0);
+  };
+
   // Santri CRUD
   const addSantri = (santriData: Omit<Santri, 'id' | 'nis'>): Santri => {
     const newNis = generateNextNIS();
@@ -548,26 +777,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setSantriList(prev => [newSantri, ...prev]);
 
-    // Generate one monthly invoice for each Syahriyah category.
+    // Generate the mandatory monthly payment types that match this santri.
     if (newSantri.status === 'Aktif') {
       const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
       const now = new Date();
       const currentMonthYear = `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
-      const activeConfig = getAktifDistribusiConfig();
-      const configNominals = activeConfig ? getConfigNominals(activeConfig) : undefined;
-      const syahriyahCosts = biayaMasterList.filter(b => b.jenis === 'Syahriyah' && b.kategori);
+      const currentBulanKe = now.getMonth() >= 6 ? now.getMonth() - 5 : now.getMonth() + 7;
+      const syahriyahCosts = biayaMasterList.filter(b =>
+        b.jenis === 'Syahriyah' &&
+        b.aktif !== false &&
+        b.wajib !== false &&
+        !b.id.startsWith('by-demo-status-') &&
+        isBiayaTargetMatch(newSantri, b)
+      );
       const createdAt = Date.now();
       const newTagihans: TagihanKeuangan[] = syahriyahCosts.map((biaya, index) => ({
         id: `tgh-${createdAt}-${index}`,
         santriId: newSantri.id,
         biayaMasterId: biaya.id,
         bulanTahun: currentMonthYear,
-        nominalTagihan: configNominals?.[biaya.kategori!] ?? biaya.nominal ?? 0,
+        bulanKe: currentBulanKe,
+        unitId: getUnitKeyFromSantri(newSantri.id, newSantri),
+        nominalTagihan: getApplicableNominal(newSantri, biaya),
         nominalTerbayar: 0,
-        status: 'Belum Lunas',
+        status: 'Belum Lunas' as const,
         tanggalJatuhTempo: `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-10`,
         tahunAjaranId: getTahunAjaranAktif()?.id ?? ''
-      }));
+      })).filter(tagihan => tagihan.nominalTagihan > 0);
       setTagihanList(prev => [...newTagihans, ...prev]);
     }
 
@@ -710,30 +946,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Keuangan
-  const isTarifMatch = (santri: Santri, tarif: TarifPembayaran): boolean => {
-    switch (tarif.targetScope) {
-      case 'Unit Sekolah': return santri.unitSekolahId === tarif.targetValue;
-      case 'Unit Pesantren': return santri.unitPesantrenId === tarif.targetValue;
-      case 'Kelas Sekolah': return santri.kelasSekolahId === tarif.targetValue;
-      case 'Kelas Madin': return santri.kelasMadinId === tarif.targetValue;
-      case 'Kategori Utama': return santri.kategoriUtama === tarif.targetValue;
-      case 'Tipe Asuh': return santri.tipeAsuh === tarif.targetValue;
-      case 'Golongan Asuh': return santri.golonganAsuh === tarif.targetValue;
-      case 'Program': return santri.program === tarif.targetValue;
-      default: return true;
-    }
-  };
-
   const generateTagihan = (input: { santriId: string; biayaMasterId: string; periode: string; bulanKe?: number; tanggalJatuhTempo?: string }): TagihanKeuangan | null => {
     const santri = santriList.find(s => s.id === input.santriId);
     const biaya = biayaMasterList.find(b => b.id === input.biayaMasterId);
-    if (!santri || !biaya || biaya.aktif === false || !biaya.nominal || biaya.nominal <= 0) return null;
+    if (!santri || santri.status !== 'Aktif' || !biaya || biaya.aktif === false || !isBiayaTargetMatch(santri, biaya)) return null;
     if (tagihanList.some(t => t.santriId === input.santriId && t.biayaMasterId === input.biayaMasterId && t.bulanTahun === input.periode)) return null;
 
-    const tarif = tarifPembayaranList
-      .filter(t => t.biayaMasterId === input.biayaMasterId && t.aktif && isTarifMatch(santri, t))
-      .sort((a, b) => (a.targetScope === 'Semua Santri' ? 1 : 0) - (b.targetScope === 'Semua Santri' ? 1 : 0))[0];
-    const nominal = tarif?.nominal ?? biaya.nominal;
+    const nominal = getApplicableNominal(santri, biaya);
+    if (nominal <= 0) return null;
     const [bulanPeriode, tahun] = input.periode.split(/\s+(?=\d{4}$)/);
     const newTagihan: TagihanKeuangan = {
       id: `tgh-${Date.now()}`,
@@ -815,8 +1035,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Resolusi unit santri (PONPES/SMP/MTS/MA/SMK/MADIN) — untuk snapshot & filter monitoring.
-  const getUnitKeyFromSantri = (santriId: string): string | undefined => {
-    const s = santriList.find(x => x.id === santriId);
+  const getUnitKeyFromSantri = (santriId: string, santriOverride?: Santri): string | undefined => {
+    const s = santriOverride ?? santriList.find(x => x.id === santriId);
     if (!s) return undefined;
     const sekolah = unitSekolahList.find(u => u.id === s.unitSekolahId);
     if (sekolah?.kodeSekolah) return sekolah.kodeSekolah;
@@ -825,6 +1045,110 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const madin = marhalahList.find(m => m.id === s.marhalahMadinId);
     if (madin) return 'MADIN';
     return undefined;
+  };
+
+  const previewGenerateTagihan = (input: TagihanGenerationInput): TagihanGenerationPreview | null => {
+    const biaya = biayaMasterList.find(b => b.id === input.biayaMasterId);
+    const tahunAjaran = tahunAjaranList.find(t => t.id === (input.tahunAjaranId || getTahunAjaranAktif()?.id));
+    if (!biaya || biaya.aktif === false || !tahunAjaran) return null;
+
+    const periods = getGenerationPeriods(biaya, tahunAjaran, input.bulanMulai, input.bulanSelesai);
+    const eligibleSantri = santriList.filter(s => s.status === 'Aktif' && isBiayaTargetMatch(s, biaya));
+    let existingTagihanCount = 0;
+    let calonTagihanCount = 0;
+    let totalNominal = 0;
+
+    for (const santri of eligibleSantri) {
+      const nominal = getApplicableNominal(santri, biaya);
+      if (nominal <= 0) continue;
+      for (const period of periods) {
+        const exists = tagihanList.some(t =>
+          t.santriId === santri.id &&
+          t.biayaMasterId === biaya.id &&
+          getTagihanPeriodKey(t, tahunAjaran.id) === `${tahunAjaran.id}:${period.bulanKe}`
+        );
+        if (exists) existingTagihanCount++;
+        else {
+          calonTagihanCount++;
+          totalNominal += nominal;
+        }
+      }
+    }
+
+    return {
+      biayaMasterId: biaya.id,
+      tahunAjaranId: tahunAjaran.id,
+      periodeCount: periods.length,
+      eligibleSantriCount: eligibleSantri.length,
+      calonTagihanCount,
+      existingTagihanCount,
+      totalNominal,
+      periodeLabels: periods.map(period => period.bulanTahun)
+    };
+  };
+
+  const generateTagihanMassal = (input: TagihanGenerationInput): TagihanGenerationResult | null => {
+    const biaya = biayaMasterList.find(b => b.id === input.biayaMasterId);
+    const tahunAjaran = tahunAjaranList.find(t => t.id === (input.tahunAjaranId || getTahunAjaranAktif()?.id));
+    if (!biaya || biaya.aktif === false || !tahunAjaran) return null;
+
+    const periods = getGenerationPeriods(biaya, tahunAjaran, input.bulanMulai, input.bulanSelesai);
+    const eligibleSantri = santriList.filter(s => s.status === 'Aktif' && isBiayaTargetMatch(s, biaya));
+    const createdAt = Date.now();
+    const newTagihans: TagihanKeuangan[] = [];
+    let skippedCount = 0;
+    let sequence = tagihanList.length + 1;
+
+    for (const santri of eligibleSantri) {
+      const nominal = getApplicableNominal(santri, biaya);
+      if (nominal <= 0) continue;
+      for (const period of periods) {
+        const exists = tagihanList.some(t =>
+          t.santriId === santri.id &&
+          t.biayaMasterId === biaya.id &&
+          getTagihanPeriodKey(t, tahunAjaran.id) === `${tahunAjaran.id}:${period.bulanKe}`
+        ) || newTagihans.some(t =>
+          t.santriId === santri.id &&
+          t.biayaMasterId === biaya.id &&
+          getTagihanPeriodKey(t, tahunAjaran.id) === `${tahunAjaran.id}:${period.bulanKe}`
+        );
+
+        if (exists) {
+          skippedCount++;
+          continue;
+        }
+
+        newTagihans.push({
+          id: `tgh-${createdAt}-${newTagihans.length}`,
+          santriId: santri.id,
+          biayaMasterId: biaya.id,
+          noTagihan: `TG-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${(sequence++).toString().padStart(4, '0')}`,
+          bulanTahun: period.bulanTahun,
+          bulanPeriode: BULAN_KE_LABEL[period.bulanKe - 1],
+          tahunPeriode: Number(period.bulanTahun.slice(-4)),
+          bulanKe: period.bulanKe,
+          unitId: getUnitKeyFromSantri(santri.id),
+          nominalTagihan: nominal,
+          nominalTerbayar: 0,
+          status: 'Belum Lunas',
+          tanggalJatuhTempo: period.tanggalJatuhTempo,
+          tahunAjaranId: tahunAjaran.id
+        });
+      }
+    }
+
+    if (newTagihans.length > 0) setTagihanList(prev => [...newTagihans, ...prev]);
+
+    return {
+      biayaMasterId: biaya.id,
+      tahunAjaranId: tahunAjaran.id,
+      eligibleSantriCount: eligibleSantri.length,
+      periodeCount: periods.length,
+      createdCount: newTagihans.length,
+      skippedCount,
+      totalNominal: newTagihans.reduce((total, tagihan) => total + tagihan.nominalTagihan, 0),
+      tagihan: newTagihans
+    };
   };
 
   // Rekam audit trail (siapa-melakukan-apa-kapan-terhadap-apa).
@@ -1181,6 +1505,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         tagihanList,
         transaksiList,
         generateTagihan,
+        getNominalBiayaSantri,
+        getTagihanPreview,
+        previewGenerateTagihan,
+        generateTagihanMassal,
         addBayarTagihan,
         verifikasiTransaksi,
 

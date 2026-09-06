@@ -9,7 +9,7 @@
 | **Versi Frontend** | v1.1.0 (SPA Multi-URL Routing) |
 | **Teknologi Utama** | React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons, React Router DOM |
 | **Dokumen Acuan** | [prd.md](file:///d:/web/sisantri---sim-pesantren-mukhtar-syafaat/prd.md) & `RENCANA APLIKASI.xlsx` |
-| **Tanggal Laporan** | 21 Agustus 2026 |
+| **Tanggal Laporan** | 6 September 2026 |
 
 ---
 
@@ -114,12 +114,18 @@ graph TD
    - Mencatat hafalan kitab syair agama (seperti *Aqidatul Awam*, *Imriti*, *Alfiyah Ibn Malik*).
    - **Kalkulasi Akumulasi Otomatis**: Fungsi `addSetoranNadhoman` pada [AppContext.tsx](file:///d:/web/sisantri---sim-pesantren-mukhtar-syafaat/src/context/AppContext.tsx#L478-L497) mengambil total hafalan sebelumnya untuk kitab yang sama pada santri tersebut, lalu menjumlahkannya dengan `jumlahBaitBaru` untuk menghasilkan `totalHafalanSelesai` secara real-time.
 
-### 3.4 Alur Keuangan, Syahriyah & Pembayaran
-1. **Master Biaya & Tagihan**: Mengelola Biaya Tahunan, Syahriyah (Bulanan), dan Non-Syahriyah.
-2. **Pembayaran & Generasi Kuitansi**:
-   - Melalui [KeuanganModule.tsx](file:///d:/web/sisantri---sim-pesantren-mukhtar-syafaat/src/components/keuangan/KeuanganModule.tsx), admin input nominal pembayaran dan metode (Tunai/Transfer/E-Wallet).
-   - Fungsi `addBayarTagihan` membuat nomor kuitansi otomatis dengan format `KW-YYYYMMDD-XXX`.
-   - Menghitung `nominalTerbayar`. Jika `nominalTerbayar >= nominalTagihan`, status tagihan otomatis menjadi `'Lunas'`, jika sebagian menjadi `'Sebagian'`.
+### 3.4 Alur Keuangan, Tarif Hierarkis, Syahriyah & Pemasukan
+1. **Sumber Data Santri**: Modul Keuangan tidak membuat atau menyalin data santri. Admin memilih santri existing menggunakan `santriId` dari `santriList`, sehingga tidak terjadi duplikasi santri.
+2. **Master Jenis Pembayaran**: Menu [JenisPembayaran.tsx](file:///d:/web/sisantri---sim-pesantren-mukhtar-syafaat/src/components/keuangan/JenisPembayaran.tsx) mengelola komponen Yayasan, Sekolah, Pesantren, Makan, dan Madin, termasuk target kategori, tipe asuh, golongan A1/A2/A3, program, jenjang sekolah, nominal, frekuensi, dan status wajib/opsional.
+3. **Hierarki Tarif**: Sistem menghitung nominal berdasarkan kombinasi `kategoriUtama`, `tipeAsuh`, `golonganAsuh`, `program`, dan jenjang sekolah. MTs dikelompokkan sebagai SMP, sedangkan MA, SMA, dan SMK dikelompokkan sebagai SLTA. Aturan yang paling spesifik selalu dipilih lebih dahulu.
+4. **Data Demo Tarif**: Tersedia 13 profil status, 2 kelompok jenjang, dan 5 komponen pembayaran, sehingga terdapat 130 aturan tarif demo. Contoh profilnya adalah Bukan Asuh-Pelajar, Asuh A1-Pelajar, Asuh A2-Pelajar, Asuh A3-Pelajar, Pengabdian, Lulus, dan Desa.
+5. **Pembuatan Tagihan**: Pada menu Jenis Pembayaran, sistem membaca santri existing, mencocokkan target hierarki, lalu membuat tagihan hanya untuk santri yang sesuai. Kunci pencegahan duplikasi menggunakan kombinasi santri, jenis pembayaran, tahun ajaran, dan periode.
+6. **Preview Kewajiban**: Form data santri menampilkan estimasi syahriyah berdasarkan status dan jenjangnya. Fitur ini hanya preview dan pembuatan tagihan awal; data santri tetap dikelola pada modul Data Santri.
+7. **Input Pemasukan**: Pada [PemasukanDistribusi.tsx](file:///d:/web/sisantri---sim-pesantren-mukhtar-syafaat/src/components/keuangan/PemasukanDistribusi.tsx), admin memilih santri existing dan periode. Untuk Syahriyah, nominal otomatis diambil dari total sisa tagihan periode tersebut dan kolom nominal dibuat read-only.
+8. **Rincian Nominal Otomatis**: Setelah santri dipilih, sistem menampilkan rincian tagihan per pos Yayasan, Sekolah, Pesantren, Makan, dan Madin. Admin tidak perlu mengetik ulang nominal atau status santri.
+9. **Distribusi Pemasukan**: Pemasukan Syahriyah menggunakan rincian nominal aktual tagihan santri, bukan lagi memaksa satu nominal global untuk semua santri. Snapshot distribusi menyimpan pembagian aktual yang digunakan pada transaksi.
+10. **Pembayaran & Generasi Kuitansi**: Fungsi `addBayarTagihan` tetap menyediakan nomor kuitansi otomatis dengan format `KW-YYYYMMDD-XXX`, menghitung `nominalTerbayar`, dan mengubah status tagihan menjadi `'Lunas'` atau `'Sebagian'` sesuai jumlah yang dibayar.
+11. **Batasan Jenis Non-Syahriyah**: Jenis pembayaran non-Syahriyah yang belum terhubung ke tagihan periode masih menggunakan input nominal manual. Otomatisasi nominal saat ini difokuskan pada Syahriyah berbasis tagihan.
 
 ### 3.5 Alur Kepengasuhan (Kesehatan, Perizinan, Konseling)
 1. **Kesehatan UKS**: Pencatatan keluhan, diagnosa, obat, dan status santri (`Dalam Perawatan UKS`, `Sembuh`, `Dirujuk Rumah Sakit`).
@@ -150,7 +156,7 @@ Berdasarkan analisis perbandingan terhadap spesifikasi pada [prd.md](file:///d:/
 | 10 | **Modul Kepengasuhan** | PRD 4.3 | **Selesai** (Kesehatan UKS, Workflow Approval Perizinan, Log Konseling, Kunjungan Tamu) |
 | 11 | **Modul Kepegawaian** | PRD 4.4 | **Selesai** (Master Jabatan, Data Pegawai Aktif/Non-Aktif, Auto Generasi NIP) |
 | 12 | **Modul Akademik & Presensi** | PRD 4.5 | **Selesai** (Presensi Formal & Madin batch entry per kelas & tanggal) |
-| 13 | **Modul Keuangan & Syahriyah** | PRD 4.6 | **Selesai** (Master Biaya, Tagihan Bulanan/Tahunan, Modal Bayar, Auto Kuitansi `KW-xxx`) |
+| 13 | **Modul Keuangan & Syahriyah** | PRD 4.6 | **Selesai frontend** (Master Jenis Pembayaran, Tarif Hierarkis Status Santri, Tagihan sesuai Target, Preview Kewajiban, Pemasukan dengan Nominal Syahriyah Otomatis, Distribusi Snapshot, Auto Kuitansi `KW-xxx`) |
 | 14 | **Modul PPDB & Mutasi NIS** | PRD 4.7 & 5.1 & Excel `Sheet4` | **Selesai** (Form Pendaftaran, Verifikasi, & **Fitur Mutasi Otomatis 1-Click Ke Data Santri**) |
 | 15 | **Portal Wali Santri** | PRD 2.3 | **Selesai** (Dashboard monitoring wali santri real-time) |
 | 16 | **Dashboard Executive** | PRD 4.1 & Excel Sheet `DASBOARD` | **Selesai** (Statistik santri, grafik perkembangan, widget perizinan & tunggakan) |
@@ -359,9 +365,11 @@ timeline
 
 ## 8. KESIMPULAN
 
-Sistem Informasi Manajemen Pesantren Mukhtar Syafaat (**SiSantri**) saat ini telah memiliki **fondasi frontend SPA yang sangat matang, komprehensif, dan 100% mematuhi seluruh spesifikasi dokumen [prd.md](file:///d:/web/sisantri---sim-pesantren-mukhtar-syafaat/prd.md) serta `RENCANA APLIKASI.xlsx`**. 
+Sistem Informasi Manajemen Pesantren Mukhtar Syafaat (**SiSantri**) saat ini telah memiliki **fondasi frontend SPA yang matang dan komprehensif** untuk memvalidasi alur operasional pesantren sebelum integrasi produksi.
 
-Seluruh alur logika bisnis—mulai dari generasi NIS otomatis, formulir santri 8 bagian, mutasi PPDB 1-click, kalkulasi akumulasi nadhoman, pelunasan syahriyah, hingga portal monitoring wali santri—telah berfungsi dengan lancar secara interaktif. Pada **v1.1.0**, aplikasi ditingkatkan dengan antarmuka yang lebih ringkas serta **routing berbasis URL** (`/`, `/login`, `/app/:tab`) sehingga setiap halaman dapat diakses melalui alamat yang unik dan dapat dibagikan, dengan SPA rewrite agar kompatibel penuh pada Vercel. Langkah strategis berikutnya adalah mengeksekusi pengembangan sisi Backend REST API dan integrasi Database Relasional sesuai rencana task kedepannya.
+Pada modul Keuangan, aturan tarif sekarang tidak lagi menggunakan satu nominal yang sama untuk semua santri. Sistem membaca profil hierarki santri dan jenjang sekolah, kemudian menentukan nominal masing-masing komponen pembayaran. Data santri tetap menjadi sumber data utama; modul Keuangan hanya membaca `santriId`, mencocokkan target, membuat tagihan, dan mencatat pemasukan berdasarkan tagihan periode yang dipilih. Nominal Syahriyah otomatis tampil setelah admin memilih santri dan periode, lengkap dengan rincian lima pos keuangan.
+
+Seluruh alur frontend—mulai dari generasi NIS otomatis, formulir santri 8 bagian, mutasi PPDB 1-click, tarif Keuangan hierarkis, tagihan berbasis target, preview kewajiban, pemasukan Syahriyah otomatis, hingga portal monitoring wali santri—telah berfungsi secara interaktif menggunakan `localStorage`. Pada **v1.1.0**, aplikasi juga ditingkatkan dengan antarmuka ringkas serta **routing berbasis URL** (`/`, `/login`, `/app/:tab`). Langkah strategis berikutnya adalah menghubungkan aturan dan data tersebut ke Backend REST API, database relasional, serta modul pembayaran produksi.
 
 ---
 *Laporan ini disusun secara otomatis oleh Antigravity AI Assistant tanpa mengubah kode sumber aplikasi.*

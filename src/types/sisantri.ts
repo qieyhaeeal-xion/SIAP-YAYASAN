@@ -349,7 +349,8 @@ export interface BiayaMaster {
   aktif?: boolean;
 }
 
-export type TarifTargetScope = 'Semua Santri' | 'Unit Sekolah' | 'Unit Pesantren' | 'Kelas Sekolah' | 'Kelas Madin' | 'Kategori Utama' | 'Tipe Asuh' | 'Golongan Asuh' | 'Program';
+export type TarifTargetScope = 'Semua Santri' | 'Unit Sekolah' | 'Unit Pesantren' | 'Kelas Sekolah' | 'Kelas Madin' | 'Kategori Utama' | 'Tipe Asuh' | 'Golongan Asuh' | 'Program' | 'Jenjang Sekolah';
+export type JenjangSekolah = 'SMP' | 'SLTA';
 
 export type SantriKategori = 'Santri' | 'Desa';
 export type TipeAsuh = 'Asuh' | 'Bukan Asuh';
@@ -361,6 +362,14 @@ export interface TarifPembayaran {
   biayaMasterId: string;
   targetScope: TarifTargetScope;
   targetValue?: string;
+  // Kombinasi target hierarki untuk aturan tarif yang lebih spesifik.
+  targetKategoriUtama?: SantriKategori;
+  targetTipeAsuh?: TipeAsuh;
+  targetGolonganAsuh?: GolonganAsuh;
+  targetProgram?: ProgramSantri;
+  targetJenjangSekolah?: JenjangSekolah;
+  targetUnitPesantrenId?: string;
+  targetUnitSekolahId?: string;
   nominal: number;
   wajib: boolean;
   aktif: boolean;
@@ -383,6 +392,43 @@ export interface TagihanKeuangan {
   status: 'Lunas' | 'Sebagian' | 'Belum Lunas';
   tanggalJatuhTempo?: string;
   tahunAjaranId?: string;
+}
+
+export interface TagihanGenerationInput {
+  biayaMasterId: string;
+  tahunAjaranId?: string;
+  bulanMulai: number;
+  bulanSelesai: number;
+}
+
+export interface TagihanGenerationPreview {
+  biayaMasterId: string;
+  tahunAjaranId: string;
+  periodeCount: number;
+  eligibleSantriCount: number;
+  calonTagihanCount: number;
+  existingTagihanCount: number;
+  totalNominal: number;
+  periodeLabels: string[];
+}
+
+export interface TagihanGenerationResult {
+  biayaMasterId: string;
+  tahunAjaranId: string;
+  eligibleSantriCount: number;
+  periodeCount: number;
+  createdCount: number;
+  skippedCount: number;
+  totalNominal: number;
+  tagihan: TagihanKeuangan[];
+}
+
+export interface TagihanPreviewItem {
+  biayaMasterId: string;
+  namaBiaya: string;
+  kategori?: BiayaKategori;
+  nominal: number;
+  wajib: boolean;
 }
 
 export interface RekapKategoriItem {
@@ -577,6 +623,7 @@ export interface Pemasukan {
   id: string;
   noPemasukan: string; // identitas transaksi asli (unik)
   santriId: string;
+  biayaMasterId?: string; // jenis pembayaran yang dipilih saat pemasukan dicatat
   unitId?: string; // snapshot unit santri saat transaksi (PONPES/SMP/MTS/MA/SMK/MADIN)
   tanggal: string;
   nominal: number;

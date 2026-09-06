@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { BadgeDollarSign, Plus, Trash2 } from 'lucide-react';
-import { BiayaMaster, BiayaKategori } from '../../types/sisantri';
+import { BadgeDollarSign, CalendarDays, CheckCircle2, Eye, Plus, Trash2 } from 'lucide-react';
+import { BiayaMaster, BiayaKategori, BULAN_KE_LABEL, TagihanGenerationPreview } from '../../types/sisantri';
 import { PAYMENT_FREQUENCIES, COST_CATEGORIES, formatRp, Field } from './shared';
 
 export const JenisPembayaran: React.FC = () => {
-  const { biayaMasterList, addBiayaMaster, updateBiayaMaster, deleteBiayaMaster, unitsPesantren, unitSekolahList } = useApp();
+  const {
+    biayaMasterList,
+    addBiayaMaster,
+    updateBiayaMaster,
+    deleteBiayaMaster,
+    unitsPesantren,
+    unitSekolahList,
+    getTahunAjaranAktif,
+    previewGenerateTagihan,
+    generateTagihanMassal
+  } = useApp();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
@@ -24,6 +34,14 @@ export const JenisPembayaran: React.FC = () => {
   const [required, setRequired] = useState(true);
   const [description, setDescription] = useState('');
   const [feedback, setFeedback] = useState<{ ok: boolean; message: string } | null>(null);
+  const [generationPaymentId, setGenerationPaymentId] = useState('');
+  const [generationStart, setGenerationStart] = useState(1);
+  const [generationEnd, setGenerationEnd] = useState(12);
+  const [generationPreview, setGenerationPreview] = useState<TagihanGenerationPreview | null>(null);
+  const [generationFeedback, setGenerationFeedback] = useState<{ ok: boolean; message: string } | null>(null);
+
+  const activeTahunAjaran = getTahunAjaranAktif();
+  const selectedGenerationPayment = biayaMasterList.find(item => item.id === generationPaymentId);
 
   const reset = () => {
     setEditingId(null);
@@ -75,6 +93,53 @@ export const JenisPembayaran: React.FC = () => {
     else addBiayaMaster(payload);
     setFeedback({ ok: true, message: editingId ? 'Jenis pembayaran diperbarui.' : 'Jenis pembayaran ditambahkan.' });
     reset();
+  };
+
+  const handlePreviewGeneration = () => {
+    if (!generationPaymentId) {
+      setGenerationFeedback({ ok: false, message: 'Pilih jenis pembayaran terlebih dahulu.' });
+      return;
+    }
+    if (!activeTahunAjaran) {
+      setGenerationFeedback({ ok: false, message: 'Belum ada tahun ajaran aktif.' });
+      return;
+    }
+    if (generationStart > generationEnd) {
+      setGenerationFeedback({ ok: false, message: 'Periode mulai tidak boleh melewati periode akhir.' });
+      return;
+    }
+    const preview = previewGenerateTagihan({
+      biayaMasterId: generationPaymentId,
+      tahunAjaranId: activeTahunAjaran.id,
+      bulanMulai: generationStart,
+      bulanSelesai: generationEnd
+    });
+    setGenerationPreview(preview);
+    setGenerationFeedback(preview ? null : { ok: false, message: 'Preview tagihan tidak dapat dibuat.' });
+  };
+
+  const handleGenerate = () => {
+    if (!generationPreview || !selectedGenerationPayment || !activeTahunAjaran) return;
+    const confirmed = window.confirm(
+      `Buat ${generationPreview.calonTagihanCount} tanggungan ${selectedGenerationPayment.namaBiaya} untuk ${generationPreview.eligibleSantriCount} santri pada ${generationPreview.periodeCount} periode?`
+    );
+    if (!confirmed) return;
+
+    const result = generateTagihanMassal({
+      biayaMasterId: generationPaymentId,
+      tahunAjaranId: activeTahunAjaran.id,
+      bulanMulai: generationStart,
+      bulanSelesai: generationEnd
+    });
+    if (!result) {
+      setGenerationFeedback({ ok: false, message: 'Tagihan gagal dibuat.' });
+      return;
+    }
+    setGenerationFeedback({
+      ok: true,
+      message: `${result.createdCount} tanggungan dibuat, ${result.skippedCount} dilewati karena sudah ada.`
+    });
+    setGenerationPreview(null);
   };
 
   const getStatusSummary = () => {
@@ -245,6 +310,68 @@ export const JenisPembayaran: React.FC = () => {
         </form>
 
         <div className="xl:col-span-2 bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+          <div className="mb-6 rounded-2xl border border-sky-200 bg-sky-50/60 p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="flex items-center gap-2 font-extrabold text-[#1A5276]"><CalendarDays className="h-5 w-5 text-[#1ABC9C]" />Terapkan Tanggungan Santri</h3>
+                <p className="mt-1 text-xs text-slate-600">Buat tagihan untuk semua santri aktif yang sesuai sasaran jenis pembayaran.</p>
+              </div>
+              <span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-sky-700">{activeTahunAjaran?.kodeTahunAjaran || 'Tanpa tahun aktif'}</span>
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+              <Field label="Jenis Pembayaran">
+                <select
+                  value={generationPaymentId}
+                  onChange={e => { setGenerationPaymentId(e.target.value); setGenerationPreview(null); setGenerationFeedback(null); }}
+                  className="input"
+                >
+                  <option value="">Pilih jenis pembayaran</option>
+                  {biayaMasterList.filter(item => item.aktif !== false).map(item => (
+                    <option key={item.id} value={item.id}>{item.namaBiaya} - {formatRp(item.nominal || 0)}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="Periode Mulai">
+                <select value={generationStart} onChange={e => { setGenerationStart(Number(e.target.value)); setGenerationPreview(null); }} className="input">
+                  {BULAN_KE_LABEL.map((label, index) => <option key={label} value={index + 1}>{label}</option>)}
+                </select>
+              </Field>
+              <Field label="Periode Selesai">
+                <select value={generationEnd} onChange={e => { setGenerationEnd(Number(e.target.value)); setGenerationPreview(null); }} className="input">
+                  {BULAN_KE_LABEL.map((label, index) => <option key={label} value={index + 1}>{label}</option>)}
+                </select>
+              </Field>
+            </div>
+
+            {selectedGenerationPayment && selectedGenerationPayment.jenis !== 'Syahriyah' && (
+              <p className="mt-3 text-xs font-semibold text-amber-700">Jenis pembayaran ini tidak berulang. Sistem hanya membuat satu tanggungan pada periode mulai.</p>
+            )}
+
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button type="button" onClick={handlePreviewGeneration} className="button-secondary"><Eye className="h-4 w-4" />Lihat Preview</button>
+              {generationPreview && (
+                <button type="button" onClick={handleGenerate} className="button-primary"><CheckCircle2 className="h-4 w-4" />Konfirmasi & Buat Tanggungan</button>
+              )}
+            </div>
+
+            {generationFeedback && (
+              <div className={`mt-3 rounded-xl border p-3 text-sm font-bold ${generationFeedback.ok ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>
+                {generationFeedback.message}
+              </div>
+            )}
+
+            {generationPreview && (
+              <div className="mt-4 grid grid-cols-2 gap-2 text-xs md:grid-cols-5">
+                <div className="rounded-xl bg-white p-3"><span className="text-gray-500">Santri sesuai</span><strong className="mt-1 block text-lg text-[#1A5276]">{generationPreview.eligibleSantriCount}</strong></div>
+                <div className="rounded-xl bg-white p-3"><span className="text-gray-500">Periode</span><strong className="mt-1 block text-lg text-[#1A5276]">{generationPreview.periodeCount}</strong></div>
+                <div className="rounded-xl bg-white p-3"><span className="text-gray-500">Akan dibuat</span><strong className="mt-1 block text-lg text-emerald-700">{generationPreview.calonTagihanCount}</strong></div>
+                <div className="rounded-xl bg-white p-3"><span className="text-gray-500">Sudah ada</span><strong className="mt-1 block text-lg text-amber-700">{generationPreview.existingTagihanCount}</strong></div>
+                <div className="col-span-2 rounded-xl bg-[#1A5276] p-3 text-white md:col-span-1"><span className="text-sky-100">Total nominal baru</span><strong className="mt-1 block text-sm">{formatRp(generationPreview.totalNominal)}</strong></div>
+              </div>
+            )}
+          </div>
+
           <div className="flex items-center justify-between mb-5">
             <div>
               <h3 className="font-extrabold text-lg text-[#1A5276]">Daftar Jenis Pembayaran</h3>

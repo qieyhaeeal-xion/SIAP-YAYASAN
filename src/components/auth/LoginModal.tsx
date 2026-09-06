@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { UserRole } from '../../types/sisantri';
+import { getApiErrorMessage } from '../../services/api/client';
+import { login } from '../../services/api/authService';
 import { 
   X, 
   User, 
@@ -14,15 +15,6 @@ import {
 } from 'lucide-react';
 
 export type RoleCategory = 'yayasan' | 'pengurus' | 'guru' | 'wali' | 'admin';
-
-// Hak akses modul otomatis ditentukan dari role yang dipilih (bukan pilihan manual terpisah)
-const ROLE_TO_ACCESS: Record<RoleCategory, UserRole> = {
-  yayasan: 'admin_yayasan',
-  pengurus: 'pengurus',
-  guru: 'guru',
-  wali: 'wali_santri',
-  admin: 'admin_yayasan',
-};
 
 // Username demo otomatis mengikuti role yang dipilih
 const USERNAME_BY_CATEGORY: Record<RoleCategory, string> = {
@@ -46,21 +38,22 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onSuccessLogin,
   initialRoleCategory = 'yayasan'
 }) => {
-  const { switchRole, users, setCurrentUser } = useApp();
+  const { setCurrentUser } = useApp();
   const [activeTab, setActiveTab] = useState<RoleCategory>(initialRoleCategory);
   
-  const [selectedRole, setSelectedRole] = useState<UserRole>('admin_yayasan');
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('123456');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Sync tab with initialRoleCategory when opened
   useEffect(() => {
     if (isOpen) {
       const normalizedCat: RoleCategory = initialRoleCategory === 'admin' ? 'yayasan' : initialRoleCategory;
       setActiveTab(normalizedCat);
-      setSelectedRole(ROLE_TO_ACCESS[normalizedCat]);
       setUsername(USERNAME_BY_CATEGORY[normalizedCat]);
       setPassword('123456');
+      setErrorMessage('');
     }
   }, [isOpen, initialRoleCategory]);
 
@@ -69,25 +62,26 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const handleTabSelect = (category: RoleCategory) => {
     const normalizedCat: RoleCategory = category === 'admin' ? 'yayasan' : category;
     setActiveTab(normalizedCat);
-    setSelectedRole(ROLE_TO_ACCESS[normalizedCat]);
     setUsername(USERNAME_BY_CATEGORY[normalizedCat]);
     setPassword('123456');
+    setErrorMessage('');
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Find matched user profile if exists, or switch role
-    const foundUser = users.find(u => u.username === username);
-    if (foundUser) {
-      setCurrentUser(foundUser);
-    } else {
-      switchRole(selectedRole);
-    }
 
-    // Direct to main app dashboard
-    onClose();
-    onSuccessLogin?.();
+    setIsSubmitting(true);
+    setErrorMessage('');
+    try {
+      const authenticatedUser = await login(username, password);
+      setCurrentUser(authenticatedUser);
+      onClose();
+      onSuccessLogin?.();
+    } catch (error) {
+      setErrorMessage(getApiErrorMessage(error, 'Login gagal. Pastikan backend dan database aktif.'));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -215,12 +209,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             </span>
           </div>
 
+          {errorMessage && (
+            <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
+              {errorMessage}
+            </p>
+          )}
+
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-3.5 sm:py-4 bg-[#1A5276] hover:bg-[#2E86C1] text-white font-extrabold text-sm sm:text-base rounded-xl transition-all flex items-center justify-center gap-2.5 sm:gap-3 shadow-lg hover:shadow-xl active:scale-[0.99]"
+            disabled={isSubmitting}
+            className="w-full py-3.5 sm:py-4 bg-[#1A5276] hover:bg-[#2E86C1] disabled:cursor-not-allowed disabled:opacity-60 text-white font-extrabold text-sm sm:text-base rounded-xl transition-all flex items-center justify-center gap-2.5 sm:gap-3 shadow-lg hover:shadow-xl active:scale-[0.99]"
           >
-            <span>MASUK KE SISTEM SIAP</span>
+            <span>{isSubmitting ? 'MEMERIKSA AKUN...' : 'MASUK KE SISTEM SIAP'}</span>
             <ArrowRight className="w-5 h-5" />
           </button>
 

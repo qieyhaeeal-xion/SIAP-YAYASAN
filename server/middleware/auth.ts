@@ -10,7 +10,7 @@ export interface AuthRequest extends Request {
   };
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'siap-pesantren-super-secret-key-2026';
+const getJwtSecret = () => process.env.JWT_SECRET || 'siap-pesantren-super-secret-key-2026';
 
 export function verifyToken(req: AuthRequest, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
@@ -21,7 +21,7 @@ export function verifyToken(req: AuthRequest, res: Response, next: NextFunction)
 
   const token = authHeader.substring(7);
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as AuthRequest['user'];
+    const decoded = jwt.verify(token, getJwtSecret()) as AuthRequest['user'];
     req.user = decoded;
     next();
   } catch (error) {
@@ -34,14 +34,14 @@ export function verifyToken(req: AuthRequest, res: Response, next: NextFunction)
 }
 
 export function generateTokens(payload: { id: string; username: string; role: string; nama: string }) {
-  const accessToken = jwt.sign(payload, JWT_SECRET, { expiresIn: '15m' });
-  const refreshToken = jwt.sign({ id: payload.id }, JWT_SECRET + '_refresh', { expiresIn: '7d' });
+  const accessToken = jwt.sign(payload, getJwtSecret(), { expiresIn: '15m' });
+  const refreshToken = jwt.sign({ id: payload.id }, getJwtSecret() + '_refresh', { expiresIn: '7d' });
   return { accessToken, refreshToken };
 }
 
 export function verifyRefreshToken(token: string): { id: string } | null {
   try {
-    return jwt.verify(token, JWT_SECRET + '_refresh') as { id: string };
+    return jwt.verify(token, getJwtSecret() + '_refresh') as { id: string };
   } catch {
     return null;
   }

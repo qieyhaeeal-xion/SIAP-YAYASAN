@@ -27,13 +27,13 @@ import {
   PesertaTahfidz,
   BiayaKategori,
   TarifPembayaran,
+  JenjangSekolah,
   bulanKeLabel,
   DistribusiKeuanganConfig,
   Pemasukan,
   AlokasiPemasukan,
   AuditLog
 } from '../types/sisantri';
-import { createPemasukanRecord, NewPemasukanInput } from '../services/distributionService';
 
 export const INITIAL_TAHUN_AJARAN: TahunAjaran[] = [
   {
@@ -332,6 +332,115 @@ export const INITIAL_SANTRI: Santri[] = [
   }
 ];
 
+// Santri demo untuk melengkapi seluruh jalur Status Santri / Sasaran Pembayaran.
+// Semua tetap Aktif agar bisa dipakai untuk preview dan generate tagihan.
+const createDemoStatusSantri = (overrides: Partial<Santri> & Pick<Santri, 'id' | 'nis' | 'namaLengkap' | 'namaPanggilan' | 'kategoriUtama'>): Santri => ({
+  id: overrides.id,
+  nis: overrides.nis,
+  status: 'Aktif',
+  nik: `351099${overrides.nis}01`,
+  nisn: `0099${overrides.nis}`,
+  namaLengkap: overrides.namaLengkap,
+  namaPanggilan: overrides.namaPanggilan,
+  jenisKelamin: 'L',
+  tempatLahir: 'Banyuwangi',
+  tanggalLahir: '2010-01-15',
+  anakKe: 1,
+  jumlahSaudara: 2,
+  hobi: 'Membaca dan olahraga',
+  citaCita: 'Pendidik',
+  alamat: 'Jl. Demo Pendidikan No. 1',
+  rt: '01',
+  rw: '01',
+  dusun: 'Krajan',
+  desa: 'Tegalsari',
+  kecamatan: 'Tegalsari',
+  kabupaten: 'Banyuwangi',
+  provinsi: 'Jawa Timur',
+  kodePos: '68485',
+  golonganDarah: 'O',
+  riwayatPenyakit: 'Tidak Ada',
+  tindakanKesehatan: 'Pemeriksaan rutin',
+  kondisiSaatIni: 'Sehat',
+  unitPesantrenId: 'up-1',
+  asramaId: 'asr-1',
+  kamarId: 'kmr-1',
+  unitSekolahId: 'sekol-1',
+  kelasSekolahId: 'ks-1',
+  marhalahMadinId: 'mrh-1',
+  kelasMadinId: 'km-1',
+  sekolahAsal: 'SMP Demo Mukhtar Syafaat',
+  tahunLulusSekolahAsal: '2024',
+  namaAyah: 'Bapak Demo Santri',
+  nikAyah: `351099${overrides.nis}02`,
+  pekerjaanAyah: 'Wiraswasta',
+  penghasilanAyah: 'Rp 3.000.000 - Rp 5.000.000',
+  namaIbu: 'Ibu Demo Santri',
+  nikIbu: `351099${overrides.nis}03`,
+  pekerjaanIbu: 'Ibu Rumah Tangga',
+  penghasilanIbu: 'Tidak Berpenghasilan',
+  noHpOrtu: '081200000000',
+  tipeAsuh: 'Bukan Asuh',
+  golonganAsuh: null,
+  program: 'Pelajar',
+  tanggalDaftar: '2025-07-01',
+  tahunAjaranId: 'ta-2526',
+  targetJuz: 2,
+  capaianJuz: 1,
+  capaianNadhoman: 25,
+  statusBerkasKK: true,
+  statusBerkasAkta: true,
+  statusBerkasIjazah: true,
+  ...overrides
+});
+
+export const INITIAL_DEMO_STATUS_SANTRI: Santri[] = [
+  createDemoStatusSantri({
+    id: 'snt-demo-desa', nis: '260010', namaLengkap: 'Daffa Demo Desa', namaPanggilan: 'Daffa', jenisKelamin: 'L',
+    kategoriUtama: 'Desa', tipeAsuh: null, golonganAsuh: null, program: null
+  }),
+  createDemoStatusSantri({
+    id: 'snt-demo-bukan-asuh-pengabdian', nis: '260011', namaLengkap: 'Rizky Demo Pengabdian', namaPanggilan: 'Rizky',
+    kategoriUtama: 'Santri', tipeAsuh: 'Bukan Asuh', program: 'Pengabdian'
+  }),
+  createDemoStatusSantri({
+    id: 'snt-demo-bukan-asuh-lulus', nis: '260012', namaLengkap: 'Fajar Demo Lulus', namaPanggilan: 'Fajar',
+    kategoriUtama: 'Santri', tipeAsuh: 'Bukan Asuh', program: 'Lulus'
+  }),
+  createDemoStatusSantri({
+    id: 'snt-demo-a1-pengabdian', nis: '260013', namaLengkap: 'Ilham Demo A1 Pengabdian', namaPanggilan: 'Ilham',
+    kategoriUtama: 'Santri', tipeAsuh: 'Asuh', golonganAsuh: 'A1', program: 'Pengabdian'
+  }),
+  createDemoStatusSantri({
+    id: 'snt-demo-a1-lulus', nis: '260014', namaLengkap: 'Bagas Demo A1 Lulus', namaPanggilan: 'Bagas',
+    kategoriUtama: 'Santri', tipeAsuh: 'Asuh', golonganAsuh: 'A1', program: 'Lulus'
+  }),
+  createDemoStatusSantri({
+    id: 'snt-demo-a2-pelajar', nis: '260015', namaLengkap: 'Rafi Demo A2 Pelajar', namaPanggilan: 'Rafi',
+    kategoriUtama: 'Santri', tipeAsuh: 'Asuh', golonganAsuh: 'A2', program: 'Pelajar'
+  }),
+  createDemoStatusSantri({
+    id: 'snt-demo-a2-pengabdian', nis: '260016', namaLengkap: 'Hafiz Demo A2 Pengabdian', namaPanggilan: 'Hafiz',
+    kategoriUtama: 'Santri', tipeAsuh: 'Asuh', golonganAsuh: 'A2', program: 'Pengabdian'
+  }),
+  createDemoStatusSantri({
+    id: 'snt-demo-a2-lulus', nis: '260017', namaLengkap: 'Naufal Demo A2 Lulus', namaPanggilan: 'Naufal',
+    kategoriUtama: 'Santri', tipeAsuh: 'Asuh', golonganAsuh: 'A2', program: 'Lulus'
+  }),
+  createDemoStatusSantri({
+    id: 'snt-demo-a3-pelajar', nis: '260018', namaLengkap: 'Arif Demo A3 Pelajar', namaPanggilan: 'Arif',
+    kategoriUtama: 'Santri', tipeAsuh: 'Asuh', golonganAsuh: 'A3', program: 'Pelajar'
+  }),
+  createDemoStatusSantri({
+    id: 'snt-demo-a3-pengabdian', nis: '260019', namaLengkap: 'Iqbal Demo A3 Pengabdian', namaPanggilan: 'Iqbal',
+    kategoriUtama: 'Santri', tipeAsuh: 'Asuh', golonganAsuh: 'A3', program: 'Pengabdian'
+  }),
+  createDemoStatusSantri({
+    id: 'snt-demo-a3-lulus', nis: '260020', namaLengkap: 'Fikri Demo A3 Lulus', namaPanggilan: 'Fikri',
+    kategoriUtama: 'Santri', tipeAsuh: 'Asuh', golonganAsuh: 'A3', program: 'Lulus'
+  })
+];
+
 export const INITIAL_SETORAN_TAHFIDZ: SetoranTahfidz[] = [
   {
     id: 'stf-1',
@@ -536,7 +645,98 @@ export const INITIAL_BIAYA_MASTER: BiayaMaster[] = [
   { id: 'by-makan', namaBiaya: 'Uang Makan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 250000, nominalStandard: 250000, kategori: 'MAKAN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'Biaya konsumsi santri bulanan' },
   { id: 'by-madin', namaBiaya: 'Syahriyah Madin', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 75000, nominalStandard: 75000, kategori: 'MADIN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP diniyah (Madin)' },
   { id: 'by-4', namaBiaya: 'Seragam & Perlengkapan Kitab', jenis: 'Non-Syahriyah', tipeFrekuensi: 'Tahunan', nominal: 750000, nominalStandard: 750000, kategori: 'PESANTREN', kategoriPembayaran: 'Insidental', wajib: true, keterangan: 'Paket kitab matan & seragam pesantren' },
+
+  // Jenis pembayaran demo untuk menguji seluruh jalur Status Santri / Sasaran.
+  { id: 'by-demo-status-desa', kodeBiaya: 'DEMO-DESA', namaBiaya: '[DEMO] Iuran Pendidikan Desa', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 75000, nominalStandard: 75000, kategori: 'SEKOLAH', kategoriPembayaran: 'Rutin', targetKategoriUtama: 'Desa', wajib: true, aktif: true, keterangan: 'Demo: Santri kategori Desa' },
+  { id: 'by-demo-status-bukan-asuh-pelajar', kodeBiaya: 'DEMO-BA-PELAJAR', namaBiaya: '[DEMO] Iuran Bukan Asuh Pelajar', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 100000, nominalStandard: 100000, kategori: 'PESANTREN', kategoriPembayaran: 'Rutin', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Bukan Asuh', targetProgram: 'Pelajar', wajib: true, aktif: true, keterangan: 'Demo: Santri > Bukan Asuh > Pelajar' },
+  { id: 'by-demo-status-bukan-asuh-pengabdian', kodeBiaya: 'DEMO-BA-PENGABDIAN', namaBiaya: '[DEMO] Iuran Bukan Asuh Pengabdian', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 50000, nominalStandard: 50000, kategori: 'YAYASAN', kategoriPembayaran: 'Rutin', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Bukan Asuh', targetProgram: 'Pengabdian', wajib: true, aktif: true, keterangan: 'Demo: Santri > Bukan Asuh > Pengabdian' },
+  { id: 'by-demo-status-bukan-asuh-lulus', kodeBiaya: 'DEMO-BA-LULUS', namaBiaya: '[DEMO] Administrasi Bukan Asuh Lulus', jenis: 'Non-Syahriyah', tipeFrekuensi: 'Sekali Bayar', nominal: 25000, nominalStandard: 25000, kategori: 'YAYASAN', kategoriPembayaran: 'Insidental', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Bukan Asuh', targetProgram: 'Lulus', wajib: true, aktif: true, keterangan: 'Demo: Santri > Bukan Asuh > Lulus' },
+  { id: 'by-demo-status-a1-pelajar', kodeBiaya: 'DEMO-A1-PELAJAR', namaBiaya: '[DEMO] Iuran Asuh A1 Pelajar', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 50000, nominalStandard: 50000, kategori: 'PESANTREN', kategoriPembayaran: 'Rutin', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A1', targetProgram: 'Pelajar', wajib: true, aktif: true, keterangan: 'Demo: Santri > Asuh > A1 > Pelajar' },
+  { id: 'by-demo-status-a1-pengabdian', kodeBiaya: 'DEMO-A1-PENGABDIAN', namaBiaya: '[DEMO] Iuran Asuh A1 Pengabdian', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 25000, nominalStandard: 25000, kategori: 'YAYASAN', kategoriPembayaran: 'Rutin', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A1', targetProgram: 'Pengabdian', wajib: true, aktif: true, keterangan: 'Demo: Santri > Asuh > A1 > Pengabdian' },
+  { id: 'by-demo-status-a1-lulus', kodeBiaya: 'DEMO-A1-LULUS', namaBiaya: '[DEMO] Administrasi Asuh A1 Lulus', jenis: 'Non-Syahriyah', tipeFrekuensi: 'Sekali Bayar', nominal: 25000, nominalStandard: 25000, kategori: 'YAYASAN', kategoriPembayaran: 'Insidental', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A1', targetProgram: 'Lulus', wajib: true, aktif: true, keterangan: 'Demo: Santri > Asuh > A1 > Lulus' },
+  { id: 'by-demo-status-a2-pelajar', kodeBiaya: 'DEMO-A2-PELAJAR', namaBiaya: '[DEMO] Iuran Asuh A2 Pelajar', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 75000, nominalStandard: 75000, kategori: 'PESANTREN', kategoriPembayaran: 'Rutin', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A2', targetProgram: 'Pelajar', wajib: true, aktif: true, keterangan: 'Demo: Santri > Asuh > A2 > Pelajar' },
+  { id: 'by-demo-status-a2-pengabdian', kodeBiaya: 'DEMO-A2-PENGABDIAN', namaBiaya: '[DEMO] Iuran Asuh A2 Pengabdian', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 35000, nominalStandard: 35000, kategori: 'YAYASAN', kategoriPembayaran: 'Rutin', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A2', targetProgram: 'Pengabdian', wajib: true, aktif: true, keterangan: 'Demo: Santri > Asuh > A2 > Pengabdian' },
+  { id: 'by-demo-status-a2-lulus', kodeBiaya: 'DEMO-A2-LULUS', namaBiaya: '[DEMO] Administrasi Asuh A2 Lulus', jenis: 'Non-Syahriyah', tipeFrekuensi: 'Sekali Bayar', nominal: 25000, nominalStandard: 25000, kategori: 'YAYASAN', kategoriPembayaran: 'Insidental', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A2', targetProgram: 'Lulus', wajib: true, aktif: true, keterangan: 'Demo: Santri > Asuh > A2 > Lulus' },
+  { id: 'by-demo-status-a3-pelajar', kodeBiaya: 'DEMO-A3-PELAJAR', namaBiaya: '[DEMO] Iuran Asuh A3 Pelajar', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 100000, nominalStandard: 100000, kategori: 'PESANTREN', kategoriPembayaran: 'Rutin', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A3', targetProgram: 'Pelajar', wajib: true, aktif: true, keterangan: 'Demo: Santri > Asuh > A3 > Pelajar' },
+  { id: 'by-demo-status-a3-pengabdian', kodeBiaya: 'DEMO-A3-PENGABDIAN', namaBiaya: '[DEMO] Iuran Asuh A3 Pengabdian', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 50000, nominalStandard: 50000, kategori: 'YAYASAN', kategoriPembayaran: 'Rutin', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A3', targetProgram: 'Pengabdian', wajib: true, aktif: true, keterangan: 'Demo: Santri > Asuh > A3 > Pengabdian' },
+  { id: 'by-demo-status-a3-lulus', kodeBiaya: 'DEMO-A3-LULUS', namaBiaya: '[DEMO] Administrasi Asuh A3 Lulus', jenis: 'Non-Syahriyah', tipeFrekuensi: 'Sekali Bayar', nominal: 25000, nominalStandard: 25000, kategori: 'YAYASAN', kategoriPembayaran: 'Insidental', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A3', targetProgram: 'Lulus', wajib: true, aktif: true, keterangan: 'Demo: Santri > Asuh > A3 > Lulus' },
 ];
+
+const KATEGORI_BIAYA_ID: Record<BiayaKategori, string> = {
+  YAYASAN: 'by-yayasan',
+  SEKOLAH: 'by-sekolah',
+  PESANTREN: 'by-pesantren',
+  MAKAN: 'by-makan',
+  MADIN: 'by-madin'
+};
+
+type DemoTarifProfile = {
+  key: string;
+  targetKategoriUtama: 'Santri' | 'Desa';
+  targetTipeAsuh?: 'Asuh' | 'Bukan Asuh';
+  targetGolonganAsuh?: 'A1' | 'A2' | 'A3';
+  targetProgram?: 'Pengabdian' | 'Lulus' | 'Pelajar';
+  rates: Record<JenjangSekolah, Record<BiayaKategori, number>>;
+};
+
+const rates = (
+  yayasan: number,
+  sekolahSmp: number,
+  sekolahSlta: number,
+  pesantren: number,
+  makan: number,
+  madin: number
+): Record<JenjangSekolah, Record<BiayaKategori, number>> => ({
+  SMP: { YAYASAN: yayasan, SEKOLAH: sekolahSmp, PESANTREN: pesantren, MAKAN: makan, MADIN: madin },
+  SLTA: { YAYASAN: yayasan, SEKOLAH: sekolahSlta, PESANTREN: pesantren, MAKAN: makan, MADIN: madin }
+});
+
+// Tarif demo sementara. MA, SMA, dan SMK menggunakan kelompok jenjang SLTA.
+const DEMO_TARIF_PROFILES: DemoTarifProfile[] = [
+  { key: 'desa', targetKategoriUtama: 'Desa', rates: rates(0, 75000, 100000, 0, 0, 0) },
+  { key: 'bukan-asuh-pelajar', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Bukan Asuh', targetProgram: 'Pelajar', rates: rates(100000, 150000, 175000, 200000, 250000, 75000) },
+  { key: 'bukan-asuh-pengabdian', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Bukan Asuh', targetProgram: 'Pengabdian', rates: rates(0, 50000, 75000, 100000, 125000, 25000) },
+  { key: 'bukan-asuh-lulus', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Bukan Asuh', targetProgram: 'Lulus', rates: rates(0, 25000, 50000, 50000, 0, 0) },
+  { key: 'a1-pelajar', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A1', targetProgram: 'Pelajar', rates: rates(0, 50000, 75000, 100000, 125000, 25000) },
+  { key: 'a1-pengabdian', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A1', targetProgram: 'Pengabdian', rates: rates(0, 25000, 50000, 50000, 75000, 0) },
+  { key: 'a1-lulus', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A1', targetProgram: 'Lulus', rates: rates(0, 0, 0, 25000, 0, 0) },
+  { key: 'a2-pelajar', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A2', targetProgram: 'Pelajar', rates: rates(25000, 75000, 100000, 125000, 150000, 50000) },
+  { key: 'a2-pengabdian', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A2', targetProgram: 'Pengabdian', rates: rates(0, 35000, 50000, 75000, 100000, 25000) },
+  { key: 'a2-lulus', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A2', targetProgram: 'Lulus', rates: rates(0, 25000, 35000, 50000, 0, 0) },
+  { key: 'a3-pelajar', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A3', targetProgram: 'Pelajar', rates: rates(50000, 100000, 125000, 150000, 200000, 60000) },
+  { key: 'a3-pengabdian', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A3', targetProgram: 'Pengabdian', rates: rates(25000, 50000, 75000, 100000, 125000, 25000) },
+  { key: 'a3-lulus', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A3', targetProgram: 'Lulus', rates: rates(0, 25000, 50000, 50000, 0, 0) }
+];
+
+const createDemoTarifPembayaran = (): TarifPembayaran[] => {
+  const rows: TarifPembayaran[] = [];
+  const levels: JenjangSekolah[] = ['SMP', 'SLTA'];
+  const categories: BiayaKategori[] = ['YAYASAN', 'SEKOLAH', 'PESANTREN', 'MAKAN', 'MADIN'];
+
+  for (const profile of DEMO_TARIF_PROFILES) {
+    for (const level of levels) {
+      for (const category of categories) {
+        rows.push({
+          id: `tarif-demo-${profile.key}-${level.toLowerCase()}-${category.toLowerCase()}`,
+          biayaMasterId: KATEGORI_BIAYA_ID[category],
+          targetScope: 'Jenjang Sekolah',
+          targetValue: level,
+          targetKategoriUtama: profile.targetKategoriUtama,
+          targetTipeAsuh: profile.targetTipeAsuh,
+          targetGolonganAsuh: profile.targetGolonganAsuh,
+          targetProgram: profile.targetProgram,
+          targetJenjangSekolah: level,
+          nominal: profile.rates[level][category],
+          wajib: profile.rates[level][category] > 0,
+          aktif: true,
+          effectiveFrom: '2026-07-01'
+        });
+      }
+    }
+  }
+
+  return rows;
+};
 
 export const INITIAL_TARIF_PEMBAYARAN: TarifPembayaran[] = [
   {
@@ -548,18 +748,11 @@ export const INITIAL_TARIF_PEMBAYARAN: TarifPembayaran[] = [
     wajib: true,
     aktif: true,
     effectiveFrom: '2026-01-01'
-  }
+  },
+  ...createDemoTarifPembayaran()
 ];
 
 // ── Rekap Syahriyah: 5 kategori (YAYASAN/SEKOLAH/PESANTREN/MAKAN/MADIN) per santri per bulan ──
-const KATEGORI_BIAYA_ID: Record<BiayaKategori, string> = {
-  YAYASAN: 'by-yayasan',
-  SEKOLAH: 'by-sekolah',
-  PESANTREN: 'by-pesantren',
-  MAKAN: 'by-makan',
-  MADIN: 'by-madin'
-};
-
 const NOMINAL_BY_KATEGORI: Record<BiayaKategori, number> = {
   YAYASAN: 100000,
   SEKOLAH: 150000,
@@ -577,44 +770,48 @@ const UNIT_BY_SANTRI: Record<string, string> = {
 
 const KATEGORI_ORDER: BiayaKategori[] = ['YAYASAN', 'SEKOLAH', 'PESANTREN', 'MAKAN', 'MADIN'];
 
-// Bulan "sekarang" untuk demo (Agustus = bulanKe 2) -> bulan lampau Lunas, bulan kini beragam, bulan depan belum
-const CURRENT_BULAN_KE = 2;
+const getDemoTarifProfile = (santri: Santri): DemoTarifProfile | undefined =>
+  DEMO_TARIF_PROFILES.find(profile =>
+    profile.targetKategoriUtama === santri.kategoriUtama &&
+    (!profile.targetTipeAsuh || profile.targetTipeAsuh === santri.tipeAsuh) &&
+    (!profile.targetGolonganAsuh || profile.targetGolonganAsuh === santri.golonganAsuh) &&
+    (!profile.targetProgram || profile.targetProgram === santri.program)
+  );
+
+const getDemoNominal = (santri: Santri, kategori: BiayaKategori, santriIndex: number): number => {
+  const jenjang: JenjangSekolah = santri.unitSekolahId === 'sekol-1' ? 'SMP' : 'SLTA';
+  const profileNominal = getDemoTarifProfile(santri)?.rates[jenjang][kategori];
+  if (profileNominal !== undefined) return profileNominal;
+
+  const fallbackVariations = [1, 0.9, 1.1, 0.8, 1.2];
+  const variation = fallbackVariations[santriIndex % fallbackVariations.length];
+  return Math.round((NOMINAL_BY_KATEGORI[kategori] * variation) / 5000) * 5000;
+};
 
 function generateMockTagihan(): TagihanKeuangan[] {
   const rows: TagihanKeuangan[] = [];
-  const santriIds = ['snt-1', 'snt-2', 'snt-3'];
+  const santris = [...INITIAL_SANTRI, ...INITIAL_DEMO_STATUS_SANTRI].filter(santri => santri.status === 'Aktif');
   let seq = 1;
 
-  for (const santriId of santriIds) {
+  for (const [santriIndex, santri] of santris.entries()) {
     for (let bulanKe = 1; bulanKe <= 12; bulanKe++) {
       for (const k of KATEGORI_ORDER) {
-        const nominal = NOMINAL_BY_KATEGORI[k];
-        let terbayar = 0;
-
-        if (bulanKe < CURRENT_BULAN_KE) {
-          terbayar = nominal;
-        } else if (bulanKe === CURRENT_BULAN_KE) {
-          if (santriId === 'snt-1') terbayar = nominal;
-          else if (santriId === 'snt-2' && k !== 'MAKAN') terbayar = nominal;
-          else if (santriId === 'snt-3' && (k === 'YAYASAN' || k === 'SEKOLAH')) terbayar = Math.round(nominal / 2);
-        }
-
-        const status: TagihanKeuangan['status'] =
-          terbayar >= nominal && nominal > 0 ? 'Lunas' : terbayar > 0 ? 'Sebagian' : 'Belum Lunas';
+        const nominal = getDemoNominal(santri, k, santriIndex);
+        if (nominal <= 0) continue;
 
         rows.push({
           id: `tgh-${seq}`,
-          santriId,
+          santriId: santri.id,
           biayaMasterId: KATEGORI_BIAYA_ID[k],
           noTagihan: `TG-${bulanKe.toString().padStart(2, '0')}-${seq.toString().padStart(3, '0')}`,
           bulanTahun: `${bulanKeLabel(bulanKe)} 2026`,
           bulanPeriode: bulanKeLabel(bulanKe),
           tahunPeriode: 2026,
           bulanKe,
-          unitId: UNIT_BY_SANTRI[santriId],
+          unitId: UNIT_BY_SANTRI[santri.id] ?? (santri.unitSekolahId === 'sekol-1' ? 'MTS' : 'MA'),
           nominalTagihan: nominal,
-          nominalTerbayar: terbayar,
-          status,
+          nominalTerbayar: 0,
+          status: 'Belum Lunas',
           tanggalJatuhTempo: `2026-${(bulanKe <= 6 ? bulanKe + 6 : bulanKe - 6).toString().padStart(2, '0')}-10`,
           tahunAjaranId: 'ta-2526'
         });
@@ -627,36 +824,7 @@ function generateMockTagihan(): TagihanKeuangan[] {
 
 export const INITIAL_TAGIHAN: TagihanKeuangan[] = generateMockTagihan();
 
-export const INITIAL_TRANSAKSI: TransaksiPembayaran[] = [
-  {
-    id: 'trx-1',
-    tagihanId: 'tgh-1',
-    santriId: 'snt-1',
-    noKuitansi: 'KW-20260801-001',
-    tanggal: '2026-08-01',
-    tanggalBayar: '2026-08-01',
-    nominal: 450000,
-    nominalDibayar: 450000,
-    metodePembayaran: 'Transfer Bank',
-    penerima: 'H. Ahmad Rifa\'i (Bendahara)',
-    penerimaBendahara: 'H. Ahmad Rifa\'i (Bendahara)',
-    catatan: 'Pembayaran Syahriyah Lunas via Bank Syariah Indonesia'
-  },
-  {
-    id: 'trx-2',
-    tagihanId: 'tgh-3',
-    santriId: 'snt-3',
-    noKuitansi: 'KW-20260805-002',
-    tanggal: '2026-08-05',
-    tanggalBayar: '2026-08-05',
-    nominal: 200000,
-    nominalDibayar: 200000,
-    metodePembayaran: 'Tunai',
-    penerima: 'H. Ahmad Rifa\'i (Bendahara)',
-    penerimaBendahara: 'H. Ahmad Rifa\'i (Bendahara)',
-    catatan: 'Pembayaran Syahriyah Sebagian (Sisa Rp 250.000)'
-  }
-];
+export const INITIAL_TRANSAKSI: TransaksiPembayaran[] = [];
 
 // ── KONFIGURASI PEMBAGIAN PEMASUKAN (histori berbasis periode) ──
 export const INITIAL_DISTRIBUSI_CONFIG: DistribusiKeuanganConfig[] = [
@@ -685,52 +853,10 @@ export const INITIAL_DISTRIBUSI_CONFIG: DistribusiKeuanganConfig[] = [
   }
 ];
 
-// ── PEMASUKAN & ALOKASI (contoh transaksi + snapshot distribusi) ──
-function unitKeyOf(santriId: string): string {
-  const map: Record<string, string> = { 'snt-1': 'MA', 'snt-2': 'SMK', 'snt-3': 'MTS' };
-  return map[santriId] ?? 'PONPES';
-}
-
+// ── PEMASUKAN & ALOKASI (kosong agar semua demo santri belum membayar) ──
 function buildMockPemasukan(): { pemasukan: Pemasukan[]; alokasi: AlokasiPemasukan[] } {
-  const aktif = INITIAL_DISTRIBUSI_CONFIG.find(c => c.status === 'Aktif');
-  if (!aktif) return { pemasukan: [], alokasi: [] };
-
-  const samples: Omit<NewPemasukanInput, 'createdBy'>[] = [
-    { santriId: 'snt-1', tanggal: '2026-08-05', nominal: 775000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Transfer Bank', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526', catatan: 'Transfer BSI' },
-    { santriId: 'snt-2', tanggal: '2026-08-07', nominal: 775000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Tunai', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526' },
-    { santriId: 'snt-3', tanggal: '2026-08-09', nominal: 775000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'E-Wallet (QRIS)', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526' }
-  ];
-
-  const pemasukan: Pemasukan[] = [];
-  const alokasi: AlokasiPemasukan[] = [];
-  samples.forEach((s, i) => {
-    const rec = createPemasukanRecord({ ...s, createdBy: 'K.H. Mukhtar Syafaat' }, aktif, i + 1, unitKeyOf(s.santriId));
-    pemasukan.push(rec.pemasukan);
-    alokasi.push(...rec.alokasi);
-  });
-
-  // Contoh transaksi GAGAL distribusi (untuk demo monitoring error) — total distribusi tidak sesuai.
-  const failedConfig: DistribusiKeuanganConfig = {
-    id: 'dcfg-9',
-    name: 'Periode Rusak (uji error)',
-    version: 'V-900',
-    effectiveFrom: '2026-08-01',
-    nominals: { YAYASAN: 100000, MADIN: 75000, SEKOLAH: 150000, PESANTREN: 200000, MAKAN: 249000 },
-    status: 'Draft',
-    createdBy: 'K.H. Mukhtar Syafaat',
-    createdAt: '2026-08-01T08:00:00.000Z',
-    updatedAt: '2026-08-01T08:00:00.000Z'
-  };
-  const failedRec = createPemasukanRecord(
-    { santriId: 'snt-1', tanggal: '2026-08-10', nominal: 775000, jenisPembayaran: 'Syahriyah', metodePembayaran: 'Tunai', periode: 'Agustus 2026', bulanKe: 2, tahunAjaranId: 'ta-2526', createdBy: 'K.H. Mukhtar Syafaat' },
-    failedConfig,
-    99,
-    'MA'
-  );
-  pemasukan.push(failedRec.pemasukan);
-  alokasi.push(...failedRec.alokasi);
-
-  return { pemasukan, alokasi };
+  // Data awal sengaja kosong agar seluruh demo santri dapat diuji sebagai belum membayar.
+  return { pemasukan: [], alokasi: [] };
 }
 
 const { pemasukan: _pemasukanMock, alokasi: _alokasiMock } = buildMockPemasukan();

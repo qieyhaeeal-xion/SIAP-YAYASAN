@@ -1,10 +1,10 @@
 ﻿import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { verifyToken, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
+import { generateTagihanForSantri } from '../services/tagihanService';
+import { prisma } from '../lib/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 router.use(verifyToken);
 
 // GET /api/ppdb
@@ -54,32 +54,47 @@ router.post('/:id/mutasi', requireRole('admin_sistem', 'admin_pesantren'), async
   const nis = `${yearPrefix}${nextSeq.toString().padStart(4, '0')}`;
 
   const [santri] = await prisma.$transaction(async (tx) => {
+    const wali = await tx.wali.create({
+      data: {
+        namaAyah: pendaftar.namaOrtu || '',
+        noHpOrtu: pendaftar.noHpOrtu || ''
+      }
+    });
     const newSantri = await tx.santri.create({
       data: {
         nis, status: 'Aktif', namaLengkap: pendaftar.namaLengkap, namaPanggilan: pendaftar.namaLengkap.split(' ')[0],
         jenisKelamin: pendaftar.jenisKelamin, tempatLahir: pendaftar.tempatLahir || '', tanggalLahir: pendaftar.tanggalLahir || '',
-        alamat: pendaftar.alamat || '', namaAyah: pendaftar.namaOrtu || '', noHpOrtu: pendaftar.noHpOrtu || '',
-        sekolahAsal: pendaftar.sekolahAsal || '', statusSantri: 'Reguler',
+        alamat: pendaftar.alamat || '', waliId: wali.id,
+        sekolahAsal: pendaftar.sekolahAsal || '',
         unitPesantrenId: pendaftar.unitPesantrenPilihanId, asramaId: defaultAsrama?.id,
         kamarId: defaultKamar?.id, unitSekolahId: pendaftar.unitSekolahPilihanId,
         kelasSekolahId: defaultKelasSekolah?.id, marhalahMadinId: pendaftar.marhalahPilihanId,
         kelasMadinId: defaultKelasMadin?.id, golonganDarah: 'O', kondisiSaatIni: 'Sehat',
-        riwayatPenyakit: 'Tidak ada', tindakanKesehatan: '-', nikAyah: '', pekerjaanAyah: 'Wiraswasta',
-        penghasilanAyah: 'Rp 3.000.000 - Rp 5.000.000', namaIbu: '', nikIbu: '',
-        pekerjaanIbu: 'Ibu Rumah Tangga', penghasilanIbu: 'Tidak Berpenghasilan', anakKe: 1, jumlahSaudara: 2,
-        tanggalDaftar: new Date().toISOString().split('T')[0], tahunAjaranId: tahunAjaran?.id || ''
-      }
-    });
-
-    // Generate tagihan syahriyah perdana
-    const biayaSyahriyah = await tx.biayaMaster.findFirst({ where: { jenis: 'Syahriyah' } });
-    const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-    const now = new Date();
-    if (biayaSyahriyah && tahunAjaran) {
-      await tx.tagihanKeuangan.create({
-        data: { santriId: newSantri.id, biayaMasterId: biayaSyahriyah.id, bulanTahun: `${bulan[now.getMonth()]} ${now.getFullYear()}`, nominalTagihan: biayaSyahriyah.nominal, nominalTerbayar: 0, status: 'Belum Lunas', tanggalJatuhTempo: `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-10`, tahunAjaranId: tahunAjaran.id }
+        riwayatPenyakit: 'Tidak ada', tindakanKesehatan: '-', anakKe: 1, jumlahSaudara: 2,
+        tanggalDaftar: new Date().toISOString().split('T')[0],
+        tahunAjaranId: tahunAjaran?.id || '',
+        kategoriUtama: 'Santri', tipeAsuh: 'Bukan Asuh', program: 'Pelajar'
+       }
       });
-    }
+
+     // Generate seluruh tagihan Syahriyah yang sesuai sasaran.
+     const now = new Date();
+     const bulanKe = now.getMonth() >= 6 ? now.getMonth() - 5 : now.getMonth() + 7;
+     if (tahunAjaran) {
+       const [biayaSyahriyah, tariffs] = await Promise.all([
+         tx.biayaMaster.findMany({ where: { jenis: 'Syahriyah', aktif: true, wajib: true } }),
+         tx.tarifPembayaran.findMany({ where: { aktif: true } })
+       ]);
+       await generateTagihanForSantri(
+         tx,
+         newSantri as never,
+         { id: tahunAjaran.id, kodeTahunAjaran: tahunAjaran.kodeTahunAjaran },
+         biayaSyahriyah,
+         tariffs,
+         bulanKe,
+         bulanKe
+       );
+     }
 
     await tx.pendaftarPpdb.update({ where: { id: req.params.id }, data: { statusSeleksi: 'Telah Dimutasi' } });
     return [newSantri];

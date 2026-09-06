@@ -528,6 +528,7 @@ model TagihanKeuangan {
   @@index([santriId])
   @@index([bulanKe])
   @@index([unitId])
+  @@unique([santriId, biayaMasterId, tahunAjaranId, bulanTahun])
   createdAt DateTime @default(now())
 }
 

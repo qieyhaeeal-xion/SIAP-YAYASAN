@@ -1,14 +1,15 @@
 ﻿import { Router, Response } from 'express';
-import { PrismaClient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { verifyToken, AuthRequest } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { apiLimiter } from '../middleware/rateLimit';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { pick, requireFields, HttpError } from '../middleware/validate';
 import { withUniqueNIS } from '../utils/generators';
+import { generateTagihanForSantri } from '../services/tagihanService';
+import { prisma } from '../lib/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 router.use(apiLimiter);
 router.use(verifyToken);
 
@@ -38,6 +39,7 @@ const SANTRI_SELECT = {
   jurusanId: true, kelasSekolahId: true, marhalahMadinId: true, kelasMadinId: true,
   sekolahAsal: true, alamatSekolahAsal: true, tahunLulusSekolahAsal: true, noKip: true,
   waliId: true,
+  kategoriUtama: true, tipeAsuh: true, golonganAsuh: true, program: true,
   statusSantri: true, jenisSantriAsuh: true, alasanAsuh: true,
   alasanKeluar: true, tahunKeluar: true, noHpAlumni: true, statusAlumniDetail: true,
   tanggalDaftar: true, tahunAjaranId: true, createdAt: true, updatedAt: true,
@@ -227,21 +229,24 @@ router.post('/', requireRole('admin_sistem', 'admin_pesantren'), asyncHandler(as
     })
   );
 
-  // Auto generate tagihan syahriyah bulan berjalan untuk santri aktif (PRD 4.6)
+  // Auto generate seluruh tagihan Syahriyah yang sesuai sasaran untuk bulan berjalan.
   if (status === 'Aktif') {
-    const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
     const now = new Date();
-    const bulanTahun = `${bulan[now.getMonth()]} ${now.getFullYear()}`;
-    const biayaSyahriyah = await prisma.biayaMaster.findFirst({ where: { jenis: 'Syahriyah' } });
-    if (biayaSyahriyah && tahunAjaran) {
-      await prisma.tagihanKeuangan.create({
-        data: {
-          santriId: santri.id, biayaMasterId: biayaSyahriyah.id, bulanTahun,
-          nominalTagihan: biayaSyahriyah.nominal, nominalTerbayar: 0, status: 'Belum Lunas',
-          tanggalJatuhTempo: `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-10`,
-          tahunAjaranId
-        }
-      });
+    const bulanKe = now.getMonth() >= 6 ? now.getMonth() - 5 : now.getMonth() + 7;
+    const [biayaSyahriyah, tariffs] = await Promise.all([
+      prisma.biayaMaster.findMany({ where: { jenis: 'Syahriyah', aktif: true, wajib: true } }),
+      prisma.tarifPembayaran.findMany({ where: { aktif: true } })
+    ]);
+    if (tahunAjaran && biayaSyahriyah.length > 0) {
+      await prisma.$transaction(tx => generateTagihanForSantri(
+        tx,
+        santri as never,
+        { id: tahunAjaran.id, kodeTahunAjaran: tahunAjaran.kodeTahunAjaran },
+        biayaSyahriyah,
+        tariffs,
+        bulanKe,
+        bulanKe
+      ));
     }
   }
 
@@ -250,10 +255,11 @@ router.post('/', requireRole('admin_sistem', 'admin_pesantren'), asyncHandler(as
 
 // PUT /api/santri/:id - Update santri
 router.put('/:id', requireRole('admin_sistem', 'admin_pesantren'), asyncHandler(async (req: AuthRequest, res: Response) => {
-  const existing = await prisma.santri.findUnique({ where: { id: req.params.id }, select: { id: true, kamarId: true, status: true } });
+  const existing = await prisma.santri.findUnique({ where: { id: req.params.id }, select: { id: true, kamarId: true, waliId: true, status: true } });
   if (!existing) throw new HttpError(404, 'Santri tidak ditemukan');
 
   const data = pick<Record<string, unknown>>(req.body, SANTRI_WRITABLE);
+  const waliData = pick<Record<string, unknown>>(req.body, [...WALI_FIELDS]);
 
   // Otomatisasi status alumni (PRD 5.4)
   if (data.alasanKeluar || data.tahunKeluar) data.status = 'Alumni';
@@ -269,8 +275,8 @@ router.put('/:id', requireRole('admin_sistem', 'admin_pesantren'), asyncHandler(
 
   const santri = await prisma.$transaction(async (tx) => {
     // Resolve Wali
-    if (data.waliId || WALI_FIELDS.some(f => data[f] !== undefined)) {
-      data.waliId = await resolveWali(tx, waliData, existing.waliId);
+    if (data.waliId || WALI_FIELDS.some(f => waliData[f] !== undefined)) {
+      data.waliId = await resolveWaliId(tx, waliData, existing.waliId);
     }
     const updated = await tx.santri.update({ where: { id: req.params.id }, data: data as never, select: SANTRI_SELECT });
 

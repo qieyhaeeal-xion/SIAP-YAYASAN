@@ -39,7 +39,8 @@ export const DataSantriModule: React.FC = () => {
     unitSekolahList,
     jurusanList,
     kelasSekolahList,
-    getSantriNameById
+    getSantriNameById,
+    getTagihanPreview
   } = useApp();
 
   // Search and Dependent Filters
@@ -182,6 +183,9 @@ export const DataSantriModule: React.FC = () => {
 
     return true;
   });
+
+  const tagihanPreview = getTagihanPreview(formData);
+  const totalTagihanPreview = tagihanPreview.reduce((total, item) => total + item.nominal, 0);
 
   const handleOpenTambah = () => {
     setEditSantriId(null);
@@ -960,6 +964,32 @@ export const DataSantriModule: React.FC = () => {
                     </div>
                   </div>
                 )}
+
+                <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-xs">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-black uppercase tracking-widest text-emerald-800">Estimasi Syahriyah Otomatis</p>
+                      <p className="mt-1 text-emerald-900/70">Nominal dihitung dari status hierarki dan jenjang sekolah santri.</p>
+                    </div>
+                    <span className="rounded-full bg-white px-3 py-1 font-black text-emerald-700">
+                      Rp {totalTagihanPreview.toLocaleString('id-ID')} / bulan
+                    </span>
+                  </div>
+                  {formData.status !== 'Aktif' ? (
+                    <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 font-bold text-amber-800">Santri tidak berstatus Aktif, sehingga tagihan otomatis tidak dibuat.</p>
+                  ) : tagihanPreview.length > 0 ? (
+                    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-5">
+                      {tagihanPreview.map(item => (
+                        <div key={item.biayaMasterId} className="rounded-xl border border-emerald-100 bg-white p-3">
+                          <p className="font-bold text-gray-600">{item.namaBiaya}</p>
+                          <p className="mt-1 font-black text-[#1A5276]">Rp {item.nominal.toLocaleString('id-ID')}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 font-bold text-amber-800">Tarif belum tersedia untuk kombinasi status dan unit yang dipilih.</p>
+                  )}
+                </div>
               </form>
             </div>
 

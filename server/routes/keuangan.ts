@@ -1,18 +1,20 @@
 ﻿import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { verifyToken, AuthRequest } from '../middleware/auth';
 import { requireKeuangan } from '../middleware/rbac';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { pick, requireFields, assertPositiveInt, HttpError } from '../middleware/validate';
 import { withUniqueKuitansi } from '../utils/generators';
+import { generateTagihanForSantri, isBiayaTargetMatch } from '../services/tagihanService';
+import { prisma } from '../lib/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 router.use(verifyToken);
 
 const BIAYA_MASTER_FIELDS = [
   'kodeBiaya', 'namaBiaya', 'jenis', 'tipeFrekuensi', 'nominal', 'nominalStandard',
-  'kategori', 'kategoriPembayaran', 'wajib', 'aktif', 'keterangan'
+  'kategori', 'kategoriPembayaran', 'targetKategoriUtama', 'targetTipeAsuh',
+  'targetGolonganAsuh', 'targetProgram', 'targetUnitPesantrenId', 'targetUnitSekolahId',
+  'wajib', 'aktif', 'keterangan'
 ];
 const TARIF_FIELDS = ['biayaMasterId', 'targetScope', 'targetValue', 'nominal', 'wajib', 'aktif', 'effectiveFrom', 'effectiveUntil'];
 const TAGIHAN_FIELDS = [
@@ -32,6 +34,65 @@ router.post('/biaya-master', requireKeuangan, asyncHandler(async (req, res: Resp
   const data = pick<Record<string, unknown>>(req.body, BIAYA_MASTER_FIELDS);
   const result = await prisma.biayaMaster.create({ data: data as never });
   res.status(201).json({ success: true, data: result });
+}));
+
+// POST /api/keuangan/biaya-master/:id/generate-tagihan
+// Membuat tanggungan untuk santri aktif yang memenuhi sasaran jenis pembayaran.
+router.post('/biaya-master/:id/generate-tagihan', requireKeuangan, asyncHandler(async (req, res: Response) => {
+  const bulanMulai = Number(req.body.bulanMulai);
+  const bulanSelesai = Number(req.body.bulanSelesai);
+  if (!Number.isInteger(bulanMulai) || !Number.isInteger(bulanSelesai) || bulanMulai < 1 || bulanSelesai > 12 || bulanMulai > bulanSelesai) {
+    throw new HttpError(400, 'Rentang periode bulan tidak valid');
+  }
+
+  const biaya = await prisma.biayaMaster.findUnique({ where: { id: req.params.id } });
+  if (!biaya) throw new HttpError(404, 'Jenis pembayaran tidak ditemukan');
+  const tahunAjaran = await prisma.tahunAjaran.findUnique({
+    where: { id: req.body.tahunAjaranId || (await prisma.tahunAjaran.findFirst({ where: { isAktif: true } }))?.id || '' },
+    select: { id: true, kodeTahunAjaran: true }
+  });
+  if (!tahunAjaran) throw new HttpError(400, 'Tahun ajaran aktif tidak ditemukan');
+
+  const [santriList, tariffs] = await Promise.all([
+    prisma.santri.findMany({
+      where: { status: 'Aktif', deletedAt: null },
+      select: {
+        id: true, status: true, kategoriUtama: true, tipeAsuh: true, golonganAsuh: true,
+        program: true, unitPesantrenId: true, unitSekolahId: true
+      }
+    }),
+    prisma.tarifPembayaran.findMany({ where: { biayaMasterId: biaya.id } })
+  ]);
+
+  const eligibleSantri = santriList.filter(santri => isBiayaTargetMatch(santri, biaya));
+  const createdCount = await prisma.$transaction(async tx => {
+    let count = 0;
+    for (const santri of eligibleSantri) {
+      count += await generateTagihanForSantri(
+        tx,
+        santri,
+        tahunAjaran,
+        [biaya],
+        tariffs,
+        bulanMulai,
+        bulanSelesai
+      );
+    }
+    return count;
+  });
+
+  res.status(201).json({
+    success: true,
+    data: {
+      biayaMasterId: biaya.id,
+      tahunAjaranId: tahunAjaran.id,
+      eligibleSantriCount: eligibleSantri.length,
+      createdCount,
+      periodeCount: biaya.jenis === 'Syahriyah' || biaya.tipeFrekuensi === 'Bulanan' || biaya.tipeFrekuensi === 'Periodik'
+        ? bulanSelesai - bulanMulai + 1
+        : 1
+    }
+  });
 }));
 
 router.put('/biaya-master/:id', requireKeuangan, asyncHandler(async (req, res: Response) => {
@@ -73,7 +134,7 @@ router.delete('/tarif/:id', requireKeuangan, asyncHandler(async (req, res: Respo
 }));
 
 // ─── TAGIHAN KEUANGAN ─────────────────────────────────
-router.get('/tagihan', asyncHandler(async (req, res: Response) => {
+router.get('/tagihan', asyncHandler(async (req: AuthRequest, res: Response) => {
   const where: Record<string, unknown> = {};
   if (req.query.santriId) where.santriId = req.query.santriId;
   if (req.query.status) where.status = req.query.status;
@@ -114,7 +175,7 @@ router.post('/tagihan', requireKeuangan, asyncHandler(async (req, res: Response)
 }));
 
 // ─── TRANSAKSI PEMBAYARAN ─────────────────────────────
-router.get('/transaksi', asyncHandler(async (req, res: Response) => {
+router.get('/transaksi', asyncHandler(async (req: AuthRequest, res: Response) => {
   const where: Record<string, unknown> = {};
   if (req.query.santriId) where.santriId = req.query.santriId;
   if (req.query.tagihanId) where.tagihanId = req.query.tagihanId;

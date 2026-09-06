@@ -1,14 +1,13 @@
 import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
 import { verifyToken, AuthRequest } from '../middleware/auth';
 import { requireRole, UserRole } from '../middleware/rbac';
 import { apiLimiter } from '../middleware/rateLimit';
 import { asyncHandler } from '../middleware/asyncHandler';
 import { pick, requireFields, HttpError } from '../middleware/validate';
+import { prisma } from '../lib/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 router.use(apiLimiter);
 router.use(verifyToken);
 

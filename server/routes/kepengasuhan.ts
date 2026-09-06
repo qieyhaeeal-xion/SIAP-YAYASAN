@@ -1,10 +1,9 @@
 ﻿import { Router, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import { verifyToken, AuthRequest } from '../middleware/auth';
 import { requireKepengasuhan } from '../middleware/rbac';
+import { prisma } from '../lib/prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 router.use(verifyToken);
 
 // ─── KESEHATAN UKS ────────────────────────────────────
