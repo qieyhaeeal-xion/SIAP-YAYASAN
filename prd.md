@@ -7,13 +7,13 @@
 
 | Field | Value |
 |---|---|
-| **Versi** | v1.1.0 (Diperbarui berdasarkan Analisis Frontend & Logic Flow) |
-| **Tanggal** | 2026 |
+| **Versi** | v1.2.0 |
+| **Tanggal** | 7 September 2026 |
 | **Penyusun** | Tim Multimedia Yayasan Mukhtar Syafaat & Antigravity AI |
-| **Status** | Frontend Selesai (MVP Prototype) — Menunggu Integrasi Backend REST API |
+| **Status** | Frontend MVP Single-Role Super Admin + Rencana Pengembangan Terencana |
 | **Institusi** | PP Mukhtar Syafaat Blokagung, Banyuwangi |
 
-> *Dokumen ini bersifat konfidensial dan hanya untuk keperluan internal pengembangan sistem.*
+> Dokumen ini bersifat konfidensial dan hanya untuk keperluan internal pengembangan sistem.
 
 ---
 
@@ -21,371 +21,494 @@
 
 ### 1.1 Latar Belakang
 
-Pondok Pesantren Mukhtar Syafaat Blokagung, Banyuwangi, adalah lembaga pendidikan Islam yang mengelola ratusan hingga ribuan santri secara aktif. Saat ini, pengelolaan data santri, pendidikan madin, sekolah formal, kepengasuhan, hingga keuangan masih dilakukan secara manual atau menggunakan dokumen spreadsheet yang tidak terintegrasi.
+Pondok Pesantren Mukhtar Syafaat Blokagung, Banyuwangi mengelola data santri, pendidikan madin, sekolah formal, kepengasuhan, kepegawaian, PPDB, dan keuangan. Sebelum SIAP, sebagian proses tersebut masih tersebar pada dokumen manual dan spreadsheet sehingga pencarian data, pelaporan, dan konsistensi antar unit belum optimal.
 
-Kondisi ini menimbulkan berbagai tantangan, antara lain: data yang tidak konsisten antar unit, proses pencarian dan pelaporan yang lambat, tidak adanya rekam jejak aktivitas santri secara terpusat, serta keterbatasan akses informasi real-time bagi pengasuh dan pimpinan pesantren.
-
-**SIAP (Sistem Informasi Administrasi Pesantren)** hadir sebagai solusi sistem informasi terpadu berbasis web yang mengintegrasikan seluruh data dan proses operasional pesantren ke dalam satu platform terpadu, mulai dari penerimaan santri baru (PPDB), manajemen data santri, hafalan, madin, sekolah, kepengasuhan, kepegawaian, keuangan, hingga **Portal E-Santri** (Portal Wali Santri).
+SIAP (Sistem Informasi Administrasi Pesantren) dikembangkan sebagai aplikasi web terpusat. Codebase saat ini merupakan frontend MVP berbasis React dengan data persisten pada `localStorage`. Backend REST API dan database relasional menjadi target fase berikutnya.
 
 ### 1.2 Tujuan Produk
 
-- Membangun sistem informasi terpusat yang mengintegrasikan seluruh data operasional pesantren.
-- Meningkatkan efisiensi administrasi dan manajemen data santri secara digital.
-- Memberikan kemudahan akses informasi real-time bagi seluruh pemangku kepentingan (termasuk wali santri).
-- Menyediakan laporan dan rekap data yang akurat untuk mendukung pengambilan keputusan.
-- Mengurangi ketergantungan pada proses manual yang rawan kesalahan.
+- Menyatukan data operasional pesantren dalam satu aplikasi.
+- Mempercepat pengelolaan data santri, pendidikan, kepengasuhan, PPDB, dan keuangan.
+- Menyediakan alur kerja yang konsisten untuk Super Admin.
+- Menyediakan ringkasan statistik dan laporan operasional.
+- Memvalidasi logic bisnis sebelum integrasi backend produksi.
 
-### 1.3 Ruang Lingkup
+### 1.3 Status Notasi
 
-SiSantri mencakup sembilan modul utama:
+Setiap fitur pada dokumen menggunakan status berikut:
 
-1. **Modul Kesantrian** — manajemen data santri (8 section form), pesantren, madin, sekolah, tahfidz, nadhoman, dan alumni.
-2. **Modul Kepengasuhan** — kesehatan (UKS), perizinan (approval workflow), konseling, dan kunjungan santri.
-3. **Modul Kepegawaian** — jabatan dan data pegawai aktif/non-aktif.
-4. **Modul Akademik** — presensi formal dan presensi madin per kelas.
-5. **Modul Keuangan** — biaya tahunan, syahriyah bulanan, non-syahriyah, transaksi pembayaran, dan generasi kuitansi.
-6. **Modul PPDB** — penerimaan peserta didik/santri baru & **Fitur Mutasi Otomatis 1-Click ke Data Santri**.
-7. **Modul Portal Wali Santri** — portal monitoring real-time untuk orang tua/wali santri.
-8. **Modul Dashboard** — ringkasan statistik, grafik, widget perizinan, dan informasi utama.
-9. **Modul Pengaturan & RBAC** — manajemen pengguna, 9 level role-based access control, dan konfigurasi tahun ajaran.
+- **[Terimplementasi]**: tersedia dan dapat digunakan pada codebase saat ini.
+- **[Akan Diterapkan]**: disepakati sebagai pengembangan frontend berikutnya.
+- **[Opsi]**: masih memerlukan analisis desain dan keputusan lanjutan.
+- **[Roadmap]**: rencana lanjutan setelah prioritas frontend utama.
+- **[Known Issue]**: keterbatasan atau masalah teknis yang telah diketahui.
 
-### 1.4 Definisi & Istilah
+### 1.4 Ruang Lingkup
 
-| Istilah | Definisi |
-|---|---|
-| Santri | Siswa/peserta didik yang belajar dan tinggal di pesantren |
-| Madin | Madrasah Diniyah, lembaga pendidikan agama di pesantren |
-| Marhalah | Tingkatan kelas di Madin (misal: Ula, Wustho, Ulya) |
-| Nadhoman | Hafalan kitab berbentuk syair/nadzom agama (misal: Aqidatul Awam, Imriti, Alfiyah) |
-| Tahfidz | Program menghafal Al-Qur'an (Juz 1–30) |
-| Syahriyah | Biaya bulanan santri |
-| NIS | Nomor Induk Santri, 6 digit (2 digit tahun masuk + 4 digit urutan, contoh: `260001`) |
-| PPDB | Penerimaan Peserta Didik Baru |
-| Asrama | Tempat tinggal santri di lingkungan pesantren |
-| RBAC | Role-Based Access Control (Otorisasi Akses Berdasarkan Peran User) |
+SIAP mencakup delapan modul:
+
+1. **Kesantrian**: master pesantren/asrama/kamar, madin, sekolah formal, data santri, tahfidz, nadhoman, dan alumni.
+2. **Kepengasuhan**: UKS, perizinan, konseling, dan kunjungan.
+3. **Kepegawaian**: data pegawai dan NIP otomatis.
+4. **Akademik**: presensi batch formal dan madin.
+5. **Keuangan**: jenis pembayaran, tarif, tagihan, pemasukan, distribusi, dan ringkasan.
+6. **PPDB**: pendaftaran dan mutasi calon santri menjadi santri aktif.
+7. **Dashboard**: ringkasan statistik dan shortcut modul.
+8. **Pengaturan Admin**: profil, akun admin, identitas lembaga, backup, matriks akses, dan tahun ajaran.
+
+Portal Wali Santri dan sistem multi-role tidak termasuk dalam scope versi ini.
 
 ---
 
-## 2. VISI, MISI & SASARAN PRODUK
+## 2. VISI, MISI & SASARAN
 
 ### 2.1 Visi
 
-> *"Menjadi sistem informasi pesantren yang handal, terpadu, dan mudah digunakan, sehingga mendukung tata kelola pesantren yang modern, efisien, dan transparan."*
+Menjadi sistem informasi pesantren yang handal, terpadu, dan mudah digunakan untuk mendukung tata kelola pesantren yang modern, efisien, dan transparan.
 
 ### 2.2 Misi
 
-- Menyediakan platform manajemen data santri yang akurat dan mudah diakses.
-- Mengintegrasikan seluruh unit pendidikan (madin, sekolah formal, tahfidz) dalam satu sistem.
-- Mendukung digitalisasi proses administrasi pesantren dari PPDB hingga kelulusan/kepulangan santri.
-- Memberikan kemudahan pelaporan kepada pimpinan pesantren, yayasan, serta pemantauan oleh wali santri.
+- Menyediakan data santri yang terpusat dan mudah dicari.
+- Mengintegrasikan unit pesantren, madin, sekolah formal, dan kepengasuhan.
+- Mendukung digitalisasi PPDB, presensi, hafalan, dan keuangan.
+- Menyediakan dasar data yang siap diintegrasikan dengan backend produksi.
 
-### 2.3 Target Pengguna & Role System (9 Peran)
+### 2.3 Target Pengguna
 
-| Peran | Deskripsi | Hak Akses Utama |
+Versi ini hanya memiliki satu peran pengguna:
+
+| Peran | Deskripsi | Hak Akses |
 |---|---|---|
-| Admin Sistem | Pengelola teknis & administrator sistem | Full akses semua modul & konfigurasi RBAC |
-| Admin Pesantren | Operator data kesantrian & kamar | Kesantrian, PPDB, mutasi, laporan pesantren |
-| Admin Madin | Pengurus madin & marhalah | Data madin, presensi madin, setoran nadhoman |
-| Admin Sekolah | Tata usaha sekolah formal (MTs, MA, SMK) | Data sekolah, presensi formal |
-| Admin Kepengasuhan | Bagian pengasuhan santri & UKS | Perizinan, kesehatan UKS, konseling, kunjungan |
-| Bendahara | Pengelola keuangan pesantren | Modul keuangan, syahriyah, kuitansi |
-| Pimpinan | Pengasuh / kepala yayasan / Kiai | Dashboard executive, laporan read-only |
-| Guru | Pengajar formal & madin | Presensi & input nilai setoran |
-| Wali Santri | Orang tua/wali santri aktif | Portal Wali Santri (Monitoring Capaian & Tagihan) |
+| **Super Admin / Admin Yayasan** | Pengelola utama sistem | Akses seluruh modul, konfigurasi, data, backup, dan pemeliharaan |
+
+Tidak ada role Admin Madin, Admin Sekolah, Bendahara, Guru, Pimpinan, Wali Santri, atau role tambahan lain pada scope versi ini.
 
 ---
 
 ## 3. ARSITEKTUR SISTEM & TEKNOLOGI
 
-### 3.1 Arsitektur Umum
+### 3.1 Arsitektur Saat Ini
 
-SiSantri mengadopsi arsitektur Single Page Application (SPA) di sisi Frontend yang berkomunikasi via REST API ke sisi Backend.
+| Layer | Implementasi |
+|---|---|
+| Frontend | React 19, TypeScript, Vite, Tailwind CSS, Lucide Icons |
+| Routing | React Router DOM v7, route publik dan route aplikasi |
+| State | React Context API melalui `AppContext` |
+| Persistensi MVP | `localStorage` dengan prefix `sisantri_app_` |
+| Auth MVP | `authService`, username/sandi lokal, sesi lokal |
+| Authorization | Guard satu role melalui `rbac.ts` |
+| Logic Distribusi | `distributionService.ts` sebagai domain logic murni |
+| Deployment SPA | Vercel rewrite melalui `vercel.json` |
 
-| Layer | Komponen | Teknologi Saat Ini |
+### 3.2 Route Utama
+
+| URL | Halaman |
+|---|---|
+| `/` | Landing page publik |
+| `/login` | Login Super Admin |
+| `/app` | Dashboard aplikasi |
+| `/app/:tab` | Modul spesifik |
+| `/app/keuangan` | Redirect ke ringkasan keuangan |
+| `/app/payment-management` | Redirect ke ringkasan keuangan |
+
+### 3.3 Target Backend
+
+Fase berikutnya dapat menggunakan Laravel 11 atau Node.js dengan database MySQL/PostgreSQL/Supabase. Auth produksi dapat menggunakan JWT atau Laravel Sanctum. Migrasi dari `localStorage` ke REST API harus mempertahankan aturan bisnis yang sudah divalidasi pada frontend.
+
+---
+
+## 4. SPESIFIKASI MODUL
+
+### 4.1 Dashboard [Terimplementasi]
+
+Dashboard Super Admin menampilkan:
+
+- Total santri aktif dan alumni.
+- Jumlah unit pesantren dan pegawai.
+- Total pembayaran/tagihan dan tunggakan.
+- Rekap setoran Tahfidz dan Nadhoman.
+- Grafik sebaran santri berdasarkan marhalah.
+- Antrian PPDB.
+- Izin santri dan status persetujuan.
+- Shortcut menuju modul utama.
+
+Catatan: label tahun ajaran pada sebagian widget masih perlu diambil dinamis dari master tahun ajaran.
+
+### 4.2 Modul Kesantrian
+
+#### 4.2.1 Pesantren, Asrama, dan Kamar [Terimplementasi]
+
+- CRUD unit pesantren.
+- CRUD asrama yang terhubung dengan unit pesantren.
+- CRUD kamar yang terhubung dengan asrama.
+- Kapasitas dan nilai `terisi` kamar.
+
+Catatan: nilai `terisi` saat ini dikelola manual. Perhitungan otomatis berdasarkan santri akan menjadi penyempurnaan berikutnya.
+
+#### 4.2.2 Madin [Terimplementasi]
+
+- Master marhalah Ula, Wustho, dan Ulya.
+- Master kelas madin.
+- Master kitab hafalan.
+- Filter bertingkat: pilih marhalah lalu kelas madin.
+
+#### 4.2.3 Sekolah Formal [Terimplementasi]
+
+- Master unit sekolah MTs, MA, dan SMK.
+- Master jurusan.
+- Master kelas formal dan kode kelas.
+- Relasi kelas terhadap unit sekolah.
+
+Pengaitan jurusan langsung pada form kelas dan form santri perlu disempurnakan.
+
+#### 4.2.4 Data Santri [Terimplementasi + Akan Diterapkan]
+
+Form saat ini terdiri dari delapan tab:
+
+1. **Data Pribadi**: NIK, nama, tempat/tanggal lahir, jenis kelamin, nomor HP, alamat, RT/RW, dusun, desa, kecamatan, kabupaten, provinsi, kode pos, wilayah bertingkat, dan status santri.
+2. **Orang Tua/Wali**: data ayah, ibu, pekerjaan/penghasilan yang tersedia, dan nomor HP orang tua.
+3. **Sekolah Formal**: unit sekolah, kelas, sekolah asal, dan tahun lulus.
+4. **Madin**: marhalah dan kelas madin.
+5. **Asrama**: unit pesantren, asrama, dan kamar.
+6. **Hafalan**: target/capaian juz dan capaian nadhoman.
+7. **UKS/Kesehatan**: golongan darah, kondisi, dan riwayat penyakit.
+8. **Berkas Digital**: URL foto dan checklist KK, akta, ijazah.
+
+Status santri menggunakan hirarki:
+
+`Kategori Utama (Santri/Desa) -> Tipe Asuh -> Golongan (A1/A2/A3) -> Program (Pengabdian/Lulus/Pelajar)`.
+
+Fitur berikut akan diterapkan:
+
+- **Tab 9 Keterangan Keluar**, hanya ditampilkan saat edit santri.
+- Field alasan keluar, tahun keluar, nomor HP alumni, dan detail alumni.
+- Pengisian Section H mengubah status Aktif menjadi Alumni.
+- Pembuatan filter dan validasi field yang belum tersedia pada form.
+
+#### 4.2.5 Tahfidz Al-Qur'an [Terimplementasi + Akan Diterapkan]
+
+- Registrasi peserta Tahfidz berdasarkan tahun ajaran.
+- Status peserta Aktif, Non Aktif, atau Lulus.
+- Histori setoran dengan juz, surah, ayat, jenis setoran, nilai, pengampu, dan catatan.
+- Pencarian santri melalui kolom nama yang dapat diketik akan diterapkan pada semua alur pemilihan santri.
+- Tanggal setoran akan disempurnakan agar dapat dipilih pengguna.
+
+#### 4.2.6 Nadhoman [Terimplementasi + Akan Diperbaiki]
+
+- Pilihan kitab dari master kitab hafalan.
+- Form bait awal dan bait akhir.
+- Jumlah bait baru dihitung otomatis dengan rumus:
+
+`jumlahBaitBaru = baitAkhir - baitAwal + 1`.
+
+- Akumulasi dihitung dengan rumus:
+
+`totalHafalanSelesai = totalSebelumnya + jumlahBaitBaru`.
+
+- Pencarian santri menggunakan nama yang dapat diketik.
+- Sinkronisasi `kitabId`, nama kitab, jumlah bait, dan histori akan diperbaiki.
+
+#### 4.2.7 Data Alumni [Terimplementasi + Akan Diterapkan]
+
+Database alumni menampilkan santri berstatus Alumni. Fitur yang harus tersedia:
+
+- Pencarian berdasarkan NIS atau nama.
+- Filter tahun keluar.
+- Filter unit sekolah.
+- Tampilan kontak dan alamat alumni.
+
+### 4.3 Modul Kepengasuhan [Terimplementasi + Akan Dikembangkan]
+
+Modul terdiri dari empat area:
+
+#### Perizinan
+
+- Jenis izin: pulang, keluar komplek, atau berobat.
+- Alasan, tanggal keluar, rencana kembali, penjemput, dan status approval.
+- Status: Menunggu Persetujuan, Disetujui, atau Ditolak.
+- Tombol pencatatan bahwa santri sudah kembali dengan tanggal kembali real.
+
+#### Kesehatan UKS
+
+- Keluhan, diagnosa, tindakan, obat, petugas, dan tanggal masuk.
+- Status Dalam Perawatan UKS, Sembuh, atau Dirujuk Rumah Sakit.
+
+#### Konseling
+
+- Topik, uraian, solusi, dan konselor.
+- Kategori Bimbingan, Pelanggaran Disiplin, atau Prestasi/Apresiasi.
+
+#### Kunjungan
+
+- Nama tamu, hubungan, nomor HP, keperluan, jam masuk, dan jam keluar.
+
+Semua form pengambilan santri akan menggunakan pencarian nama yang dapat diketik, bukan dropdown panjang.
+
+### 4.4 Modul Kepegawaian [Terimplementasi]
+
+- Data pegawai/ustaz.
+- NIP otomatis dengan format `PGW-YYYY-XXX`.
+- Status kepegawaian Tetap, Kontrak, atau Honor.
+- Master jabatan dari data awal.
+
+CRUD Master Jabatan, kode jabatan, tunjangan terstruktur, dan satminkal masuk Roadmap.
+
+### 4.5 Modul Akademik & Presensi [Terimplementasi + Opsi]
+
+Fitur yang tersedia:
+
+- Presensi batch per tanggal dan kelas.
+- Kategori KBM Madin dan KBM Sekolah Formal.
+- Filter kelas bertingkat berdasarkan unit, jurusan, tingkat, dan kode kelas.
+- Konfirmasi sesi sebelum daftar santri ditampilkan.
+- Status Hadir, Izin, Sakit, dan Alpha.
+
+Rekapitulasi presensi lintas tanggal dan kelas adalah **opsi yang perlu dianalisis desainnya**. Sebelum diputuskan, perlu ditentukan format rekap, filter, periode, dan kebutuhan ekspor.
+
+### 4.6 Modul Keuangan [Terimplementasi + Roadmap]
+
+#### Ringkasan
+
+Menampilkan jenis pembayaran aktif, total pemasukan, jumlah transaksi, distribusi per pos, dan distribusi gagal.
+
+#### Jenis Pembayaran
+
+- CRUD biaya master.
+- Jenis Tahunan, Syahriyah, Non-Syahriyah, dan frekuensi.
+- Target tarif berdasarkan kategori santri, tipe asuh, golongan, program, unit, dan jenjang SMP/SLTA.
+- Preview dan pembuatan tagihan massal.
+- Pencegahan tagihan duplikat berdasarkan santri, jenis, tahun ajaran, dan periode.
+
+#### Pemasukan & Distribusi
+
+- Pilih santri, jenis pembayaran, dan periode tagihan.
+- Nominal otomatis berdasarkan sisa tagihan.
+- Nomor transaksi menggunakan format `PMK-YYYYMMDD-XXXX`.
+- Distribusi ke lima pos: Yayasan, Madin, Sekolah, Pesantren, dan Makan.
+- Snapshot konfigurasi distribusi pada transaksi.
+- Audit log untuk pencatatan konfigurasi dan transaksi.
+
+Kuitansi formal `KW-YYYYMMDD-XXX`, modal bayar tagihan, dan konfigurasi distribusi melalui UI masuk Roadmap. API context terkait kuitansi belum dipakai oleh komponen aktif.
+
+### 4.7 Modul PPDB & Mutasi [Terimplementasi]
+
+Alur status:
+
+`Pendaftaran Baru -> Lulus Seleksi -> Telah Dimutasi`.
+
+Mutasi satu klik:
+
+- Membuat NIS otomatis.
+- Menyalin data pendaftar menjadi santri Aktif.
+- Menentukan asrama, kamar, kelas sekolah, dan kelas madin fallback.
+- Membuat tagihan Syahriyah bulan berjalan.
+
+Pencarian dan aksi penolakan pendaftar perlu disempurnakan.
+
+### 4.8 Pengaturan Admin [Terimplementasi]
+
+- Profil dan keamanan Super Admin.
+- Ganti kata sandi minimal enam karakter.
+- CRUD akun admin tambahan dengan role yang sama.
+- Identitas lembaga.
+- Download, restore, dan reset backup JSON.
+- Matriks akses single-role.
+- Master tahun ajaran dengan satu tahun aktif.
+
+---
+
+## 5. ALUR KERJA UTAMA
+
+### 5.1 PPDB & Mutasi NIS
+
+Pendaftar dibuat -> diverifikasi lulus -> mutasi satu klik -> NIS dibuat -> data santri dibuat -> tagihan Syahriyah berjalan dibuat -> status pendaftar menjadi Telah Dimutasi.
+
+### 5.2 Setoran Hafalan
+
+Super Admin mencari santri berdasarkan nama -> memilih kitab/program -> memasukkan setoran -> sistem menyimpan histori. Pada Nadhoman, jumlah bait baru dan akumulasi dihitung otomatis sesuai rumus pada §4.2.6.
+
+### 5.3 Keuangan
+
+Super Admin memilih santri -> memilih jenis pembayaran -> memilih periode yang memiliki sisa tagihan -> sistem mengisi nominal tersisa -> transaksi dibuat dengan nomor PMK -> distribusi lima pos dibuat -> konfigurasi dan aktivitas dicatat.
+
+### 5.4 Transisi Alumni
+
+Super Admin membuka edit data santri -> membuka Tab 9 -> mengisi alasan/tahun keluar -> sistem mengubah status menjadi Alumni -> data tampil pada modul Alumni.
+
+### 5.5 Pencarian Santri
+
+Semua form yang membutuhkan santri menggunakan kolom pencarian nama yang dapat diketik. Daftar hasil difilter berdasarkan nama dan menampilkan NIS sebagai informasi tambahan.
+
+---
+
+## 6. DESAIN DATABASE & MAPPING STATE
+
+ERD berikut tetap menjadi target backend relasional:
+
+| Entitas Target | Sumber State MVP |
+|---|---|
+| tahun_ajaran | `tahunAjaranList` |
+| unit_pesantren, asrama, kamar | `unitsPesantren`, `asramaList`, `kamarList` |
+| marhalah_madin, kelas_madin, kitab_hafalan | `marhalahList`, `kelasMadinList`, `kitabList` |
+| unit_sekolah, jurusan, kelas_sekolah | `unitSekolahList`, `jurusanList`, `kelasSekolahList` |
+| santri | `santriList` |
+| peserta_tahfidz, setoran_tahfidz | `pesertaTahfidzList`, `setoranTahfidzList` |
+| setoran_nadhoman | `setoranNadhomanList` |
+| kesehatan, perizinan, konseling, kunjungan | masing-masing list pada `AppContext` |
+| biaya_master, tarif_pembayaran, tagihan | `biayaMasterList`, `tarifPembayaranList`, `tagihanList` |
+| transaksi_pembayaran | `transaksiList` |
+| pemasukan, alokasi_pemasukan | `pemasukanList`, `alokasiList` |
+| distribusi_config, audit_log | `distribusiConfigList`, `auditLogList` |
+| pendaftar_ppdb | `ppdbList` |
+| users | `users` dan `authService` lokal |
+
+Pada backend, seluruh relasi, constraint, audit trail, dan validasi harus dipindahkan ke server-side.
+
+---
+
+## 7. UI/UX, ROUTING & RESPONSIVE
+
+Palet utama:
+
+| Elemen | Hex |
+|---|---|
+| Primary Navy Teal | `#1A5276` |
+| Secondary Blue | `#2E86C1` |
+| Accent Teal | `#1ABC9C` |
+| Background | `#F4F6F7` |
+
+Layout menggunakan sidebar desktop dan drawer mobile. Tabel menggunakan scroll horizontal internal. Route aplikasi menggunakan URL sehingga halaman dapat dibookmark.
+
+---
+
+## 8. KEAMANAN & AKSES
+
+- Versi MVP menggunakan autentikasi localStorage.
+- Role aplikasi hanya Super Admin (`admin_yayasan`).
+- Guard route menolak role yang tidak terdaftar.
+- Password demo dapat diganti dari Pengaturan Admin.
+- Audit log disimpan untuk transaksi dan konfigurasi distribusi.
+- JWT/Sanctum, hashing server-side, rate limiting, CORS, dan audit server adalah target backend.
+
+---
+
+## 9. ROADMAP PENGEMBANGAN
+
+### Fase 1: Backend & Database
+
+- REST API Laravel/Node.js.
+- Database relasional.
+- Migrasi state localStorage.
+- Auth server-side Super Admin.
+
+### Fase 2: Export & Dokumen
+
+- PDF kuitansi formal.
+- Export Excel/PDF data santri, presensi, dan keuangan.
+- Buku rapor hafalan.
+- Kartu santri QR.
+
+### Fase 3: Storage
+
+- Upload foto santri.
+- Berkas PPDB.
+- Bukti transfer.
+
+### Fase 4: Notifikasi
+
+- WhatsApp reminder tagihan.
+- Notifikasi izin dan UKS.
+
+### Fase 5: QA & Deployment
+
+- Unit/integration/load testing.
+- Audit keamanan.
+- Backup database.
+- Deployment HTTPS dan pelatihan admin.
+
+### Backlog Frontend Tambahan
+
+- Kuitansi formal `KW-YYYYMMDD-XXX` dan modal bayar tagihan.
+- UI konfigurasi distribusi pemasukan.
+- CRUD Master Jabatan.
+- Viewer audit log.
+- Rekap presensi setelah analisis desain disetujui.
+- Perhitungan `terisi` kamar dari data santri.
+
+Portal Wali dan multi-role tidak termasuk roadmap versi ini.
+
+---
+
+## 10. STATUS IMPLEMENTASI & RENCANA TERENCANA
+
+| Fitur | Status | Kriteria Hasil |
 |---|---|---|
-| **Frontend** | Antarmuka pengguna (SPA) | React 19 + TypeScript + Vite + Tailwind CSS + Lucide Icons |
-| **State Store** | Manajemen state lokal & persistensi | Context API (`AppContext`) + `useLocalStorage` |
-| **Backend (Target)** | REST API server | Laravel 11 (PHP) / Node.js Express |
-| **Database (Target)** | Penyimpanan data relasional | MySQL / PostgreSQL / Supabase |
-| **Auth System** | Autentikasi dan otorisasi | JWT Token + RBAC (9 Level Peran) |
-| **Storage (Target)** | Upload file/foto santri & berkas PPDB | Local Storage API / S3-Compatible Cloud Storage |
+| Section H | Akan Diterapkan | Tab 9 edit-only, auto Alumni |
+| Cari santri berbasis nama | Akan Diterapkan | Semua form santri menggunakan input ketik |
+| Perbaikan Nadhoman | Akan Diperbaiki | Jumlah bait dan total akumulasi numerik benar |
+| Filter Alumni | Akan Diterapkan | Tahun, unit sekolah, NIS/nama |
+| Pengembangan Kepengasuhan | Akan Diterapkan | Jenis izin, kembali real, UKS lengkap, kategori konseling |
+| Rekap Presensi | Opsi | Diputuskan setelah analisis desain |
+| Kuitansi KW | Roadmap | Modal bayar dan dokumen formal |
+
+Implementasi fitur berstatus Akan Diterapkan merupakan task coding terpisah dari penyelarasan dokumen ini.
 
 ---
 
-## 4. SPESIFIKASI MODUL & FITUR
+## 11. KNOWN ISSUES & TECHNICAL DEBT
 
-*(Seluruh antarmuka modul di bawah ini telah **Selesai Diimplementasikan (100%)** pada Frontend MVP).*
-
-### 4.1 Modul Dashboard `[STATUS FRONTEND: SELESAI]`
-
-Halaman utama eksekutif setelah login yang menyajikan ringkasan statistik real-time:
-- Statistik total santri aktif, alumni, dan unit pesantren.
-- Ringkasan tagihan keuangan belum lunas dan total penerimaan.
-- Notifikasi perizinan santri yang menunggu persetujuan (*Pending Approval*).
-- Rekapitulasi entri setoran Tahfidz Al-Qur'an dan Nadhoman Kitab.
-- Akses navigasi cepat ke modul-modul utama.
-
----
-
-### 4.2 Modul Kesantrian `[STATUS FRONTEND: SELESAI]`
-
-#### 4.2.1 Sub Menu: Pesantren & Asrama
-- Mengelola Master Data Unit Pesantren (Pusat, Al-Mukhtar, Nurul Huda), Asrama, dan Kamar.
-- Monitoring terisi vs kapasitas kamar santri secara real-time.
-
-#### 4.2.2 Sub Menu: Madin (Madrasah Diniyah)
-- Mengelola Marhalah Madin (Ula, Wustho, Ulya), Kelas Madin, dan Kitab Hafalan Nadhoman.
-- **Fitur Filter**: Dependent dropdown 2 tingkat (*Pilih Marhalah* → *Pilih Kelas Madin*).
-
-#### 4.2.3 Sub Menu: Sekolah Formal
-- Mengelola Unit Sekolah Formal (MTs, MA, SMK Mukhtar Syafaat), Jurusan (MIPA, IPS, TKJ, AKL), dan Kode Kelas.
-
-#### 4.2.4 Sub Menu: Data Santri (8 Section Form)
-- **Generasi NIS Otomatis**: Format 6 digit (`YY` 2 digit tahun masuk + `4 digit` urutan pendaftaran, contoh: `260001`).
-- **Formulir 8 Bagian**:
-  - **A. Keterangan Santri**: NIS, NIK, NISN, Nama Lengkap, Gender, TTL, Jumlah Saudara di PP, Status Keluarga.
-  - **B. Tempat Tinggal**: Alamat, RT/RW, Dusun, Desa, Kecamatan, Kabupaten, Provinsi, Kode Pos.
-  - **C. Kesehatan**: Golongan Darah, Riwayat Penyakit, Tindakan, Kondisi Saat Ini.
-  - **D. Pendidikan**: Dropdown terintegrasi master Unit Pesantren, Asrama, Kamar, Unit Sekolah, Jurusan, Kelas, Marhalah, dan Kelas Madin.
-  - **E. Riwayat Pendidikan**: Nama Sekolah Asal, Alamat, Tahun Lulus, No KIP.
-  - **F. Orang Tua / Wali**: NIK & Nama Ayah/Ibu, Pekerjaan, Penghasilan, No HP Wali.
-  - **G. Santri Asuh**: Jenis Santri Asuh (Bukan Asuh / ASUH 1 / ASUH 2 / ASUH 3) & Alasan.
-  - **H. Keterangan Keluar**: Alasan Keluar, Tahun Keluar, No HP Alumni.
-- **Otomatisasi Status Alumni**: Mengisi Bagian H secara otomatis mengubah status santri dari `'Aktif'` menjadi `'Alumni'`.
-
-#### 4.2.5 Sub Menu: Tahfidz Al-Qur'an
-- **Layout 2 Panel**: Form Input Setoran + Tabel Histori Hafalan & Popup Cari Santri.
-- **Fitur Pendaftaran**: Button *"Input Peserta Tahfidz"* untuk mendaftarkan santri ke program Tahfidz.
-- **Form Setoran**: Tanggal, Juz (1-30), Surah, Rentang Ayat, Jenis Setoran (Ziyadah/Murojaah), Nilai (A/B/C), Pengampu.
-
-#### 4.2.6 Sub Menu: Setoran Nadhoman Kitab
-- **Layout 2 Panel**: Form Input Setoran + Tabel Histori & Popup Cari Santri.
-- **Pilihan Kitab**: *Aqidatul Awam* (Tauhid - 57 bait), *Matan Al-Imriti* (Nahwu - 254 bait), *Alfiyah Ibn Malik* (Gramatika - 1002 bait).
-- **Akumulasi Otomatis**: Sistem secara otomatis menghitung akumulasi total bait selesai (`totalHafalanSelesai`) berdasarkan riwayat setoran sebelumnya.
-
-#### 4.2.7 Sub Menu: Data Alumni
-- Database khusus menampilkan santri dengan status `'Alumni'` (keluar/lulus).
-- Fitur filter berdasarkan tahun keluar, unit sekolah, pencarian NIS/nama.
+1. Akumulasi Nadhoman pada codebase saat ini dapat menghasilkan `NaN` karena field form belum tersinkron dengan context (`NadhomanModule.tsx:69-82`, `AppContext.tsx:860-879`).
+2. Section H belum memiliki input UI pada codebase saat ini.
+3. Fungsi kuitansi `KW-` tersedia di context tetapi belum dipanggil komponen aktif.
+4. UI konfigurasi distribusi belum tersedia, meskipun state dan service tersedia.
+5. Presensi batch belum menyimpan `kelasId` dan `tipe` secara konsisten sehingga deduplikasi perlu diperbaiki.
+6. Fungsi pivot rekap tagihan pada `types/sisantri.ts` belum digunakan UI.
+7. Audit log belum memiliki viewer.
+8. Sebagian label tahun ajaran dashboard masih hardcode.
+9. Alumni belum memiliki filter/search sesuai target §4.2.7.
+10. Hapus tahun ajaran masih berupa stub alert.
+11. Master Jabatan masih read-only.
+12. Nilai `terisi` kamar masih manual.
+13. PPDB belum memiliki aksi penolakan pada UI.
+14. Tanggal setoran Tahfidz/Nadhoman masih otomatis hari ini.
+15. Sejumlah field pada interface/data belum memiliki input form lengkap, termasuk NISN, anak ke, jumlah saudara, alamat sekolah asal, No KIP, data ibu, wali, alasan asuh, dan jurusan santri.
 
 ---
 
-### 4.3 Modul Kepengasuhan `[STATUS FRONTEND: SELESAI]`
+## 12. KRITERIA PENERIMAAN
 
-- **Kesehatan UKS**: Pencatatan tanggal sakit, keluhan, diagnosa, tindakan, obat, dan status (`Dalam Perawatan UKS`, `Sembuh`, `Dirujuk Rumah Sakit`).
-- **Perizinan Santri**: Pengajuan izin (pulang/keluar komplek/berobat), tanggal kembali, penjemput, dan alur persetujuan (`Menunggu Persetujuan`, `Disetujui`, `Ditolak`) beserta nama pengasuh penyetuju.
-- **Konseling & Kunjungan**: Log bimbingan/pelanggaran disiplin dan pencatatan tamu/wali santri di pos kepengasuhan.
-
----
-
-### 4.4 Modul Kepegawaian `[STATUS FRONTEND: SELESAI]`
-
-- **Jabatan Pegawai**: Master Jabatan (Kode, Nama, Tunjangan, Satminkal).
-- **Data Pegawai**: Data pegawai Aktif & Non-Aktif dengan pembuatan NIP otomatis (`PGW-YYYY-XXX`).
-
----
-
-### 4.5 Modul Akademik & Presensi `[STATUS FRONTEND: SELESAI]`
-
-- **Presensi Formal & Madin**: Rekapitulasi & batch entry kehadiran santri per kelas/tanggal dengan status *Hadir*, *Izin*, *Sakit*, atau *Alpha*.
-
----
-
-### 4.6 Modul Keuangan & Syahriyah `[STATUS FRONTEND: SELESAI]`
-
-- **Biaya Master**: Pengaturan biaya Tahunan, Syahriyah (Bulanan), dan Non-Syahriyah.
-- **Tagihan Keuangan**: Tracking status tagihan (`Lunas`, `Sebagian`, `Belum Lunas`).
-- **Transaksi & Kuitansi**: Modal pencatatan pembayaran yang menghasilkan nomor kuitansi otomatis (`KW-YYYYMMDD-XXX`) serta memperbarui sisa tagihan.
-- **Otomatisasi Tagihan**: Penambahan santri baru atau mutasi PPDB otomatis menghasilkan tagihan Syahriyah bulan berjalan.
-
----
-
-### 4.7 Modul PPDB & Mutasi NIS `[STATUS FRONTEND: SELESAI]`
-
-- Formulir pendaftaran calon santri baru (pilihan Unit Pesantren, Unit Sekolah, Marhalah Madin).
-- Dashboard status pendaftar (`Pendaftaran Baru`, `Lulus Seleksi`, `Ditolak`, `Telah Dimutasi`).
-- **Fitur Mutasi Otomatis 1-Click (`mutasiPPDBKeSantri`)**: Memindahkan pendaftar diterima menjadi Santri Aktif, meng-generate NIS 6-Digit otomatis, menetapkan kamar/kelas fallback, dan membuat tagihan Syahriyah perdana.
-
----
-
-### 4.8 Modul Portal Wali Santri `[STATUS FRONTEND: SELESAI]`
-
-- Portal khusus orang tua/wali santri untuk memantau ananda secara real-time.
-- Menyajikan informasi: Profil Santri & Kamar/Sekolah, Capaian Juz Tahfidz & Bait Nadhoman, Status Pelunasan Syahriyah, Riwayat Perizinan, dan Catatan Kesehatan UKS.
-
----
-
-### 4.9 Modul Pengaturan & RBAC `[STATUS FRONTEND: SELESAI]`
-
-- **Manajemen RBAC**: Simulator pergantian 9 peran (Admin Sistem, Pesantren, Madin, Sekolah, Kepengasuhan, Bendahara, Pimpinan, Guru, Wali Santri).
-- **Manajemen Tahun Ajaran**: Pengaturan Tahun Ajaran Aktif (misal: `2025/2026`) yang menjadi referensi default seluruh transaksi data.
-
----
-
-## 5. ALUR KERJA UTAMA (LOGIC FLOWS)
-
-### 5.1 Alur PPDB & Mutasi NIS Otomatis
-
-```
-[Calon Santri Daftar PPDB] 
-       │
-       ▼
-[Admin PPDB Verifikasi & Kelulusan]
-       │
-       ▼
-[Klik Tombol "Mutasi ke Data Santri"]
-       │
-       ├─► Generasi NIS Otomatis (Format: YY + 4 Digit Urutan)
-       ├─► Salin Data Pendaftar ke Tabel Data Santri (8 Section)
-       ├─► Tetapkan Asrama, Kamar, & Kelas Fallback
-       ├─► Buat Tagihan Syahriyah Bulan Berjalan Otomatis
-       └─► Ubah Status PPDB ke "Telah Dimutasi"
-```
-
-### 5.2 Alur Pencatatan Setoran Hafalan & Kalkulasi Bait
-
-```
-[Pilih Santri via Modal / Pencarian]
-       │
-       ├─► Tahfidz: Input Juz, Surah, Ayat, Ziyadah/Murojaah, & Nilai (A/B/C)
-       │
-       └─► Nadhoman: Input Tanggal, Kitab, & Jumlah Bait Baru
-                 │
-                 ▼
-          [Sistem Cari Hitungan Bait Sebelumnya]
-                 │
-                 ▼
-          [Kalkulasi: Bait_Lama + Bait_Baru = Total_Bait_Selesai]
-```
-
-### 5.3 Alur Keuangan & Pembayaran Syahriyah
-
-```
-[Tagihan Terbuat Otomatis / Manual]
-       │
-       ▼
-[Admin Buka Modal Bayar Tagihan]
-       │
-       ▼
-[Input Nominal & Metode (Tunai/Transfer/E-Wallet)]
-       │
-       ├─► Generate No. Kuitansi (Format: KW-YYYYMMDD-XXX)
-       ├─► Hitung Total Terbayar & Sisa Tagihan
-       └─► Update Status Tagihan (Lunas / Sebagian / Belum Lunas)
-```
-
-### 5.4 Alur Transisi Santri Keluar / Alumni
-
-```
-[Admin Edit Data Santri -> Isi Section H (Keterangan Keluar)]
-       │
-       ▼
-[Sistem Deteksi Pengisian Alasan / Tahun Keluar]
-       │
-       ▼
-[Status Santri Otomatis Berubah dari "Aktif" menjadi "Alumni"]
-       │
-       ▼
-[Data Santri Ditampilkan pada Sub Modul Data Alumni]
-```
-
----
-
-## 6. DESAIN DATABASE (ERD RINGKAS)
-
-Berikut adalah struktur tabel utama relasional untuk fase Backend:
-
-| Tabel | Kolom Utama | Relasi |
+| No | Kriteria | Status |
 |---|---|---|
-| `tahun_ajaran` | id, kode_tahun_ajaran, tanggal_mulai, tanggal_selesai, is_aktif | Referensi global |
-| `unit_pesantren` | id, kode_unit, nama_unit, deskripsi | → asrama |
-| `asrama` | id, unit_pesantren_id, kode_asrama, nama_asrama, pembina, kapasitas | → kamar |
-| `kamar` | id, asrama_id, kode_kamar, nama_kamar, kapasitas, terisi | → santri |
-| `marhalah_madin` | id, kode_marhalah, nama_marhalah, tingkat | → kelas_madin |
-| `kelas_madin` | id, marhalah_id, nama_kelas, wali_kelas | → santri |
-| `kitab_hafalan` | id, marhalah_id, nama_kitab, total_bait, pengampu | → setoran_nadhoman |
-| `unit_sekolah` | id, kode_sekolah, nama_sekolah, kepala_sekolah | → kelas_sekolah |
-| `kelas_sekolah` | id, sekolah_id, jurusan_id, kode_kelas, nama_kelas | → santri |
-| `santri` | id, nis, nik, nisn, nama_lengkap, gender, ttl, status, unit_pesantren_id, asrama_id, kamar_id, unit_sekolah_id, kelas_sekolah_id, marhalah_madin_id, kelas_madin_id, ... (8 Section Fields) | Tabel Utama |
-| `peserta_tahfidz` | id, santri_id, tahun_ajaran_id, tanggal_daftar, status | → santri |
-| `setoran_tahfidz` | id, santri_id, tanggal, juz, surah, ayat_mulai, ayat_selesai, jenis_setoran, nilai, pengampu | ← santri |
-| `setoran_nadhoman` | id, santri_id, tanggal, nama_kitab, jumlah_bait_baru, total_hafalan_selesai, penguji | ← santri |
-| `perizinan` | id, santri_id, jenis_izin, alasan, tgl_keluar, tgl_kembali_plan, tgl_kembali_real, status_approval, disetujui_oleh | ← santri |
-| `kesehatan_uks` | id, santri_id, tgl_sakit, keluhan, diagnosa, tindakan_uks, obat, status | ← santri |
-| `tagihan_keuangan` | id, santri_id, biaya_master_id, bulan_tahun, nominal_tagihan, nominal_terbayar, status | ← santri |
-| `transaksi_pembayaran`| id, tagihan_id, santri_id, no_kuitansi, tanggal, nominal, metode_pembayaran, penerima | ← tagihan_keuangan |
-| `pendaftar_ppdb` | id, no_pendaftaran, nama_lengkap, sekolah_asal, unit_pesantren_pilihan_id, status_seleksi | Transisi ke santri |
-| `users` | id, username, nama, role, email, santri_id_associated | Otorisasi Akses |
+| 1 | Super Admin dapat login dan mengakses modul | Terverifikasi |
+| 2 | NIS santri dibuat otomatis enam digit | Terverifikasi |
+| 3 | Dropdown master pendidikan terintegrasi | Terverifikasi |
+| 4 | Akumulasi Nadhoman benar | Akan diperbaiki |
+| 5 | Mutasi PPDB membuat santri dan tagihan | Terverifikasi |
+| 6 | Pemasukan PMK dan distribusi lima pos tersimpan | Terverifikasi |
+| 7 | Section H mengubah santri menjadi Alumni | Akan diterapkan |
+| 8 | Pencarian santri berdasarkan nama tersedia pada semua form | Akan diterapkan |
+| 9 | Kepengasuhan mencatat jenis izin, kembali real, UKS, dan kategori konseling | Akan diterapkan |
+| 10 | Responsif pada desktop dan mobile | Terverifikasi secara visual |
 
 ---
 
-## 7. DESAIN UI/UX & TEMA WARNA
+## 13. LAMPIRAN & RIWAYAT
 
-### 7.1 Palet Warna Utama
+### 13.1 Referensi
 
-| Elemen | Warna | Kode Hex |
+- `Laporan.md` — analisis codebase dan flow aktual.
+- `RENCANA APLIKASI.xlsx` — rancangan awal struktur modul dan UI.
+- Peraturan PPDB PP Mukhtar Syafaat Blokagung.
+
+### 13.2 Riwayat Dokumen
+
+| Versi | Tanggal | Perubahan |
 |---|---|---|
-| **Primary (Header & Sidebar)** | Navy Teal | `#1A5276` |
-| **Secondary (Link & Submenu)** | Biru Sedang | `#2E86C1` |
-| **Accent (Highlight & Badge)** | Teal Hijau | `#1ABC9C` |
-| **Background Viewport** | Light Gray Canvas | `#F4F6F7` |
-| **Text Primary** | Dark Slate | `#1C2833` |
-| **Text Secondary** | Medium Slate | `#566573` |
+| v0.1 | 2026 | Draft awal berdasarkan spreadsheet. |
+| v1.0 | 2026 | PRD awal perencana sistem. |
+| v1.1.0 | 2026 | Spesifikasi frontend MVP, flow bisnis, dan rencana backend. |
+| **v1.2.0** | **7 September 2026** | Penyelarasan dengan codebase aktual, penetapan single Super Admin, penghapusan Portal Wali, Section H terencana, pencarian nama, perbaikan Nadhoman, pengembangan Alumni/Kepengasuhan, opsi rekap presensi, backlog, dan known issues. |
 
 ---
 
-## 8. KEAMANAN & RBAC
-
-- **Autentikasi Token-Based (Target)**: JWT Token / Laravel Sanctum.
-- **Otorisasi Server-Side**: Validasi hak akses dilakukan di level REST API endpoint sesuai 9 Peran pengguna.
-- **Audit Trail**: Logging aktivitas perubahan data (siapa, kapan, dan apa yang diubah).
-
----
-
-## 9. ROADMAP PENGEMBANGAN & RENCANA TASK KEDEPANNYA
-
-Status pengembangan SiSantri saat ini dan rencana kerja ke depan:
-
-| Fase | Durasi | Cakupan & Target | Status |
-|---|---|---|---|
-| **Fase MVP Frontend** | 4 Minggu | Development UI/UX React SPA 9 Modul, AppContext Store, Auto NIS, Mutasi PPDB 1-Click, Akumulasi Nadhoman, Kuitansi, & Portal Wali | **SELESAI (100%)** |
-| **Fase 1: Backend & DB** | 6 Minggu | Setup REST API (Laravel 11/Node.js), Migrasi Database Relasional MySQL/Supabase, Auth JWT, API Integration | **Rencana Task 1** |
-| **Fase 2: Export Engine** | 3 Minggu | Generasi PDF Kuitansi, Export Excel Data Santri/Presensi/Syahriyah, Cetak Buku Rapor Hafalan & Kartu Santri QR | **Rencana Task 2** |
-| **Fase 3: Cloud Storage** | 2 Minggu | Upload Foto Santri, Upload Berkas PPDB (Ijazah/KK/Akta), & Upload Bukti Transfer Syahriyah | **Rencana Task 3** |
-| **Fase 4: WA Gateway** | 3 Minggu | Integrasi WhatsApp Gateway (Fonnte/Wablas) untuk Pengingat Syahriyah, Notifikasi Izin, & Info UKS ke Ortu | **Rencana Task 4** |
-| **Fase 5: QA & Launching** | 2 Minggu | Testing Menyeluruh (Load Testing 50+ Users), Audit Log, Deployment VPS Linux HTTPS, & Training Operational Admin | **Rencana Task 5** |
-
----
-
-## 10. KRITERIA PENERIMAAN (ACCEPTANCE CRITERIA)
-
-| No | Kriteria Penerimaan | Metode Verifikasi | Status Verifikasi |
-|---|---|---|---|
-| 1 | Pengguna dapat berpindah role persona dengan aman | Simulator Role pada Pengaturan | **Terverifikasi (Selesai)** |
-| 2 | NIS Santri digenerate otomatis 6 digit sesuai format | Tambah Santri / Mutasi PPDB | **Terverifikasi (Selesai)** |
-| 3 | Dropdown Pendidikan terintegrasi dengan Master Data | Form Santri Section D | **Terverifikasi (Selesai)** |
-| 4 | Input hafalan Nadhoman terakumulasi otomatis | Input setoran Nadhoman berulang | **Terverifikasi (Selesai)** |
-| 5 | Mutasi PPDB memindahkan data ke Santri Aktif & buat Tagihan | Klik Mutasi PPDB pada Pendaftar | **Terverifikasi (Selesai)** |
-| 6 | Pembayaran tagihan menghasilkan No Kuitansi `KW-xxx` | Bayar Tagihan via Modal Keuangan | **Terverifikasi (Selesai)** |
-| 7 | Wali Santri dapat memantau capaian ananda real-time | Akses Portal Wali Santri | **Terverifikasi (Selesai)** |
-| 8 | Sistem responsif pada layar desktop & mobile | Pengujian resolusi 320px - 1920px | **Terverifikasi (Selesai)** |
-
----
-
-## 11. LAMPIRAN & RIWAYAT DOKUMEN
-
-### 11.1 Referensi Berkas
-- [Laporan.md](file:///d:/web/sisantri---sim-pesantren-mukhtar-syafaat/Laporan.md) — Laporan Analisis Sistem & Logic Flow Frontend
-- `RENCANA_APLIKASI.xlsx` — Perencanaan awal struktur modul dan UI oleh tim multimedia
-- Peraturan PPDB PP Mukhtar Syafaat Blokagung
-
-### 11.2 Riwayat Dokumen
-
-| Versi | Tanggal | Perubahan | Oleh |
-|---|---|---|---|
-| v0.1 | 2026 | Draft awal berdasarkan RENCANA_APLIKASI.xlsx | Tim Multimedia |
-| v1.0 | 2026 | Dokumen PRD awal perencana sistem | Tim Multimedia |
-| **v1.1.0** | **2026** | **Integrasi Hasil Laporan Analisis Frontend, Flow Logic (Auto NIS, Mutasi 1-Click, Akumulasi Nadhoman, Kuitansi KW-xxx, Auto Alumni), Spesifikasi 9 Modul (termasuk Portal Wali), dan Rencana Task Backend Kedepannya** | **Antigravity AI & Tim Multimedia** |
-
----
-
-*--- Akhir Dokumen PRD v1.1.0 ---*
+*Akhir Dokumen PRD SIAP v1.2.0.*
