@@ -320,6 +320,8 @@ export interface PresensiRecord {
 // ---------------- KEUANGAN TYPES ---------------- //
 
 export type BiayaKategori = 'YAYASAN' | 'SEKOLAH' | 'PESANTREN' | 'MAKAN' | 'MADIN';
+export const POS_NON_SYAHRIAH = 'LAIN-LAIN' as const;
+export type BiayaPos = BiayaKategori | typeof POS_NON_SYAHRIAH;
 
 export interface BiayaMaster {
   id: string;
@@ -329,7 +331,7 @@ export interface BiayaMaster {
   tipeFrekuensi?: string;
   nominal?: number;
   nominalStandard?: number;
-  kategori?: BiayaKategori;
+  kategori?: BiayaPos;
   keterangan?: string;
   kategoriPembayaran?: 'Rutin' | 'Insidental' | 'Sukarela';
   // Target status santri (HIRARKI 4-LEVEL)
@@ -364,11 +366,21 @@ export interface TarifPembayaran {
   targetJenjangSekolah?: JenjangSekolah;
   targetUnitPesantrenId?: string;
   targetUnitSekolahId?: string;
+  // Rincian paket Syahriyah; nominal tetap menyimpan total seluruh elemen.
+  elemen?: Partial<Record<BiayaKategori, number>>;
   nominal: number;
   wajib: boolean;
   aktif: boolean;
   effectiveFrom?: string;
   effectiveUntil?: string;
+}
+
+export const SYAHRIAH_ELEMEN: readonly BiayaKategori[] = [
+  'YAYASAN', 'SEKOLAH', 'PESANTREN', 'MAKAN', 'MADIN'
+];
+
+export function totalElemenSyahriyah(elemen: Partial<Record<BiayaKategori, number>> = {}): number {
+  return SYAHRIAH_ELEMEN.reduce((total, kategori) => total + Math.max(0, Number(elemen[kategori] || 0)), 0);
 }
 
 export interface TagihanKeuangan {
@@ -420,7 +432,7 @@ export interface TagihanGenerationResult {
 export interface TagihanPreviewItem {
   biayaMasterId: string;
   namaBiaya: string;
-  kategori?: BiayaKategori;
+  kategori?: BiayaPos;
   nominal: number;
   wajib: boolean;
 }
@@ -571,48 +583,10 @@ export interface TransaksiPembayaran {
   appliedToTagihan?: boolean;
 }
 
-// ---------------- PEMASUKAN & DISTRIBUSI TYPES ---------------- //
+// ---------------- PEMASUKAN TYPES ---------------- //
 
-// Lima konteks keuangan utama — SEJAJAR (tidak ada induk-anak)
-export type KonteksKeuangan = BiayaKategori;
+export type PemasukanStatus = 'PENDING' | 'PAID';
 
-// Urutan tampil konsisten: YAYASAN, MADIN, SEKOLAH, PESANTREN, MAKAN
-export const KONTEKS_KEUANGAN_ORDER: readonly KonteksKeuangan[] = ['YAYASAN', 'MADIN', 'SEKOLAH', 'PESANTREN', 'MAKAN'];
-
-export type NominalMap = Record<KonteksKeuangan, number>;
-
-export const DEFAULT_SYAHRIAH_NOMINALS: NominalMap = {
-  YAYASAN: 100000,
-  MADIN: 75000,
-  SEKOLAH: 150000,
-  PESANTREN: 200000,
-  MAKAN: 250000
-};
-export type DistribusiStatus = 'Draft' | 'Aktif' | 'Arsip';
-
-// Status proses transaksi pemasukan — bisa dipantau & ditelusuri.
-// PENDING  → pembayaran tercatat, belum diproses
-// PAID     → pembayaran berhasil diterima
-// DISTRIBUTED → pembagian ke 5 keuangan berhasil & terverifikasi
-// FAILED   → distribusi gagal (error tersimpan di distribusiError, transaksi tidak hilang)
-export type PemasukanStatus = 'PENDING' | 'PAID' | 'DISTRIBUTED' | 'FAILED';
-
-// Konfigurasi pembagian pemasukan santri ke 5 keuangan utama.
-// Berbasis periode (effectiveFrom/Until) agar histori aturan tersimpan.
-export interface DistribusiKeuanganConfig {
-  id: string;
-  name: string;
-  version: string; // label versi berurutan: V-001, V-002, ...
-  effectiveFrom: string; // tanggal mulai berlaku (YYYY-MM-DD)
-  effectiveUntil?: string;
-  nominals: NominalMap; // total menjadi nominal akhir Syahriyah santri
-  status: DistribusiStatus;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Satu pembayaran santri = satu pemasukan (identitas transaksi asli).
 export interface Pemasukan {
   id: string;
   noPemasukan: string; // identitas transaksi asli (unik)
@@ -627,44 +601,37 @@ export interface Pemasukan {
   bulanKe?: number;
   tahunAjaranId?: string;
   catatan?: string;
-  configId: string; // konfigurasi yang dipakai saat transaksi
-  configVersion: string; // label versi konfigurasi (snapshot)
-  configSnapshot: {
-    name: string;
-    version: string;
-    effectiveFrom: string;
-    effectiveUntil?: string;
-    nominals: NominalMap;
-  };
   status: PemasukanStatus;
   paidAt: string; // saat pembayaran diterima
-  distributedAt?: string; // saat distribusi selesai
-  distribusiError?: string; // pesan error bila status FAILED
   createdBy: string; // operator/petugas pencatat
   createdAt: string;
+  appliedTagihanIds?: string[]; // tagihan yang diperbarui oleh pembayaran ini
 }
 
-// Hasil bagi satu pemasukan ke satu konteks keuangan.
-export interface AlokasiPemasukan {
-  id: string;
-  pemasukanId: string;
-  konteks: KonteksKeuangan;
+export interface NewPemasukanInput {
+  santriId: string;
+  biayaMasterId?: string;
+  tanggal: string;
   nominal: number;
+  jenisPembayaran: string;
+  metodePembayaran: string;
+  periode: string;
+  bulanKe?: number;
+  tahunAjaranId?: string;
+  catatan?: string;
+  createdBy: string;
 }
 
 // ── AUDIT TRAIL ─────────────────────────────────────────
 // Rekam siapa-melakukan-apa-kapan-terhadap-data-apa (sebelum & sesudah).
 export type AuditAction =
   | 'CREATE_PAYMENT'
-  | 'UPDATE_DISTRIBUTION_CONFIG'
-  | 'ACTIVATE_DISTRIBUTION_CONFIG'
-  | 'DISTRIBUTION_FAILED'
   | 'VIEW_TRANSACTION';
 
 export interface AuditLog {
   id: string;
   action: AuditAction;
-  entityType: 'Pemasukan' | 'DistribusiKeuanganConfig';
+  entityType: 'Pemasukan';
   entityId: string;
   entityLabel: string; // ringkas (no pemasukan / nama konfigurasi)
   actorId: string;

@@ -54,7 +54,7 @@ const BACKUP_KEYS = [
   'unitSekolahList', 'jurusanList', 'kelasSekolahList', 'santriDemoSeedVersion', 'santriList',
   'setoranTahfidz', 'setoranNadhoman', 'kesehatan', 'perizinan', 'konseling', 'kunjungan', 'jabatan',
   'pegawai', 'presensi', 'biayaMaster', 'statusDemoSeedVersion', 'tarifPembayaran', 'tarifDemoSeedVersion',
-  'tagihan', 'transaksi', 'distribusiConfig', 'pemasukan', 'alokasiPemasukan', 'auditLog', 'tahunAjaran',
+  'tagihan', 'transaksi', 'pemasukan', 'auditLog', 'tahunAjaran',
   'pesertaTahfidz', 'ppdb', 'demoFinanceSeedVersion', 'institutionConfig'
 ] as const;
 
@@ -97,9 +97,7 @@ function getBackupValue(key: string, app: Record<string, unknown>): unknown {
     tarifPembayaran: 'tarifPembayaranList',
     tagihan: 'tagihanList',
     transaksi: 'transaksiList',
-    distribusiConfig: 'distribusiConfigList',
     pemasukan: 'pemasukanList',
-    alokasiPemasukan: 'alokasiList',
     auditLog: 'auditLogList',
     tahunAjaran: 'tahunAjaranList',
     pesertaTahfidz: 'pesertaTahfidzList',

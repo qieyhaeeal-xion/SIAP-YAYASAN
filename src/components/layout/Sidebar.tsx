@@ -15,8 +15,8 @@ import {
   CalendarCheck, 
   CreditCard,
   BadgeDollarSign,
-  PieChart,
   Receipt,
+  ClipboardList,
   UserPlus, 
   ShieldAlert, 
   ChevronDown,
@@ -280,9 +280,9 @@ const handleTabClick = (tabId: string) => {
               <div className="space-y-1 pt-0.5">
               {renderNavItem('akademik', 'Presensi KBM Batch', <CalendarCheck className="h-[18px] w-[18px]" />)}
               <SidebarSection label="Manajemen Pembayaran" isOpen={openKeuangan} onToggle={() => setOpenKeuangan(!openKeuangan)}>
-                {renderNavItem('keuangan-ringkasan', 'Ringkasan', <PieChart className="h-[18px] w-[18px]" />)}
-                {renderNavItem('keuangan-jenis', 'Jenis Pembayaran', <BadgeDollarSign className="h-[18px] w-[18px]" />)}
-                {renderNavItem('keuangan-pemasukan', 'Pemasukan & Distribusi', <Receipt className="h-[18px] w-[18px]" />)}
+                  {renderNavItem('keuangan-jenis', 'Jenis Pembayaran', <BadgeDollarSign className="h-[18px] w-[18px]" />)}
+                  {renderNavItem('keuangan-rekap', 'Rekap Tagihan', <ClipboardList className="h-[18px] w-[18px]" />)}
+                  {renderNavItem('keuangan-pemasukan', 'Pencatatan Pembayaran', <Receipt className="h-[18px] w-[18px]" />)}
               </SidebarSection>
                {renderNavItem('ppdb', 'PPDB (Mutasi NIS)', <UserPlus className="h-[18px] w-[18px]" />, pendingPPDBCount, 'bg-blue-500 text-white')}
               {renderNavItem('kepegawaian', 'Data Kepegawaian', <Briefcase className="h-[18px] w-[18px]" />)}

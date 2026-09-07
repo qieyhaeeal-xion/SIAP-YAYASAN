@@ -1,103 +1,96 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { AlertCircle, CheckCircle, ChevronDown, Plus, Printer, Receipt, Wallet, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import {
-  Plus,
-  Wallet,
-  Receipt,
-  ChevronDown,
-  X,
-  AlertCircle,
-  PieChart,
-  CheckCircle
-} from 'lucide-react';
-import {
-  KonteksKeuangan,
-  KONTEKS_KEUANGAN_ORDER,
-  Pemasukan,
-  AlokasiPemasukan,
-  TagihanKeuangan,
-  BULAN_KE_LABEL
-} from '../../types/sisantri';
-import { getConfigNominals } from '../../services/distributionService';
-
-const KONTEKS_LABEL: Record<KonteksKeuangan, string> = {
-  YAYASAN: 'Yayasan',
-  MADIN: 'Madin',
-  SEKOLAH: 'Sekolah',
-  PESANTREN: 'Pesantren',
-  MAKAN: 'Makan'
-};
-
-const KONTEKS_STYLE: Record<KonteksKeuangan, { badge: string; bar: string; text: string }> = {
-  YAYASAN: { badge: 'bg-emerald-100 text-emerald-800', bar: 'bg-emerald-500', text: 'text-emerald-700' },
-  MADIN: { badge: 'bg-violet-100 text-violet-800', bar: 'bg-violet-500', text: 'text-violet-700' },
-  SEKOLAH: { badge: 'bg-sky-100 text-sky-800', bar: 'bg-sky-500', text: 'text-sky-700' },
-  PESANTREN: { badge: 'bg-teal-100 text-teal-800', bar: 'bg-[#1ABC9C]', text: 'text-teal-700' },
-  MAKAN: { badge: 'bg-amber-100 text-amber-800', bar: 'bg-amber-500', text: 'text-amber-700' }
-};
+import { BULAN_KE_LABEL, Pemasukan, TagihanKeuangan, bulanKeFromBulanTahun } from '../../types/sisantri';
 
 const METODE_OPTIONS = ['Tunai', 'Transfer Bank', 'E-Wallet (QRIS)', 'Giro'];
+const INSTITUTION_KEY = 'sisantri_app_institutionConfig';
+const DEFAULT_INSTITUTION = {
+  namaYayasan: 'Yayasan Mukhtar Syafaat',
+  namaPesantren: 'Pondok Pesantren Mukhtar Syafaat',
+  alamat: 'Jl. Pesantren No. 01 Blokagung, Tegalsari',
+  kabupaten: 'Banyuwangi',
+  provinsi: 'Jawa Timur',
+  telepon: '',
+  email: ''
+};
 
-const rp = (n: number) => 'Rp ' + n.toLocaleString('id-ID');
+const readInstitution = () => {
+  try {
+    const stored = window.localStorage.getItem(INSTITUTION_KEY);
+    return stored ? { ...DEFAULT_INSTITUTION, ...JSON.parse(stored) } : DEFAULT_INSTITUTION;
+  } catch {
+    return DEFAULT_INSTITUTION;
+  }
+};
 
+const rp = (value: number) => `Rp ${value.toLocaleString('id-ID')}`;
+const formatTanggal = (value: string) => {
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+};
 const normalizePeriode = (value: unknown) => String(value ?? '').replace(/\s+/g, ' ').trim().toLocaleLowerCase('id-ID');
 
 const getTagihanPeriode = (tagihan: TagihanKeuangan) => {
   if (tagihan.bulanTahun) return tagihan.bulanTahun.replace(/\s+/g, ' ').trim();
-
   const rawBulan = String(tagihan.bulanPeriode ?? tagihan.bulanKe ?? '').trim();
   const bulanKe = Number(rawBulan);
-  const bulan = Number.isInteger(bulanKe) && bulanKe >= 1 && bulanKe <= 12
-    ? BULAN_KE_LABEL[bulanKe - 1]
-    : rawBulan;
+  const bulan = Number.isInteger(bulanKe) && bulanKe >= 1 && bulanKe <= 12 ? BULAN_KE_LABEL[bulanKe - 1] : rawBulan;
   return `${bulan} ${tagihan.tahunPeriode ?? ''}`.replace(/\s+/g, ' ').trim();
 };
 
 const STATUS_STYLE: Record<Pemasukan['status'], string> = {
   PENDING: 'bg-gray-100 text-gray-600',
-  PAID: 'bg-sky-100 text-sky-800',
-  DISTRIBUTED: 'bg-emerald-100 text-emerald-800',
-  FAILED: 'bg-rose-100 text-rose-700'
+  PAID: 'bg-emerald-100 text-emerald-800'
 };
 
 export const PemasukanDistribusi: React.FC = () => {
   const {
     pemasukanList,
-    alokasiList,
     santriList,
     tagihanList,
     biayaMasterList,
     getSantriNameById,
     createPemasukan,
-    getAktifDistribusiConfig,
     getNominalBiayaSantri,
+    getTahunAjaranAktif,
     currentUser
   } = useApp();
-
   const [showForm, setShowForm] = useState(false);
-  const [result, setResult] = useState<{ pemasukan: Pemasukan; alokasi: AlokasiPemasukan[] } | null>(null);
+  const [result, setResult] = useState<Pemasukan | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [printingPemasukan, setPrintingPemasukan] = useState<Pemasukan | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Form state
   const [santriId, setSantriId] = useState('');
   const [tanggal, setTanggal] = useState(new Date().toISOString().slice(0, 10));
   const [nominal, setNominal] = useState(0);
-  const [biayaMasterId, setBiayaMasterId] = useState('');
+  const [biayaMasterId, setBiayaMasterId] = useState('by-yayasan');
   const [metode, setMetode] = useState('Tunai');
   const [periode, setPeriode] = useState('');
   const [catatan, setCatatan] = useState('');
 
-  const aktifConfig = getAktifDistribusiConfig();
-  const activeNominals = aktifConfig ? getConfigNominals(aktifConfig) : undefined;
-  const activeSantris = santriList.filter(s => s.status === 'Aktif');
+  const activeSantris = santriList.filter(item => item.status === 'Aktif');
   const activePaymentTypes = biayaMasterList.filter(item => item.aktif !== false);
-  const selectedPaymentType = activePaymentTypes.find(item => item.id === biayaMasterId);
+  const matchingPaymentTypes = useMemo(() => {
+    if (!santriId) return activePaymentTypes;
+    return activePaymentTypes.filter(item => getNominalBiayaSantri(santriId, item.id) > 0);
+  }, [activePaymentTypes, getNominalBiayaSantri, santriId]);
+  const activePaymentType = activePaymentTypes.find(item => item.id === biayaMasterId);
+  const activeTahunAjaran = getTahunAjaranAktif();
+
+  useEffect(() => {
+    if (!matchingPaymentTypes.some(item => item.id === biayaMasterId)) {
+      setBiayaMasterId(matchingPaymentTypes[0]?.id || '');
+    }
+  }, [biayaMasterId, matchingPaymentTypes]);
 
   const availablePeriodes = useMemo(() => {
+    if (!santriId || !activePaymentType) return [];
     const seen = new Set<string>();
     return tagihanList
-      .filter(tagihan => tagihan.santriId === santriId && tagihan.nominalTagihan > tagihan.nominalTerbayar)
+      .filter(tagihan => tagihan.santriId === santriId && tagihan.biayaMasterId === activePaymentType.id &&
+        (!activeTahunAjaran || !tagihan.tahunAjaranId || tagihan.tahunAjaranId === activeTahunAjaran.id) &&
+        tagihan.nominalTagihan > tagihan.nominalTerbayar)
       .map(getTagihanPeriode)
       .filter(label => {
         const key = normalizePeriode(label);
@@ -105,410 +98,187 @@ export const PemasukanDistribusi: React.FC = () => {
         seen.add(key);
         return true;
       });
-  }, [santriId, tagihanList]);
+  }, [activePaymentType, activeTahunAjaran, santriId, tagihanList]);
 
   useEffect(() => {
-    if (!santriId) {
-      if (periode) setPeriode('');
-      return;
-    }
+    if (!availablePeriodes.includes(periode)) setPeriode(availablePeriodes[0] || '');
+  }, [availablePeriodes, periode]);
 
-    const selectedPeriodExists = availablePeriodes.some(
-      availablePeriode => normalizePeriode(availablePeriode) === normalizePeriode(periode)
-    );
-    if (!selectedPeriodExists) setPeriode(availablePeriodes[0] || '');
-  }, [availablePeriodes, periode, santriId]);
-
-  const selectedNominalTarif = biayaMasterId && santriId
-    ? getNominalBiayaSantri(santriId, biayaMasterId)
-    : 0;
-  const selectedNominalTerbayar = useMemo(
-    () => tagihanList
-      .filter(tagihan => tagihan.santriId === santriId && tagihan.biayaMasterId === biayaMasterId && normalizePeriode(getTagihanPeriode(tagihan)) === normalizePeriode(periode))
-      .reduce((total, tagihan) => total + tagihan.nominalTerbayar, 0),
-    [biayaMasterId, periode, santriId, tagihanList]
-  );
+  const selectedNominalTarif = santriId && activePaymentType ? getNominalBiayaSantri(santriId, activePaymentType.id) : 0;
+  const selectedNominalTerbayar = useMemo(() => tagihanList
+    .filter(tagihan => tagihan.santriId === santriId && tagihan.biayaMasterId === activePaymentType?.id &&
+      (!activeTahunAjaran || !tagihan.tahunAjaranId || tagihan.tahunAjaranId === activeTahunAjaran.id) &&
+      normalizePeriode(getTagihanPeriode(tagihan)) === normalizePeriode(periode))
+    .reduce((total, tagihan) => total + tagihan.nominalTerbayar, 0),
+  [activePaymentType, activeTahunAjaran, periode, santriId, tagihanList]);
   const selectedNominalRemaining = Math.max(0, selectedNominalTarif - selectedNominalTerbayar);
 
-  const selectedDistributionNominals = useMemo(() => {
-    const totals: Record<KonteksKeuangan, number> = { YAYASAN: 0, MADIN: 0, SEKOLAH: 0, PESANTREN: 0, MAKAN: 0 };
-    const kategori = selectedPaymentType?.kategori as KonteksKeuangan | undefined;
-    if (kategori) totals[kategori] = selectedNominalRemaining;
-    return totals;
-  }, [selectedNominalRemaining, selectedPaymentType]);
+  useEffect(() => setNominal(selectedNominalRemaining), [selectedNominalRemaining]);
 
   useEffect(() => {
-    setNominal(selectedNominalRemaining);
-  }, [selectedNominalRemaining]);
+    if (!printingPemasukan) return;
+    const printTimer = window.setTimeout(() => window.print(), 100);
+    const finishPrint = () => setPrintingPemasukan(null);
+    window.addEventListener('afterprint', finishPrint);
+    return () => {
+      window.clearTimeout(printTimer);
+      window.removeEventListener('afterprint', finishPrint);
+    };
+  }, [printingPemasukan]);
 
-  const alokasiByPemasukan = useMemo(() => {
-    const map: Record<string, AlokasiPemasukan[]> = {};
-    for (const a of alokasiList) {
-      if (!map[a.pemasukanId]) map[a.pemasukanId] = [];
-      map[a.pemasukanId].push(a);
-    }
-    return map;
-  }, [alokasiList]);
-
-  const konteksTotals = useMemo(() => {
-    const totals: Record<KonteksKeuangan, number> = { YAYASAN: 0, MADIN: 0, SEKOLAH: 0, PESANTREN: 0, MAKAN: 0 };
-    for (const a of alokasiList) totals[a.konteks] += a.nominal;
-    return totals;
-  }, [alokasiList]);
-
-  const totalPemasukan = useMemo(() => pemasukanList.reduce((a, p) => a + p.nominal, 0), [pemasukanList]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     setError(null);
-    if (!aktifConfig) {
-      setError('Tidak ada konfigurasi nominal yang aktif. Buat di tab "Konfigurasi Pemasukan" terlebih dahulu.');
-      return;
-    }
     if (!santriId) { setError('Pilih santri terlebih dahulu.'); return; }
-    if (!selectedPaymentType) { setError('Pilih jenis pembayaran terlebih dahulu.'); return; }
-    if (!nominal || nominal <= 0) { setError('Nominal harus lebih dari 0.'); return; }
-    if (selectedNominalTarif <= 0) {
-      setError('Jenis pembayaran ini tidak berlaku untuk status santri yang dipilih.');
-      return;
-    }
+    if (!activePaymentType) { setError('Pilih jenis pembayaran terlebih dahulu.'); return; }
+    if (!periode) { setError('Pilih periode tagihan terlebih dahulu.'); return; }
+    if (!nominal || nominal <= 0) { setError('Nominal pembayaran harus lebih dari 0.'); return; }
     if (nominal !== selectedNominalRemaining) {
-      setError(`Nominal pembayaran harus sama dengan tarif tersisa ${rp(selectedNominalRemaining)}.`);
+      setError(`Nominal pembayaran harus sama dengan sisa tagihan ${rp(selectedNominalRemaining)}.`);
       return;
     }
 
-    const res = createPemasukan({
+    const selectedTagihan = tagihanList.find(tagihan =>
+      tagihan.santriId === santriId && tagihan.biayaMasterId === activePaymentType.id &&
+      (!activeTahunAjaran || !tagihan.tahunAjaranId || tagihan.tahunAjaranId === activeTahunAjaran.id) &&
+      normalizePeriode(getTagihanPeriode(tagihan)) === normalizePeriode(periode) &&
+      tagihan.nominalTagihan > tagihan.nominalTerbayar
+    );
+    const response = createPemasukan({
       santriId,
-      biayaMasterId,
+      biayaMasterId: activePaymentType.id,
       tanggal,
       nominal,
-      jenisPembayaran: selectedPaymentType.namaBiaya,
+      jenisPembayaran: activePaymentType.namaBiaya,
       metodePembayaran: metode,
       periode,
+      bulanKe: selectedTagihan?.bulanKe ?? bulanKeFromBulanTahun(periode),
+      tahunAjaranId: activeTahunAjaran?.id,
       catatan: catatan || undefined,
-      distribusiNominals: selectedDistributionNominals,
       createdBy: currentUser.nama
     });
-    if (!res.ok) { setError(res.error || 'Gagal mencatat pemasukan.'); return; }
-    setResult({ pemasukan: res.pemasukan!, alokasi: res.alokasi! });
-    setShowForm(false);
-    setSantriId(''); setBiayaMasterId(''); setNominal(0); setMetode('Tunai'); setPeriode(''); setCatatan('');
+    if (!response.ok) { setError(response.error || 'Gagal mencatat pembayaran.'); return; }
+      setResult(response.pemasukan!);
+      setShowForm(false);
+    setSantriId(''); setNominal(0); setMetode('Tunai'); setPeriode(''); setCatatan('');
   };
 
   const sortedPemasukan = useMemo(
     () => [...pemasukanList].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
     [pemasukanList]
   );
+  const printInstitution = readInstitution();
+  const printSantri = printingPemasukan ? santriList.find(item => item.id === printingPemasukan.santriId) : undefined;
 
   return (
     <div className="space-y-6">
-      {/* Ringkasan distribusi per konteks */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        {KONTEKS_KEUANGAN_ORDER.map(k => {
-          const configuredNominal = activeNominals?.[k] ?? 0;
-          const total = konteksTotals[k];
-          const maxTotal = Math.max(1, ...KONTEKS_KEUANGAN_ORDER.map(x => konteksTotals[x]));
-          const width = Math.max(4, (total / maxTotal) * 100);
-          return (
-            <div key={k} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-              <div className={`inline-flex px-2 py-0.5 rounded text-[10px] font-extrabold ${KONTEKS_STYLE[k].badge}`}>
-                {KONTEKS_LABEL[k]}
-              </div>
-              <div className={`mt-2 text-lg font-black ${KONTEKS_STYLE[k].text}`}>{rp(total)}</div>
-              <div className="text-[11px] text-gray-500 font-bold">Konfigurasi aktif {rp(configuredNominal)}</div>
-              <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div className={`h-full rounded-full ${KONTEKS_STYLE[k].bar}`} style={{ width: `${width}%` }} />
-              </div>
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div className="text-[11px] font-extrabold uppercase text-gray-500">Jenis Aktif</div>
+           <div className="mt-2 text-lg font-black text-[#1A5276]">{activePaymentType?.namaBiaya || 'Belum dipilih'}</div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          <div className="text-[11px] font-extrabold uppercase text-gray-500">Tarif Dasar</div>
+           <div className="mt-2 text-lg font-black text-emerald-700">{rp(selectedNominalTarif)}</div>
+        </div>
         <div className="bg-[#1A5276] rounded-xl border border-[#1A5276] shadow-sm p-4 text-white">
-          <div className="inline-flex px-2 py-0.5 rounded text-[10px] font-extrabold bg-white/20">TOTAL PEMASUKAN</div>
-          <div className="mt-2 text-lg font-black text-white">{rp(totalPemasukan)}</div>
+          <div className="text-[11px] font-extrabold uppercase text-white/70">Total Pemasukan</div>
+          <div className="mt-2 text-lg font-black">{rp(pemasukanList.reduce((total, item) => total + item.nominal, 0))}</div>
           <div className="text-[11px] text-white/70 font-bold">{pemasukanList.length} transaksi tercatat</div>
         </div>
       </div>
 
-      {/* Header aksi */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="font-extrabold text-lg text-[#1A5276] flex items-center gap-2.5">
-            <PieChart className="w-6 h-6 text-[#1ABC9C]" />
-            Pemasukan & Distribusi
-          </h3>
-          <p className="text-sm text-[#566573] mt-1">
-            Catat pembayaran santri sebagai satu Pemasukan — otomatis dibagi ke 5 keuangan utama sesuai konfigurasi aktif & disimpan sebagai snapshot.
-          </p>
+          <h3 className="font-extrabold text-lg text-[#1A5276] flex items-center gap-2.5"><Wallet className="w-6 h-6 text-[#1ABC9C]" /> Pencatatan Pembayaran</h3>
+           <p className="text-sm text-[#566573] mt-1">Pilih santri dan jenis pembayaran, lalu sistem mengisi nominal sesuai sisa tagihan.</p>
         </div>
-        <button
-          onClick={() => {
-            setShowForm(v => !v);
-            setError(null);
-          }}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-bold rounded-lg shadow transition-all"
-        >
-          <Plus className="w-4 h-4" /> {showForm ? 'Tutup Form' : 'Catat Pemasukan'}
+        <button onClick={() => { setShowForm(value => !value); setError(null); }} className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1ABC9C] hover:bg-[#16a085] text-white font-bold rounded-lg shadow transition-all">
+          <Plus className="w-4 h-4" /> {showForm ? 'Tutup Form' : 'Catat Pembayaran'}
         </button>
       </div>
 
-      {!aktifConfig && (
-        <div className="flex items-start gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-800">
-          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <span className="font-extrabold">Belum ada konfigurasi pembagian aktif.</span>{' '}
-            Buka tab <span className="font-extrabold">"Konfigurasi Pemasukan"</span> untuk membuat & mengaktifkan nominal Syahriyah sebelum mencatat pemasukan.
-          </div>
-        </div>
-      )}
-
-      {/* Form catat pemasukan */}
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <Wallet className="w-5 h-5 text-[#1A5276]" />
-            <h4 className="font-extrabold text-base text-[#1A5276]">Catat Pemasukan Santri</h4>
+           <div className="flex items-center gap-2 mb-5"><Wallet className="w-5 h-5 text-[#1A5276]" /><h4 className="font-extrabold text-base text-[#1A5276]">Pembayaran {activePaymentType?.namaBiaya || 'Santri'}</h4></div>
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+             <label className="block text-xs font-bold text-gray-600">Santri *<select value={santriId} onChange={event => { setSantriId(event.target.value); setPeriode(''); }} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276]"><option value="">— Pilih Santri —</option>{activeSantris.map(item => <option key={item.id} value={item.id}>{item.namaLengkap} ({item.nis})</option>)}</select></label>
+             <label className="block text-xs font-bold text-gray-600">Tanggal *<input type="date" value={tanggal} onChange={event => setTanggal(event.target.value)} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276]" /></label>
+             <label className="block text-xs font-bold text-gray-600">Jenis Pembayaran *<select value={biayaMasterId} onChange={event => { setBiayaMasterId(event.target.value); setPeriode(''); }} disabled={!santriId || matchingPaymentTypes.length === 0} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] disabled:bg-gray-100"><option value="">— Pilih Jenis —</option>{matchingPaymentTypes.map(item => <option key={item.id} value={item.id}>{item.namaBiaya}</option>)}</select></label>
+            <label className="block text-xs font-bold text-gray-600">Periode *<select value={periode} onChange={event => setPeriode(event.target.value)} disabled={!santriId || availablePeriodes.length === 0} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] disabled:bg-gray-100"><option value="">{santriId ? '— Pilih Periode —' : '— Pilih Santri —'}</option>{availablePeriodes.map(item => <option key={item} value={item}>{item}</option>)}</select></label>
+            <label className="block text-xs font-bold text-gray-600">Nominal *<input type="number" value={nominal || ''} readOnly className="mt-1 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-bold text-[#1A5276] bg-gray-100" /></label>
+            <label className="block text-xs font-bold text-gray-600">Metode Pembayaran *<select value={metode} onChange={event => setMetode(event.target.value)} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276]">{METODE_OPTIONS.map(item => <option key={item}>{item}</option>)}</select></label>
+            <label className="block text-xs font-bold text-gray-600 sm:col-span-2 lg:col-span-3">Catatan (opsional)<input value={catatan} onChange={event => setCatatan(event.target.value)} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276]" placeholder="Catatan pembayaran" /></label>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Santri *</label>
-              <select
-                value={santriId}
-                onChange={e => setSantriId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]"
-              >
-                <option value="">— Pilih Santri —</option>
-                {activeSantris.map(s => (
-                  <option key={s.id} value={s.id}>{s.namaLengkap} ({s.nis})</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Tanggal *</label>
-              <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Nominal *</label>
-              <input type="number" min={0} readOnly={Boolean(selectedPaymentType)} value={nominal || ''} onChange={e => setNominal(Number(e.target.value))}
-                placeholder="cth. 775000"
-                className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C] ${selectedPaymentType ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`} />
-              {selectedPaymentType && (
-                <p className="mt-1 text-[11px] font-bold text-emerald-700">Nominal otomatis dari jenis pembayaran dan tarif santri.</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Jenis Pembayaran *</label>
-              <select value={biayaMasterId} onChange={e => setBiayaMasterId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]">
-                <option value="">— Pilih Jenis Pembayaran —</option>
-                {activePaymentTypes.map(item => (
-                  <option key={item.id} value={item.id}>{item.namaBiaya} - {rp(item.nominal || 0)}</option>
-                ))}
-              </select>
-            </div>
-            {selectedPaymentType && santriId && (
-              <div className="sm:col-span-2 lg:col-span-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
-                <p className="text-[11px] font-black uppercase tracking-wider text-emerald-800">Rincian {selectedPaymentType.namaBiaya} · {periode || 'Pilih periode'}</p>
-                {selectedNominalTarif > 0 ? (
-                  <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-5">
-                    <div className="rounded-lg border border-emerald-100 bg-white p-2">
-                      <p className="text-[10px] font-bold text-gray-500">Tarif jenis pembayaran</p>
-                      <p className="mt-1 text-sm font-black text-[#1A5276]">{rp(selectedNominalTarif)}</p>
-                    </div>
-                    <div className="rounded-lg border border-emerald-100 bg-white p-2">
-                      <p className="text-[10px] font-bold text-gray-500">Sudah dibayar</p>
-                      <p className="mt-1 text-sm font-black text-[#1A5276]">{rp(selectedNominalTerbayar)}</p>
-                    </div>
-                    <div className="rounded-lg border border-emerald-100 bg-white p-2">
-                      <p className="text-[10px] font-bold text-gray-500">Sisa pembayaran</p>
-                      <p className="mt-1 text-sm font-black text-[#1A5276]">{rp(selectedNominalRemaining)}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="mt-2 text-xs font-bold text-amber-700">Jenis pembayaran ini tidak berlaku untuk status santri yang dipilih.</p>
-                )}
-              </div>
-            )}
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Metode Pembayaran *</label>
-              <select value={metode} onChange={e => setMetode(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]">
-                {METODE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-gray-600 mb-1">Periode *</label>
-              <select value={periode} onChange={e => setPeriode(e.target.value)} disabled={!santriId || availablePeriodes.length === 0}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C] disabled:bg-gray-100 disabled:cursor-not-allowed">
-                <option value="">{santriId ? '— Pilih Periode —' : '— Pilih Santri Terlebih Dahulu —'}</option>
-                {availablePeriodes.map(option => <option key={normalizePeriode(option)} value={option}>{option}</option>)}
-              </select>
-              {santriId && availablePeriodes.length === 0 && (
-                <p className="mt-1 text-[11px] font-bold text-amber-700">Tidak ada periode dengan tagihan tersisa.</p>
-              )}
-            </div>
-            <div className="sm:col-span-2 lg:col-span-3">
-              <label className="block text-xs font-bold text-gray-600 mb-1">Catatan (opsional)</label>
-              <input type="text" value={catatan} onChange={e => setCatatan(e.target.value)}
-                placeholder="cth. Transfer BSI a.n. Bendahara"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-[#1A5276] focus:outline-none focus:ring-2 focus:ring-[#1ABC9C]" />
-            </div>
-          </div>
-
-          {error && (
-            <div className="mt-4 flex items-center gap-2 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-sm font-bold">
-              <AlertCircle className="w-4 h-4 shrink-0" /> {error}
-            </div>
-          )}
-
-          <div className="mt-5 flex items-center justify-end gap-3">
-            <button type="button" onClick={() => setShowForm(false)}
-              className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg">
-              Batal
-            </button>
-            <button type="submit"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1A5276] hover:bg-[#154360] text-white font-bold rounded-lg shadow transition-all">
-              <CheckCircle className="w-4 h-4" /> Simpan & Distribusikan
-            </button>
-          </div>
+           {santriId && !availablePeriodes.length && <p className="mt-4 text-xs font-bold text-amber-700">Belum ada tagihan yang tersisa untuk santri ini. Buat tanggungan terlebih dahulu di tab Jenis Pembayaran.</p>}
+          {error && <div className="mt-4 flex items-center gap-2 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-sm font-bold"><AlertCircle className="w-4 h-4" />{error}</div>}
+          <div className="mt-5 flex justify-end gap-3"><button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-lg">Batal</button><button type="submit" className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1A5276] text-white font-bold rounded-lg"><CheckCircle className="w-4 h-4" /> Simpan Pembayaran</button></div>
         </form>
       )}
 
-      {/* Modal hasil distribusi */}
-      {result && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h4 className="font-extrabold text-lg text-[#1A5276] flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-emerald-500" /> Pemasukan Tercatat
-                </h4>
-                <p className="text-xs text-gray-500 font-bold mt-0.5">No. {result.pemasukan.noPemasukan}</p>
-              </div>
-              <button onClick={() => setResult(null)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
-            </div>
+      {result && <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"><div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6"><div className="flex items-start justify-between mb-4"><div><h4 className="font-extrabold text-lg text-[#1A5276] flex items-center gap-2"><CheckCircle className="w-5 h-5 text-emerald-500" /> Pembayaran Tercatat</h4><p className="text-xs text-gray-500 font-bold mt-0.5">No. {result.noPemasukan}</p></div><button onClick={() => setResult(null)} className="text-gray-400"><X className="w-5 h-5" /></button></div><div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm space-y-1.5"><div className="flex justify-between"><span className="text-gray-500 font-bold">Santri</span><span className="font-extrabold text-[#1A5276]">{getSantriNameById(result.santriId)}</span></div><div className="flex justify-between"><span className="text-gray-500 font-bold">Periode</span><span>{result.periode}</span></div><div className="flex justify-between"><span className="text-gray-500 font-bold">Total</span><span className="font-black text-emerald-600">{rp(result.nominal)}</span></div></div><button onClick={() => setResult(null)} className="mt-5 w-full px-5 py-2.5 bg-[#1A5276] text-white font-bold rounded-lg">Tutup</button></div></div>}
 
-            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm space-y-1.5 mb-4">
-              <div className="flex justify-between"><span className="text-gray-500 font-bold">Santri</span><span className="font-extrabold text-[#1A5276]">{getSantriNameById(result.pemasukan.santriId)}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500 font-bold">Tanggal</span><span>{result.pemasukan.tanggal}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500 font-bold">Jenis</span><span>{result.pemasukan.jenisPembayaran} · {result.pemasukan.metodePembayaran}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500 font-bold">Total</span><span className="font-black text-emerald-600">{rp(result.pemasukan.nominal)}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500 font-bold">Konfigurasi</span><span className="text-[11px]">{result.pemasukan.configSnapshot.name}</span></div>
-            </div>
-
-            <p className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider mb-2">Distribusi otomatis</p>
-            <div className="space-y-2">
-              {result.alokasi.map(a => (
-                <div key={a.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-200">
-                  <div>
-                    <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-extrabold ${KONTEKS_STYLE[a.konteks].badge}`}>
-                      {KONTEKS_LABEL[a.konteks]}
-                    </span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-sm font-black text-[#1A5276]">{rp(a.nominal)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-5 flex justify-end">
-              <button onClick={() => setResult(null)} className="px-5 py-2.5 bg-[#1A5276] text-white font-bold rounded-lg">
-                Tutup
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Riwayat pemasukan */}
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
         <div className="flex items-center gap-2 mb-4">
           <Receipt className="w-5 h-5 text-[#1A5276]" />
-          <h4 className="font-extrabold text-base text-[#1A5276]">Riwayat Pemasukan</h4>
+          <h4 className="font-extrabold text-base text-[#1A5276]">Riwayat Pembayaran</h4>
           <span className="ml-auto text-xs font-extrabold text-gray-400">{sortedPemasukan.length} transaksi</span>
         </div>
         <div className="space-y-3">
-          {sortedPemasukan.map(p => {
-            const alokasi = alokasiByPemasukan[p.id] ?? [];
-            const open = expandedId === p.id;
+          {sortedPemasukan.map(item => {
+            const open = expandedId === item.id;
             return (
-              <div key={p.id} className="border border-gray-200 rounded-xl overflow-hidden">
-                <button
-                  onClick={() => setExpandedId(open ? null : p.id)}
-                  className="w-full flex items-center gap-4 p-4 hover:bg-sky-50 transition-colors text-left"
-                >
-                  <div className="shrink-0 w-10 h-10 rounded-lg bg-[#1A5276]/10 flex items-center justify-center">
-                    <Wallet className="w-5 h-5 text-[#1A5276]" />
-                  </div>
+              <div key={item.id} className="border border-gray-200 rounded-xl overflow-hidden">
+                <button type="button" onClick={() => setExpandedId(open ? null : item.id)} className="w-full flex items-center gap-4 p-4 hover:bg-sky-50 text-left">
+                  <div className="shrink-0 w-10 h-10 rounded-lg bg-[#1A5276]/10 flex items-center justify-center"><Wallet className="w-5 h-5 text-[#1A5276]" /></div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-extrabold text-[#1A5276] truncate">{getSantriNameById(p.santriId)}</span>
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${STATUS_STYLE[p.status]}`}>{p.status}</span>
-                    </div>
-                    <div className="text-xs text-gray-500 font-bold">
-                      {p.noPemasukan} · {p.tanggal} · {p.jenisPembayaran}
-                    </div>
+                    <div className="flex items-center gap-2"><span className="font-extrabold text-[#1A5276] truncate">{getSantriNameById(item.santriId)}</span><span className={`px-2 py-0.5 rounded text-[9px] font-extrabold ${STATUS_STYLE[item.status]}`}>{item.status}</span></div>
+                    <div className="text-xs text-gray-500 font-bold">{item.noPemasukan} · {item.tanggal} · {item.periode}</div>
                   </div>
-                  <div className="hidden sm:flex flex-wrap gap-1 max-w-[180px]">
-                    {alokasi.slice(0, 3).map(a => (
-                      <span key={a.id} className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold ${KONTEKS_STYLE[a.konteks].badge}`}>
-                         {KONTEKS_LABEL[a.konteks]} {rp(a.nominal)}
-                      </span>
-                    ))}
-                    {alokasi.length > 3 && <span className="text-[9px] font-extrabold text-gray-400">+{alokasi.length - 3}</span>}
-                  </div>
-                  <div className="text-right shrink-0">
-                    <div className="font-black text-[#1A5276]">{rp(p.nominal)}</div>
-                    <div className="text-[10px] text-gray-400 font-bold">snapshot: {p.configSnapshot.name} ({p.configVersion})</div>
-                  </div>
-                  {p.status === 'FAILED' && p.distribusiError && (
-                    <div className="shrink-0 hidden md:flex items-center gap-1 text-[10px] font-extrabold text-rose-600">
-                      <AlertCircle className="w-4 h-4" />
-                    </div>
-                  )}
-                  <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform shrink-0 ${open ? 'rotate-180' : ''}`} />
+                  <div className="text-right"><div className="font-black text-[#1A5276]">{rp(item.nominal)}</div><div className="text-[10px] text-gray-400 font-bold">{item.metodePembayaran}</div></div>
+                  <ChevronDown className={`w-4 h-4 text-gray-400 ${open ? 'rotate-180' : ''}`} />
                 </button>
                 {open && (
-                  <div className="border-t border-gray-100 p-4 bg-gray-50/50">
-                    <p className="text-[11px] font-extrabold text-gray-500 uppercase tracking-wider mb-2">Rincian distribusi (snapshot transaksi)</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
-                      {alokasi.map(a => (
-                        <div key={a.id} className="p-3 bg-white rounded-lg border border-gray-200">
-                          <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-extrabold ${KONTEKS_STYLE[a.konteks].badge}`}>
-                            {KONTEKS_LABEL[a.konteks]}
-                          </span>
-                          <div className={`mt-1.5 text-sm font-black ${KONTEKS_STYLE[a.konteks].text}`}>{rp(a.nominal)}</div>
-                           <div className="text-[10px] text-gray-400 font-bold">Nominal konfigurasi</div>
-                        </div>
-                      ))}
+                  <div className="border-t border-gray-100 p-4 bg-gray-50/50 text-xs font-bold text-gray-500">
+                    <div>Dicatat oleh {item.createdBy} · {new Date(item.paidAt).toLocaleString('id-ID')}{item.catatan ? ` · ${item.catatan}` : ''}</div>
+                    <div className="mt-4 flex justify-end border-t border-gray-200 pt-4">
+                      <button type="button" onClick={() => setPrintingPemasukan(item)} className="inline-flex items-center gap-2 rounded-lg bg-[#1A5276] px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:bg-[#154360]"><Printer className="h-4 w-4" /> Cetak Kwitansi</button>
                     </div>
-                    <div className="mt-3 flex items-center justify-between text-xs font-bold text-gray-500">
-                      <span>Metode: {p.metodePembayaran} · Periode: {p.periode}{p.unitId ? ` · Unit: ${p.unitId}` : ''}</span>
-                      <span>Dicatat oleh {p.createdBy}</span>
-                    </div>
-                    <div className="mt-2 flex items-center justify-between text-[11px] font-bold text-gray-400">
-                      <span>Dibayar: {new Date(p.paidAt).toLocaleString('id-ID')}{p.distributedAt ? ` · Didistribusi: ${new Date(p.distributedAt).toLocaleString('id-ID')}` : ''}</span>
-                      <span>Konfigurasi: {p.configSnapshot.name} ({p.configVersion})</span>
-                    </div>
-                    {p.status === 'FAILED' && p.distribusiError && (
-                      <div className="mt-3 flex items-start gap-2 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold">
-                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" /> {p.distribusiError}
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
             );
           })}
-          {sortedPemasukan.length === 0 && (
-            <div className="text-center py-10 text-gray-400 font-bold text-sm">
-              Belum ada pemasukan tercatat. Klik "Catat Pemasukan" untuk memulai.
-            </div>
-          )}
+          {sortedPemasukan.length === 0 && <div className="text-center py-10 text-gray-400 font-bold text-sm">Belum ada pembayaran tercatat.</div>}
         </div>
       </div>
+
+      {printingPemasukan && (
+        <div className="receipt-print-root" aria-hidden="true">
+          <div className="receipt-print-sheet">
+            <header className="receipt-print-header">
+              <div>
+                <p className="receipt-print-foundation">{printInstitution.namaYayasan}</p>
+                <h1>{printInstitution.namaPesantren}</h1>
+                <p>{printInstitution.alamat}, {printInstitution.kabupaten}, {printInstitution.provinsi}</p>
+                {(printInstitution.telepon || printInstitution.email) && <p>{[printInstitution.telepon, printInstitution.email].filter(Boolean).join(' | ')}</p>}
+              </div>
+              <div className="receipt-print-mark">KWITANSI</div>
+            </header>
+            <div className="receipt-print-title"><h2>KWITANSI PEMBAYARAN</h2><p>No. {printingPemasukan.noPemasukan}</p></div>
+            <div className="receipt-print-body">
+              <div className="receipt-print-row"><span>Telah diterima dari</span><strong>{printSantri?.namaLengkap || 'Santri Tidak Ditemukan'}</strong></div>
+              <div className="receipt-print-row"><span>NIS</span><strong>{printSantri?.nis || '-'}</strong></div>
+              <div className="receipt-print-row"><span>Jenis pembayaran</span><strong>{printingPemasukan.jenisPembayaran}</strong></div>
+              <div className="receipt-print-row"><span>Periode</span><strong>{printingPemasukan.periode}</strong></div>
+              <div className="receipt-print-row"><span>Metode pembayaran</span><strong>{printingPemasukan.metodePembayaran}</strong></div>
+              <div className="receipt-print-total"><span>Jumlah pembayaran</span><strong>{rp(printingPemasukan.nominal)}</strong></div>
+              {printingPemasukan.catatan && <div className="receipt-print-row"><span>Catatan</span><strong>{printingPemasukan.catatan}</strong></div>}
+            </div>
+            <div className="receipt-print-footer"><p>{printInstitution.kabupaten}, {formatTanggal(printingPemasukan.tanggal)}</p><p>Dicatat oleh,</p><div className="receipt-print-signature">{printingPemasukan.createdBy}</div><p className="receipt-print-note">Kwitansi ini merupakan bukti pembayaran yang sah.</p></div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

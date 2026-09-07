@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Wallet } from 'lucide-react';
 import { PemasukanDistribusi } from './PemasukanDistribusi';
-import { RingkasanKeuangan } from './RingkasanKeuangan';
 import { JenisPembayaran } from './JenisPembayaran';
+import { RekapTagihanKelas } from './RekapTagihanKelas';
 import { type KeuanganSubTab } from './shared';
 
 export type { KeuanganSubTab };
@@ -13,7 +13,7 @@ interface KeuanganModuleProps {
   onNavigateTab?: (tab: KeuanganSubTab) => void;
 }
 
-export const KeuanganModule: React.FC<KeuanganModuleProps> = ({ defaultSubTab = 'ringkasan', showSubTabs = false, onNavigateTab }) => {
+export const KeuanganModule: React.FC<KeuanganModuleProps> = ({ defaultSubTab = 'pemasukan', showSubTabs = false, onNavigateTab }) => {
   const [activeTabSub, setActiveTabSub] = useState<KeuanganSubTab>(defaultSubTab);
   const navigateSubTab = (tab: KeuanganSubTab) => {
     if (onNavigateTab) onNavigateTab(tab);
@@ -21,15 +21,15 @@ export const KeuanganModule: React.FC<KeuanganModuleProps> = ({ defaultSubTab = 
   };
 
   const pageTitle: Record<KeuanganSubTab, string> = {
-    ringkasan: 'Ringkasan Keuangan',
     jenis: 'Jenis Pembayaran',
-    pemasukan: 'Pemasukan & Distribusi'
+    rekap: 'Rekap Tagihan',
+    pemasukan: 'Pencatatan Pembayaran'
   };
 
   const pageDescription: Record<KeuanganSubTab, string> = {
-    ringkasan: 'Pantau ringkasan pemasukan dan distribusi pos keuangan pesantren.',
     jenis: 'Kelola jenis, kategori, frekuensi, dan nominal pembayaran.',
-    pemasukan: 'Kelola pencatatan pemasukan dan distribusi ke pos keuangan.'
+    rekap: 'Lihat rekap tagihan per unit dan kelas untuk monitoring admin.',
+    pemasukan: 'Catat pembayaran Syahriyah dan perbarui tagihan santri.'
   };
 
   return (
@@ -40,23 +40,23 @@ export const KeuanganModule: React.FC<KeuanganModuleProps> = ({ defaultSubTab = 
             <Wallet className="w-7 h-7 text-[#1ABC9C]" />
              {showSubTabs ? 'Modul Keuangan & Syahriyah Pesantren' : pageTitle[activeTabSub]}
           </h2>
-           <p className="text-sm text-[#566573] mt-1">{showSubTabs ? 'Pengelolaan jenis pembayaran, distribusi pemasukan, dan monitoring pos keuangan.' : pageDescription[activeTabSub]}</p>
+           <p className="text-sm text-[#566573] mt-1">{showSubTabs ? 'Pengelolaan Syahriyah, pembayaran, dan rekap tagihan.' : pageDescription[activeTabSub]}</p>
          </div>
          {showSubTabs && <div className="flex flex-wrap items-center gap-2 rounded-lg bg-gray-100 p-1.5">
-           <button type="button" onClick={() => navigateSubTab('ringkasan')} className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTabSub === 'ringkasan' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'}`}>
-             Ringkasan
-           </button>
-           <button type="button" onClick={() => navigateSubTab('jenis')} className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTabSub === 'jenis' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'}`}>
-             Jenis Pembayaran
-           </button>
+            <button type="button" onClick={() => navigateSubTab('jenis')} className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTabSub === 'jenis' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'}`}>
+              Jenis Pembayaran
+            </button>
+            <button type="button" onClick={() => navigateSubTab('rekap')} className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTabSub === 'rekap' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'}`}>
+              Rekap Tagihan
+            </button>
            <button type="button" onClick={() => navigateSubTab('pemasukan')} className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTabSub === 'pemasukan' ? 'bg-[#1A5276] text-white shadow' : 'text-gray-600 hover:text-gray-900'}`}>
-             Pemasukan & Distribusi
+              Pencatatan Pembayaran
            </button>
          </div>}
        </div>
 
-      {activeTabSub === 'ringkasan' && <RingkasanKeuangan onNavigate={setActiveTabSub} />}
-      {activeTabSub === 'jenis' && <JenisPembayaran />}
+       {activeTabSub === 'jenis' && <JenisPembayaran />}
+      {activeTabSub === 'rekap' && <RekapTagihanKelas />}
       {activeTabSub === 'pemasukan' && <PemasukanDistribusi />}
     </div>
   );

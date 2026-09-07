@@ -27,8 +27,8 @@ import { ShieldAlert, Lock, ArrowLeft } from 'lucide-react';
 import { hasPermission, getFirstAllowedTab, ROLE_DETAILS } from './utils/rbac';
 
 const FINANCE_ROUTE_BY_SUBTAB: Record<KeuanganSubTab, string> = {
-  ringkasan: 'keuangan-ringkasan',
   jenis: 'keuangan-jenis',
+  rekap: 'keuangan-rekap',
   pemasukan: 'keuangan-pemasukan'
 };
 
@@ -54,7 +54,7 @@ const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard'
 
   const handleNavigate = (t: string) => navigate(
     t === 'payment-management' || t === 'keuangan'
-      ? '/app/keuangan-ringkasan'
+      ? '/app/keuangan-pemasukan'
       : '/app/' + t
   );
   const permissionTab = activeTab === 'payment-management' || activeTab.startsWith('keuangan-') ? 'keuangan' : activeTab;
@@ -177,9 +177,9 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/app" element={<AppLayout />} />
           <Route path="/app/:tab" element={<AppLayout />} />
-          <Route path="/app/keuangan" element={<Navigate to="/app/keuangan-ringkasan" replace />} />
-          <Route path="/app/payment-management" element={<Navigate to="/app/keuangan-ringkasan" replace />} />
-          <Route path="/manage/payment" element={<Navigate to="/app/keuangan-ringkasan" replace />} />
+          <Route path="/app/keuangan" element={<Navigate to="/app/keuangan-pemasukan" replace />} />
+          <Route path="/app/payment-management" element={<Navigate to="/app/keuangan-pemasukan" replace />} />
+          <Route path="/manage/payment" element={<Navigate to="/app/keuangan-pemasukan" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

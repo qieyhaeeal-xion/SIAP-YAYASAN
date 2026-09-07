@@ -32,14 +32,12 @@ import {
   PresensiRecord,
   TahunAjaran,
   PesertaTahfidz,
-  DistribusiKeuanganConfig,
-  DistribusiStatus,
-  NominalMap,
   Pemasukan,
-  AlokasiPemasukan,
+  NewPemasukanInput,
   AuditLog,
   AuditAction,
   BULAN_KE_LABEL,
+  bulanKeFromBulanTahun,
   JenjangSekolah
 } from '../types/sisantri';
 
@@ -72,17 +70,9 @@ import {
   INITIAL_PRESENSI,
   INITIAL_TAHUN_AJARAN,
   INITIAL_PESERTA_TAHFIDZ,
-  INITIAL_DISTRIBUSI_CONFIG,
   INITIAL_PEMASUKAN,
-  INITIAL_ALOKASI,
   INITIAL_AUDIT_LOG
 } from '../data/mockData';
-import {
-  validateDistribution,
-  createPemasukanRecord as buildPemasukanRecord,
-  getConfigNominals,
-  NewPemasukanInput
-} from '../services/distributionService';
 import { getCurrentUser as getAuthenticatedUser, renameAdminPassword, saveAuthenticatedUser } from '../services/authService';
 
 interface AppContextType {
@@ -209,19 +199,14 @@ interface AppContextType {
   addBayarTagihan: (tagihanId: string, nominal: number, metode: TransaksiPembayaran['metodePembayaran'], catatan?: string, buktiTransferUrl?: string) => TransaksiPembayaran | null;
   verifikasiTransaksi: (id: string, status: 'Terverifikasi' | 'Ditolak', verifiedBy?: string) => boolean;
 
-  // Pemasukan & Distribusi
-  distribusiConfigList: DistribusiKeuanganConfig[];
+  // Pemasukan
   pemasukanList: Pemasukan[];
-  alokasiList: AlokasiPemasukan[];
-  getAktifDistribusiConfig: () => DistribusiKeuanganConfig | undefined;
-  saveDistribusiConfig: (input: { id?: string; name: string; effectiveFrom: string; effectiveUntil?: string; nominals: NominalMap; status?: DistribusiStatus }) => { ok: boolean; error?: string; config?: DistribusiKeuanganConfig };
-  activateDistribusiConfig: (id: string) => void;
-  createPemasukan: (input: NewPemasukanInput) => { ok: boolean; error?: string; pemasukan?: Pemasukan; alokasi?: AlokasiPemasukan[] };
+  createPemasukan: (input: NewPemasukanInput) => { ok: boolean; error?: string; pemasukan?: Pemasukan };
   getUnitKeyFromSantri: (santriId: string) => string | undefined;
 
   // Audit Trail
   auditLogList: AuditLog[];
-  addAuditLog: (input: { action: AuditAction; entityType: 'Pemasukan' | 'DistribusiKeuanganConfig'; entityId: string; entityLabel: string; detail: string; before?: unknown; after?: unknown }) => void;
+  addAuditLog: (input: { action: AuditAction; entityType: 'Pemasukan'; entityId: string; entityLabel: string; detail: string; before?: unknown; after?: unknown }) => void;
 
   // PPDB
   ppdbList: PendaftarPPDB[];
@@ -241,7 +226,7 @@ type SantriFinanceProfile = Pick<Santri, 'kategoriUtama'> & Partial<Pick<Santri,
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const STORAGE_PREFIX = 'sisantri_app_';
-const DEMO_FINANCE_SEED_VERSION = 1;
+const DEMO_FINANCE_SEED_VERSION = 4;
 
 function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -350,10 +335,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [tagihanList, setTagihanList] = useLocalStorage<TagihanKeuangan[]>('tagihan', INITIAL_TAGIHAN);
   const [transaksiList, setTransaksiList] = useLocalStorage<TransaksiPembayaran[]>('transaksi', INITIAL_TRANSAKSI);
 
-  // Pemasukan & Distribusi
-  const [distribusiConfigList, setDistribusiConfigList] = useLocalStorage<DistribusiKeuanganConfig[]>('distribusiConfig', INITIAL_DISTRIBUSI_CONFIG);
+  // Pemasukan
   const [pemasukanList, setPemasukanList] = useLocalStorage<Pemasukan[]>('pemasukan', INITIAL_PEMASUKAN);
-  const [alokasiList, setAlokasiList] = useLocalStorage<AlokasiPemasukan[]>('alokasiPemasukan', INITIAL_ALOKASI);
   const [auditLogList, setAuditLogList] = useLocalStorage<AuditLog[]>('auditLog', INITIAL_AUDIT_LOG);
 
   // Tahun Ajaran
@@ -417,30 +400,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Tambahkan jenis pembayaran demo baru ke browser lama tanpa menggandakan data.
   useEffect(() => {
-    if (statusDemoSeedVersion >= 1) return;
-
-    setBiayaMasterList(prev => {
-      const existingIds = new Set(prev.map(item => item.id));
-      const demoItems = INITIAL_BIAYA_MASTER.filter(item =>
-        item.id.startsWith('by-demo-status-') && !existingIds.has(item.id)
-      );
-      return demoItems.length > 0 ? [...prev, ...demoItems] : prev;
-    });
-    setStatusDemoSeedVersion(1);
+    if (statusDemoSeedVersion >= 2) return;
+    setBiayaMasterList(prev => prev.filter(item => !item.id.startsWith('by-demo-status-')));
+    setStatusDemoSeedVersion(2);
   }, [statusDemoSeedVersion]);
 
   // Tambahkan aturan tarif demo hierarkis ke browser lama tanpa menggandakan data.
   useEffect(() => {
-    if (tarifDemoSeedVersion >= 1) return;
+    if (tarifDemoSeedVersion >= 2) return;
 
     setTarifPembayaranList(prev => {
-      const existingIds = new Set(prev.map(item => item.id));
-      const demoItems = INITIAL_TARIF_PEMBAYARAN.filter(item =>
-        item.id.startsWith('tarif-demo-') && !existingIds.has(item.id)
+      const kept = prev.filter(item =>
+        !item.id.startsWith('tarif-demo-') && !item.id.startsWith('tarif-syahriyah-')
       );
-      return demoItems.length > 0 ? [...prev, ...demoItems] : prev;
+      return [...kept, ...INITIAL_TARIF_PEMBAYARAN];
     });
-    setTarifDemoSeedVersion(1);
+    setTarifDemoSeedVersion(2);
   }, [tarifDemoSeedVersion]);
 
   // Tambahkan santri demo status ke browser lama tanpa menggandakan data.
@@ -473,7 +448,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     ]);
     setTransaksiList(prev => prev.filter(transaksi => !demoSantriIds.has(transaksi.santriId)));
     setPemasukanList(prev => prev.filter(pemasukan => !demoSantriIds.has(pemasukan.santriId)));
-    setAlokasiList(prev => prev.filter(alokasi => !demoPemasukanIds.has(alokasi.pemasukanId)));
     setAuditLogList(prev => prev.filter(log => !demoPemasukanIds.has(log.entityId)));
     window.localStorage.setItem(`${STORAGE_PREFIX}demoFinanceSeedVersion`, String(DEMO_FINANCE_SEED_VERSION));
   }, [pemasukanList]);
@@ -690,7 +664,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       .filter(t => t.biayaMasterId === biaya.id && t.aktif && isTarifMatch(santri, t))
       .sort((a, b) => getTarifSpecificity(b) - getTarifSpecificity(a))[0];
     const hasHierarchicalRules = tarifPembayaranList.some(t =>
-      t.biayaMasterId === biaya.id && t.id.startsWith('tarif-demo-')
+      t.biayaMasterId === biaya.id && (t.id.startsWith('tarif-demo-') || Boolean(t.elemen))
     );
     if (!tarif && hasHierarchicalRules) return 0;
     return tarif?.nominal ?? biaya.nominal ?? 0;
@@ -730,22 +704,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     `${tagihan.tahunAjaranId || tahunAjaranId}:${tagihan.bulanKe ?? tagihan.bulanTahun ?? ''}`;
 
   const addBiayaMaster = (item: Omit<BiayaMaster, 'id'>): BiayaMaster => {
-    const newItem: BiayaMaster = { ...item, id: `biaya-${Date.now()}`, aktif: item.aktif ?? true };
+    const newItem: BiayaMaster = {
+      ...item,
+      id: `by-${Date.now()}`,
+      aktif: item.aktif !== false
+    };
     setBiayaMasterList(prev => [...prev, newItem]);
     return newItem;
   };
 
   const updateBiayaMaster = (id: string, item: Partial<BiayaMaster>) => {
-    setBiayaMasterList(prev => prev.map(b => b.id === id ? { ...b, ...item } : b));
+    setBiayaMasterList(prev => prev.map(b => b.id === id ? { ...b, ...item, id } : b));
   };
 
   const deleteBiayaMaster = (id: string) => {
-    setBiayaMasterList(prev => prev.filter(b => b.id !== id));
+    if (id !== 'by-yayasan') setBiayaMasterList(prev => prev.filter(b => b.id !== id));
   };
 
   const addTarifPembayaran = (item: Omit<TarifPembayaran, 'id'>) => {
-    const newItem: TarifPembayaran = { ...item, id: `tarif-${Date.now()}` };
-    setTarifPembayaranList(prev => [...prev, newItem]);
+    setTarifPembayaranList(prev => [...prev, { ...item, id: `tarif-${Date.now()}-${prev.length}` }]);
   };
 
   const updateTarifPembayaran = (id: string, item: Partial<TarifPembayaran>) => {
@@ -1047,12 +1024,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return true;
   };
 
-  // Pemasukan & Distribusi
-  const getAktifDistribusiConfig = (): DistribusiKeuanganConfig | undefined => {
-    const active = distribusiConfigList.find(c => c.status === 'Aktif');
-    return active ? { ...active, nominals: getConfigNominals(active) } : undefined;
-  };
-
   // Resolusi unit santri (PONPES/SMP/MTS/MA/SMK/MADIN) — untuk snapshot & filter monitoring.
   const getUnitKeyFromSantri = (santriId: string, santriOverride?: Santri): string | undefined => {
     const s = santriOverride ?? santriList.find(x => x.id === santriId);
@@ -1173,7 +1144,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Rekam audit trail (siapa-melakukan-apa-kapan-terhadap-apa).
   const addAuditLog = (input: {
     action: AuditAction;
-    entityType: 'Pemasukan' | 'DistribusiKeuanganConfig';
+    entityType: 'Pemasukan';
     entityId: string;
     entityLabel: string;
     detail: string;
@@ -1196,135 +1167,104 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAuditLogList(prev => [log, ...prev]);
   };
 
-  const nextConfigVersion = (): string => {
-    const maxVersion = distribusiConfigList.reduce((max, c) => {
-      const v = parseInt((c.version || 'V-000').replace('V-', ''), 10);
-      return Number.isNaN(v) ? max : Math.max(max, v);
-    }, 0);
-    return `V-${(maxVersion + 1).toString().padStart(3, '0')}`;
-  };
-
-  const saveDistribusiConfig = (input: {
-    id?: string;
-    name: string;
-    effectiveFrom: string;
-    effectiveUntil?: string;
-    nominals: NominalMap;
-    status?: DistribusiStatus;
-  }): { ok: boolean; error?: string; config?: DistribusiKeuanganConfig } => {
-    const validation = validateDistribution(input.nominals);
-    if (!validation.valid) {
-      return { ok: false, error: validation.errors.join(' ') };
-    }
-    const nowIso = new Date().toISOString();
-    const targetStatus: DistribusiStatus = input.status ?? 'Aktif';
-    const existing = input.id ? distribusiConfigList.find(c => c.id === input.id) : undefined;
-
-    // Hanya satu konfigurasi yang boleh Aktif — yang lain di-Arsip
-    if (targetStatus === 'Aktif') {
-      setDistribusiConfigList(prev =>
-        prev.map(c => (c.status === 'Aktif' ? { ...c, status: 'Arsip' as DistribusiStatus, updatedAt: nowIso } : c))
-      );
-    }
-
-    let config: DistribusiKeuanganConfig;
-    if (existing) {
-      config = {
-        ...existing,
-        name: input.name,
-        effectiveFrom: input.effectiveFrom,
-        effectiveUntil: input.effectiveUntil,
-        nominals: { ...input.nominals },
-        status: targetStatus,
-        updatedAt: nowIso
-      };
-      setDistribusiConfigList(prev => prev.map(c => (c.id === input.id ? config : c)));
-    } else {
-      config = {
-        id: `dcfg-${Date.now()}`,
-        name: input.name,
-        version: nextConfigVersion(),
-        effectiveFrom: input.effectiveFrom,
-        effectiveUntil: input.effectiveUntil,
-        nominals: { ...input.nominals },
-        status: targetStatus,
-        createdBy: currentUser.nama,
-        createdAt: nowIso,
-        updatedAt: nowIso
-      };
-      setDistribusiConfigList(prev => [config, ...prev]);
-    }
-
-    addAuditLog({
-      action: 'UPDATE_DISTRIBUTION_CONFIG',
-      entityType: 'DistribusiKeuanganConfig',
-      entityId: config.id,
-      entityLabel: config.name,
-      detail: `${existing ? `Perbarui konfigurasi ${config.name} (${config.version})` : `Buat konfigurasi baru ${config.name} (${config.version})`} — total akhir Syahriyah Rp ${validation.total.toLocaleString('id-ID')}, status ${targetStatus}.`,
-      before: existing ? { name: existing.name, nominals: getConfigNominals(existing), status: existing.status } : undefined,
-      after: { name: config.name, version: config.version, nominals: config.nominals, status: config.status }
-    });
-    return { ok: true, config };
-  };
-
-  const activateDistribusiConfig = (id: string) => {
-    const nowIso = new Date().toISOString();
-    const target = distribusiConfigList.find(c => c.id === id);
-    const previousAktif = distribusiConfigList.find(c => c.status === 'Aktif');
-    setDistribusiConfigList(prev =>
-      prev.map(c =>
-        c.id === id
-          ? { ...c, status: 'Aktif' as DistribusiStatus, updatedAt: nowIso }
-          : c.status === 'Aktif'
-            ? { ...c, status: 'Arsip' as DistribusiStatus, updatedAt: nowIso }
-            : c
-      )
-    );
-    if (target) {
-      addAuditLog({
-        action: 'ACTIVATE_DISTRIBUTION_CONFIG',
-        entityType: 'DistribusiKeuanganConfig',
-        entityId: id,
-        entityLabel: target.name,
-        detail: `Konfigurasi ${target.name} (${target.version}) diaktifkan${previousAktif && previousAktif.id !== id ? ` — ${previousAktif.name} (${previousAktif.version}) diarsipkan` : ''}.`,
-        before: { activeId: previousAktif?.id, activeName: previousAktif?.name },
-        after: { activeId: id, activeName: target.name }
-      });
-    }
-  };
-
   const createPemasukan = (input: NewPemasukanInput): {
     ok: boolean;
     error?: string;
     pemasukan?: Pemasukan;
-    alokasi?: AlokasiPemasukan[];
   } => {
-    const config = getAktifDistribusiConfig();
-    if (!config) {
-      return { ok: false, error: 'Tidak ada konfigurasi pembagian yang aktif. Buat konfigurasi terlebih dahulu.' };
+    const biaya = input.biayaMasterId ? biayaMasterList.find(item => item.id === input.biayaMasterId) : undefined;
+    const tahunAjaranId = getTahunAjaranAktif()?.id;
+    const isRecurring = Boolean(biaya && (
+      biaya.jenis === 'Syahriyah' || biaya.tipeFrekuensi === 'Bulanan' || biaya.tipeFrekuensi === 'Periodik'
+    ));
+    const bulanKe = input.bulanKe ?? bulanKeFromBulanTahun(input.periode);
+    const matchingTagihans = biaya && input.biayaMasterId
+      ? tagihanList.filter(tagihan => {
+        const sameYear = !tahunAjaranId || !tagihan.tahunAjaranId || tagihan.tahunAjaranId === tahunAjaranId;
+        const samePeriod = !isRecurring || tagihan.bulanKe === bulanKe || (
+          !tagihan.bulanKe && bulanKeFromBulanTahun(tagihan.bulanTahun ?? '') === bulanKe
+        );
+        return tagihan.santriId === input.santriId &&
+          tagihan.biayaMasterId === input.biayaMasterId &&
+          sameYear && samePeriod &&
+          tagihan.nominalTagihan > tagihan.nominalTerbayar;
+      })
+      : [];
+
+    if (!biaya) return { ok: false, error: 'Jenis pembayaran tidak ditemukan.' };
+    if (isRecurring && !bulanKe) {
+      return { ok: false, error: 'Periode bulan wajib dipilih untuk pembayaran bulanan.' };
     }
+    if (matchingTagihans.length === 0) {
+      return { ok: false, error: 'Tagihan untuk jenis pembayaran dan periode ini belum dibuat. Generate tagihan terlebih dahulu di tab Jenis Pembayaran.' };
+    }
+
+    let amountToApply = input.nominal;
+    const tagihanApplications: { id: string; nominal: number }[] = [];
+    for (const tagihan of matchingTagihans) {
+      const remaining = Math.max(0, tagihan.nominalTagihan - tagihan.nominalTerbayar);
+      const applied = Math.min(remaining, amountToApply);
+      if (applied > 0) {
+        tagihanApplications.push({ id: tagihan.id, nominal: applied });
+        amountToApply -= applied;
+      }
+      if (amountToApply <= 0) break;
+    }
+    if (amountToApply > 0) {
+      return { ok: false, error: 'Nominal pembayaran melebihi sisa tagihan pada jenis dan periode yang dipilih.' };
+    }
+
     if (!input.nominal || input.nominal <= 0) {
       return { ok: false, error: 'Nominal pembayaran harus lebih dari 0.' };
     }
     const unitId = getUnitKeyFromSantri(input.santriId);
-    const result = buildPemasukanRecord(input, config, pemasukanList.length + 1, unitId);
-    setPemasukanList(prev => [result.pemasukan, ...prev]);
-    setAlokasiList(prev => [...result.alokasi, ...prev]);
+    const nowIso = new Date().toISOString();
+    const id = `pmk-${Date.now()}`;
+    const tanggal = input.tanggal || nowIso.slice(0, 10);
+    const pemasukan: Pemasukan = {
+      id,
+      noPemasukan: `PMK-${tanggal.replace(/-/g, '')}-${(pemasukanList.length + 1).toString().padStart(4, '0')}`,
+      santriId: input.santriId,
+      biayaMasterId: input.biayaMasterId,
+      unitId,
+      tanggal,
+      nominal: Math.floor(input.nominal),
+      jenisPembayaran: input.jenisPembayaran,
+      metodePembayaran: input.metodePembayaran,
+      periode: input.periode,
+      bulanKe: input.bulanKe,
+      tahunAjaranId: input.tahunAjaranId,
+      catatan: input.catatan,
+      status: 'PAID',
+      paidAt: nowIso,
+      createdBy: input.createdBy,
+      createdAt: nowIso,
+      appliedTagihanIds: tagihanApplications.map(application => application.id)
+    };
+    setPemasukanList(prev => [pemasukan, ...prev]);
+    if (tagihanApplications.length > 0) {
+      setTagihanList(prev => prev.map(tagihan => {
+        const application = tagihanApplications.find(item => item.id === tagihan.id);
+        if (!application) return tagihan;
+        const nominalTerbayar = Math.min(tagihan.nominalTagihan, tagihan.nominalTerbayar + application.nominal);
+        return {
+          ...tagihan,
+          nominalTerbayar,
+          status: nominalTerbayar >= tagihan.nominalTagihan ? 'Lunas' : 'Sebagian'
+        };
+      }));
+    }
 
     const santriNama = getSantriNameById(input.santriId);
-    const jumlah = result.alokasi.reduce((a, x) => a + x.nominal, 0);
-    const verifies = result.pemasukan.status === 'DISTRIBUTED';
     addAuditLog({
-      action: verifies ? 'CREATE_PAYMENT' : 'DISTRIBUTION_FAILED',
+      action: 'CREATE_PAYMENT',
       entityType: 'Pemasukan',
-      entityId: result.pemasukan.id,
-      entityLabel: result.pemasukan.noPemasukan,
-      detail: verifies
-        ? `Pencatatan pembayaran ${result.pemasukan.jenisPembayaran} Rp ${result.pemasukan.nominal.toLocaleString('id-ID')} a.n. ${santriNama} (${unitId ?? '-'}) — terdistribusi ke 5 keuangan via ${result.pemasukan.configSnapshot.name} (${result.pemasukan.configVersion}).`
-        : `Distribusi gagal: total alokasi (${jumlah}) tidak sesuai nominal pembayaran (${result.pemasukan.nominal}). Transaksi disimpan dengan status FAILED untuk ditinjau.`,
-      after: { status: result.pemasukan.status, nominal: result.pemasukan.nominal, unit: unitId, error: result.pemasukan.distribusiError }
+      entityId: pemasukan.id,
+      entityLabel: pemasukan.noPemasukan,
+      detail: `Pencatatan pembayaran ${pemasukan.jenisPembayaran} Rp ${pemasukan.nominal.toLocaleString('id-ID')} a.n. ${santriNama} (${unitId ?? '-'}) — ${pemasukan.appliedTagihanIds?.length ?? 0} tagihan diperbarui.`,
+      after: { status: pemasukan.status, nominal: pemasukan.nominal, unit: unitId, appliedTagihanIds: pemasukan.appliedTagihanIds }
     });
-    return { ok: true, pemasukan: result.pemasukan, alokasi: result.alokasi };
+    return { ok: true, pemasukan };
   };
 
   // PPDB
@@ -1534,12 +1474,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addBayarTagihan,
         verifikasiTransaksi,
 
-        distribusiConfigList,
         pemasukanList,
-        alokasiList,
-        getAktifDistribusiConfig,
-        saveDistribusiConfig,
-        activateDistribusiConfig,
         createPemasukan,
         getUnitKeyFromSantri,
 

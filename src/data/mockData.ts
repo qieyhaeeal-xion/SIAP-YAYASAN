@@ -29,10 +29,9 @@ import {
   TarifPembayaran,
   JenjangSekolah,
   bulanKeLabel,
-  DistribusiKeuanganConfig,
   Pemasukan,
-  AlokasiPemasukan,
-  AuditLog
+  AuditLog,
+  totalElemenSyahriyah
 } from '../types/sisantri';
 
 export const INITIAL_TAHUN_AJARAN: TahunAjaran[] = [
@@ -637,9 +636,9 @@ export const INITIAL_PEGAWAI: Pegawai[] = [
   }
 ];
 
-export const INITIAL_BIAYA_MASTER: BiayaMaster[] = [
+const LEGACY_BIAYA_MASTER: BiayaMaster[] = [
   { id: 'by-1', namaBiaya: 'Uang Pangkal & Pendaftaran', jenis: 'Tahunan', tipeFrekuensi: 'Sekali / Tahunan', nominal: 2500000, nominalStandard: 2500000, kategori: 'YAYASAN', kategoriPembayaran: 'Insidental', wajib: true, keterangan: 'Dibayar sekali saat masuk' },
-  { id: 'by-yayasan', namaBiaya: 'Syahriyah Yayasan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 100000, nominalStandard: 100000, kategori: 'YAYASAN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'Iuran keuangan yayasan bulanan' },
+  { id: 'by-yayasan', namaBiaya: 'Syahriyah', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 100000, nominalStandard: 100000, kategori: 'YAYASAN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'Paket Syahriyah lima elemen per desil' },
   { id: 'by-sekolah', namaBiaya: 'SPP Sekolah', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 150000, nominalStandard: 150000, kategori: 'SEKOLAH', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP pendidikan formal (MTs/MA/SMK)' },
   { id: 'by-pesantren', namaBiaya: 'Syahriyah Pesantren', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 200000, nominalStandard: 200000, kategori: 'PESANTREN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'SPP kepesantrenan & asrama' },
   { id: 'by-makan', namaBiaya: 'Uang Makan', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 250000, nominalStandard: 250000, kategori: 'MAKAN', kategoriPembayaran: 'Rutin', wajib: true, keterangan: 'Biaya konsumsi santri bulanan' },
@@ -661,6 +660,8 @@ export const INITIAL_BIAYA_MASTER: BiayaMaster[] = [
   { id: 'by-demo-status-a3-pengabdian', kodeBiaya: 'DEMO-A3-PENGABDIAN', namaBiaya: '[DEMO] Iuran Asuh A3 Pengabdian', jenis: 'Syahriyah', tipeFrekuensi: 'Bulanan', nominal: 50000, nominalStandard: 50000, kategori: 'YAYASAN', kategoriPembayaran: 'Rutin', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A3', targetProgram: 'Pengabdian', wajib: true, aktif: true, keterangan: 'Demo: Santri > Asuh > A3 > Pengabdian' },
   { id: 'by-demo-status-a3-lulus', kodeBiaya: 'DEMO-A3-LULUS', namaBiaya: '[DEMO] Administrasi Asuh A3 Lulus', jenis: 'Non-Syahriyah', tipeFrekuensi: 'Sekali Bayar', nominal: 25000, nominalStandard: 25000, kategori: 'YAYASAN', kategoriPembayaran: 'Insidental', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A3', targetProgram: 'Lulus', wajib: true, aktif: true, keterangan: 'Demo: Santri > Asuh > A3 > Lulus' },
 ];
+
+export const INITIAL_BIAYA_MASTER: BiayaMaster[] = LEGACY_BIAYA_MASTER.filter(item => item.id === 'by-yayasan');
 
 const KATEGORI_BIAYA_ID: Record<BiayaKategori, string> = {
   YAYASAN: 'by-yayasan',
@@ -708,51 +709,46 @@ const DEMO_TARIF_PROFILES: DemoTarifProfile[] = [
   { key: 'a3-lulus', targetKategoriUtama: 'Santri', targetTipeAsuh: 'Asuh', targetGolonganAsuh: 'A3', targetProgram: 'Lulus', rates: rates(0, 25000, 50000, 50000, 0, 0) }
 ];
 
-const createDemoTarifPembayaran = (): TarifPembayaran[] => {
-  const rows: TarifPembayaran[] = [];
-  const levels: JenjangSekolah[] = ['SMP', 'SLTA'];
-  const categories: BiayaKategori[] = ['YAYASAN', 'SEKOLAH', 'PESANTREN', 'MAKAN', 'MADIN'];
-
-  for (const profile of DEMO_TARIF_PROFILES) {
-    for (const level of levels) {
-      for (const category of categories) {
-        rows.push({
-          id: `tarif-demo-${profile.key}-${level.toLowerCase()}-${category.toLowerCase()}`,
-          biayaMasterId: KATEGORI_BIAYA_ID[category],
-          targetScope: 'Jenjang Sekolah',
-          targetValue: level,
-          targetKategoriUtama: profile.targetKategoriUtama,
-          targetTipeAsuh: profile.targetTipeAsuh,
-          targetGolonganAsuh: profile.targetGolonganAsuh,
-          targetProgram: profile.targetProgram,
-          targetJenjangSekolah: level,
-          nominal: profile.rates[level][category],
-          wajib: profile.rates[level][category] > 0,
-          aktif: true,
-          effectiveFrom: '2026-07-01'
-        });
-      }
-    }
-  }
-
-  return rows;
+// Demo Syahriyah: satu paket per desil dengan lima elemen biaya.
+// Elemen bernilai 0 sengaja tidak ditagihkan pada desil tersebut.
+const DEMO_SYAHRIAH_ELEMEN: Record<string, Partial<Record<BiayaKategori, number>>> = {
+  desa: { SEKOLAH: 75000 },
+  'bukan-asuh-pelajar': { YAYASAN: 100000, SEKOLAH: 150000, PESANTREN: 200000, MAKAN: 250000, MADIN: 75000 },
+  'bukan-asuh-pengabdian': { SEKOLAH: 50000, PESANTREN: 100000, MAKAN: 125000 },
+  'bukan-asuh-lulus': { SEKOLAH: 25000, PESANTREN: 50000 },
+  'a1-pelajar': { PESANTREN: 100000, MAKAN: 125000, MADIN: 25000 },
+  'a1-pengabdian': { PESANTREN: 50000, MAKAN: 75000 },
+  'a1-lulus': { PESANTREN: 25000 },
+  'a2-pelajar': { YAYASAN: 25000, PESANTREN: 125000, MAKAN: 150000, MADIN: 50000 },
+  'a2-pengabdian': { PESANTREN: 75000, MAKAN: 100000, MADIN: 25000 },
+  'a2-lulus': { PESANTREN: 35000 },
+  'a3-pelajar': { YAYASAN: 50000, SEKOLAH: 100000, PESANTREN: 150000, MAKAN: 200000, MADIN: 60000 },
+  'a3-pengabdian': { YAYASAN: 25000, PESANTREN: 100000, MAKAN: 125000, MADIN: 25000 },
+  'a3-lulus': { PESANTREN: 50000 }
 };
 
-export const INITIAL_TARIF_PEMBAYARAN: TarifPembayaran[] = [
-  {
-    id: 'tarif-asuh-sekolah',
-    biayaMasterId: 'by-sekolah',
-    targetScope: 'Golongan Asuh',
-    targetValue: 'A1',
-    nominal: 75000,
-    wajib: true,
+const createDemoTarifPembayaran = (): TarifPembayaran[] => DEMO_TARIF_PROFILES.map(profile => {
+  const elemen = DEMO_SYAHRIAH_ELEMEN[profile.key] || {};
+  return {
+    id: `tarif-syahriyah-${profile.key}`,
+    biayaMasterId: 'by-yayasan',
+    targetScope: 'Kategori Utama',
+    targetValue: profile.targetKategoriUtama,
+    targetKategoriUtama: profile.targetKategoriUtama,
+    targetTipeAsuh: profile.targetTipeAsuh,
+    targetGolonganAsuh: profile.targetGolonganAsuh,
+    targetProgram: profile.targetProgram,
+    elemen,
+    nominal: totalElemenSyahriyah(elemen),
+    wajib: totalElemenSyahriyah(elemen) > 0,
     aktif: true,
-    effectiveFrom: '2026-01-01'
-  },
-  ...createDemoTarifPembayaran()
-];
+    effectiveFrom: '2026-07-01'
+  };
+});
 
-// ── Rekap Syahriyah: 5 kategori (YAYASAN/SEKOLAH/PESANTREN/MAKAN/MADIN) per santri per bulan ──
+export const INITIAL_TARIF_PEMBAYARAN: TarifPembayaran[] = createDemoTarifPembayaran();
+
+// ── Rekap Syahriyah Yayasan per santri per bulan ──
 const NOMINAL_BY_KATEGORI: Record<BiayaKategori, number> = {
   YAYASAN: 100000,
   SEKOLAH: 150000,
@@ -788,15 +784,25 @@ const getDemoNominal = (santri: Santri, kategori: BiayaKategori, santriIndex: nu
   return Math.round((NOMINAL_BY_KATEGORI[kategori] * variation) / 5000) * 5000;
 };
 
+const getDemoSyahriyahNominal = (santri: Santri): number => {
+  const profile = DEMO_TARIF_PROFILES.find(item =>
+    item.targetKategoriUtama === santri.kategoriUtama &&
+    (!item.targetTipeAsuh || item.targetTipeAsuh === santri.tipeAsuh) &&
+    (!item.targetGolonganAsuh || item.targetGolonganAsuh === santri.golonganAsuh) &&
+    (!item.targetProgram || item.targetProgram === santri.program)
+  );
+  return profile ? totalElemenSyahriyah(DEMO_SYAHRIAH_ELEMEN[profile.key]) : 100000;
+};
+
 function generateMockTagihan(): TagihanKeuangan[] {
   const rows: TagihanKeuangan[] = [];
   const santris = [...INITIAL_SANTRI, ...INITIAL_DEMO_STATUS_SANTRI].filter(santri => santri.status === 'Aktif');
   let seq = 1;
 
-  for (const [santriIndex, santri] of santris.entries()) {
+  for (const santri of santris) {
     for (let bulanKe = 1; bulanKe <= 12; bulanKe++) {
-      for (const k of KATEGORI_ORDER) {
-        const nominal = getDemoNominal(santri, k, santriIndex);
+      for (const k of ['YAYASAN' as BiayaKategori]) {
+        const nominal = getDemoSyahriyahNominal(santri);
         if (nominal <= 0) continue;
 
         rows.push({
@@ -822,86 +828,15 @@ function generateMockTagihan(): TagihanKeuangan[] {
   return rows;
 }
 
-export const INITIAL_TAGIHAN: TagihanKeuangan[] = generateMockTagihan();
+export const INITIAL_TAGIHAN: TagihanKeuangan[] = generateMockTagihan().filter(tagihan => tagihan.biayaMasterId === 'by-yayasan');
 
 export const INITIAL_TRANSAKSI: TransaksiPembayaran[] = [];
 
-// ── KONFIGURASI PEMBAGIAN PEMASUKAN (histori berbasis periode) ──
-export const INITIAL_DISTRIBUSI_CONFIG: DistribusiKeuanganConfig[] = [
-  {
-    id: 'dcfg-1',
-    name: 'Periode A — Syahriyah 2025/2026 Awal',
-    version: 'V-001',
-    effectiveFrom: '2025-07-01',
-    effectiveUntil: '2025-12-31',
-    nominals: { YAYASAN: 100000, MADIN: 75000, SEKOLAH: 125000, PESANTREN: 200000, MAKAN: 250000 },
-    status: 'Arsip',
-    createdBy: 'K.H. Mukhtar Syafaat',
-    createdAt: '2025-06-15T08:00:00.000Z',
-    updatedAt: '2025-06-15T08:00:00.000Z'
-  },
-  {
-    id: 'dcfg-2',
-    name: 'Periode B — Syahriyah 2026',
-    version: 'V-002',
-    effectiveFrom: '2026-01-01',
-    nominals: { YAYASAN: 100000, MADIN: 75000, SEKOLAH: 150000, PESANTREN: 200000, MAKAN: 250000 },
-    status: 'Aktif',
-    createdBy: 'K.H. Mukhtar Syafaat',
-    createdAt: '2025-12-20T09:30:00.000Z',
-    updatedAt: '2025-12-20T09:30:00.000Z'
-  }
-];
-
-// ── PEMASUKAN & ALOKASI (kosong agar semua demo santri belum membayar) ──
-function buildMockPemasukan(): { pemasukan: Pemasukan[]; alokasi: AlokasiPemasukan[] } {
-  // Data awal sengaja kosong agar seluruh demo santri dapat diuji sebagai belum membayar.
-  return { pemasukan: [], alokasi: [] };
-}
-
-const { pemasukan: _pemasukanMock, alokasi: _alokasiMock } = buildMockPemasukan();
-export const INITIAL_PEMASUKAN: Pemasukan[] = _pemasukanMock;
-export const INITIAL_ALOKASI: AlokasiPemasukan[] = _alokasiMock;
+// ── PEMASUKAN (kosong agar semua demo santri belum membayar) ──
+export const INITIAL_PEMASUKAN: Pemasukan[] = [];
 
 // ── AUDIT TRAIL AWAL ────────────────────────────────────
-export const INITIAL_AUDIT_LOG: AuditLog[] = [
-  {
-    id: 'aud-1',
-    action: 'CREATE_PAYMENT',
-    entityType: 'Pemasukan',
-    entityId: _pemasukanMock[0]?.id ?? 'pmk-0',
-    entityLabel: _pemasukanMock[0]?.noPemasukan ?? 'PMK-0000',
-    actorId: 'usr-1',
-    actorName: 'K.H. Mukhtar Syafaat',
-    detail: 'Pencatatan pembayaran Syahriyah Rp 775.000 a.n. Ahmad Fauzi (MA) - distribusi otomatis ke 5 keuangan.',
-    after: { status: 'DISTRIBUTED', nominal: 775000, unit: 'MA' },
-    createdAt: '2026-08-05T08:00:00.000Z'
-  },
-  {
-    id: 'aud-2',
-    action: 'CREATE_PAYMENT',
-    entityType: 'Pemasukan',
-    entityId: _pemasukanMock[1]?.id ?? 'pmk-0',
-    entityLabel: _pemasukanMock[1]?.noPemasukan ?? 'PMK-0000',
-    actorId: 'usr-1',
-    actorName: 'K.H. Mukhtar Syafaat',
-    detail: 'Pencatatan pembayaran Syahriyah Rp 775.000 a.n. Ahmad Fauzi (SMK) - distribusi otomatis ke 5 keuangan.',
-    after: { status: 'DISTRIBUTED', nominal: 775000, unit: 'SMK' },
-    createdAt: '2026-08-07T09:15:00.000Z'
-  },
-  {
-    id: 'aud-3',
-    action: 'DISTRIBUTION_FAILED',
-    entityType: 'Pemasukan',
-    entityId: _pemasukanMock[3]?.id ?? 'pmk-0',
-    entityLabel: _pemasukanMock[3]?.noPemasukan ?? 'PMK-0099',
-    actorId: 'usr-1',
-    actorName: 'K.H. Mukhtar Syafaat',
-    detail: _pemasukanMock[3]?.distribusiError ?? 'Distribusi gagal: total alokasi tidak sesuai nominal pembayaran. Transaksi disimpan dengan status FAILED untuk ditinjau.',
-    after: { status: 'FAILED', nominal: 775000, error: _pemasukanMock[3]?.distribusiError },
-    createdAt: '2026-08-10T10:00:00.000Z'
-  }
-];
+export const INITIAL_AUDIT_LOG: AuditLog[] = [];
 
 export const INITIAL_PENDAFTAR_PPDB: PendaftarPPDB[] = [
   {
