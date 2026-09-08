@@ -36,6 +36,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -56,8 +65,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-lg sm:max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" role="presentation">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-lg sm:max-w-2xl overflow-hidden flex flex-col max-h-[90vh]" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
         
         {/* Modal Header */}
         <div className="bg-linear-to-r from-[#1A5276] via-[#2E86C1] to-[#1A5276] text-white p-4 sm:p-6 flex items-center justify-between shrink-0">
@@ -66,13 +75,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <BookOpen className="w-6 h-6 sm:w-7 sm:h-7" />
             </div>
             <div>
-              <h3 className="font-black text-xl sm:text-2xl leading-tight">Portal Login Super Admin</h3>
+               <h3 id="login-modal-title" className="font-black text-xl sm:text-2xl leading-tight">Portal Login Super Admin</h3>
               <p className="text-xs sm:text-sm text-sky-200">Pondok Pesantren Mukhtar Syafaat</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0"
+           <button
+             onClick={onClose}
+             type="button"
+             aria-label="Tutup modal login"
+             className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition shrink-0"
           >
             <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
@@ -83,12 +94,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({
           
           {/* Username Input */}
           <div>
-            <label className="block text-sm sm:text-base font-bold text-gray-700 mb-2">
+             <label htmlFor="login-username" className="block text-sm sm:text-base font-bold text-gray-700 mb-2">
               Username / ID Akun
             </label>
             <div className="relative">
               <input
-                type="text"
+                 id="login-username"
+                 name="username"
+                 type="text"
+                 autoComplete="username"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 required
@@ -101,10 +115,13 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
           {/* Password Input */}
           <div>
-            <label className="block text-sm sm:text-base font-bold text-gray-700 mb-2">Kata Sandi</label>
+             <label htmlFor="login-password" className="block text-sm sm:text-base font-bold text-gray-700 mb-2">Kata Sandi</label>
             <div className="relative">
               <input
-                type="password"
+                 id="login-password"
+                 name="password"
+                 type="password"
+                 autoComplete="current-password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required

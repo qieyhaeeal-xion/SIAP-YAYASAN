@@ -262,6 +262,17 @@ export const JenisPembayaran: React.FC = () => {
   };
 
   const paymentList = useMemo(() => biayaMasterList.filter(item => item.aktif !== false), [biayaMasterList]);
+  const periodBasedPaymentList = useMemo(
+    () => paymentList.filter(item => item.jenis === 'Syahriyah' || item.tipeFrekuensi === 'Bulanan' || item.tipeFrekuensi === 'Periodik'),
+    [paymentList]
+  );
+  useEffect(() => {
+    if (!periodBasedPaymentList.some(item => item.id === generationPaymentId)) {
+      setGenerationPaymentId('');
+      setGenerationPreview(null);
+      setGenerationFeedback(null);
+    }
+  }, [generationPaymentId, periodBasedPaymentList]);
 
   return (
     <div className="space-y-5">
@@ -311,30 +322,30 @@ export const JenisPembayaran: React.FC = () => {
             <Field label="Keterangan"><input value={description} onChange={event => setDescription(event.target.value)} className="input" placeholder="Keterangan" /></Field>
             <label className="flex items-center gap-2 text-sm font-bold text-gray-700 pt-5"><input type="checkbox" checked={required} onChange={event => setRequired(event.target.checked)} /> Wajib ditagihkan</label>
           </div>
-          <div className="space-y-3 p-3 bg-emerald-50/50 rounded-xl border border-emerald-100">
-            <label className="block text-xs font-bold text-gray-700">Sasaran desil (opsional)</label>
+           <div className="space-y-3 p-3 bg-emerald-50/50 rounded-xl border border-emerald-100">
+             <label className="block text-xs font-bold text-gray-700">Sasaran desil (opsional)</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               <select value={kategoriUtama} onChange={event => { setKategoriUtama(event.target.value as 'Santri' | 'Desa' | ''); setTipeAsuh(''); setGolonganAsuh(''); setProgram(''); }} className="input text-xs"><option value="">Semua Kategori</option><option value="Santri">Santri</option><option value="Desa">Desa</option></select>
               {kategoriUtama === 'Santri' && <select value={tipeAsuh} onChange={event => { setTipeAsuh(event.target.value as 'Asuh' | 'Bukan Asuh' | ''); setGolonganAsuh(''); setProgram(''); }} className="input text-xs"><option value="">Semua Tipe Asuh</option><option value="Asuh">Asuh</option><option value="Bukan Asuh">Bukan Asuh</option></select>}
               {kategoriUtama === 'Santri' && tipeAsuh === 'Asuh' && <select value={golonganAsuh} onChange={event => { setGolonganAsuh(event.target.value as 'A1' | 'A2' | 'A3' | ''); setProgram(''); }} className="input text-xs"><option value="">Semua Golongan</option><option value="A1">A1</option><option value="A2">A2</option><option value="A3">A3</option></select>}
               {kategoriUtama === 'Santri' && (tipeAsuh === 'Bukan Asuh' || (tipeAsuh === 'Asuh' && golonganAsuh)) && <select value={program} onChange={event => setProgram(event.target.value as 'Pengabdian' | 'Lulus' | 'Pelajar' | '')} className="input text-xs"><option value="">Semua Program</option><option value="Pengabdian">Pengabdian</option><option value="Lulus">Lulus</option><option value="Pelajar">Pelajar</option></select>}
-            </div>
-            <span className="text-[11px] text-emerald-800 font-bold">Sasaran: {getStatusSummary()}</span>
-          </div>
-          <div className="flex justify-end gap-2"><button type="button" onClick={resetNonForm} className="button-secondary">Batal</button><button type="submit" className="button-primary inline-flex items-center gap-2"><Plus className="w-4 h-4" /> {editingId ? 'Simpan Perubahan' : 'Tambah Pembayaran'}</button></div>
-        </form>
+             </div>
+             <span className="text-[11px] text-emerald-800 font-bold">Sasaran: {getStatusSummary()}</span>
+           </div>
+           <p className="text-[11px] font-semibold text-slate-500">{frequency === 'Periodik' ? 'Periodik dibuat melalui bagian Terapkan Tanggungan Berkala.' : required ? `${frequency === 'Tahunan' ? 'Satu tanggungan per tahun ajaran' : 'Satu tanggungan'} akan dibuat otomatis untuk santri yang sesuai.` : 'Jenis pembayaran tidak dibuatkan tanggungan otomatis.'}</p>
+           <div className="flex justify-end gap-2"><button type="button" onClick={resetNonForm} className="button-secondary">Batal</button><button type="submit" className="button-primary inline-flex items-center gap-2"><Plus className="w-4 h-4" /> {editingId ? 'Simpan Perubahan' : 'Tambah Pembayaran'}</button></div>
+         </form>
       )}
 
       <section className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5">
         <div className="mb-5 rounded-2xl border border-sky-200 bg-sky-50/60 p-5">
-          <div className="flex items-start justify-between gap-3"><div><h3 className="flex items-center gap-2 font-extrabold text-[#1A5276]"><CalendarDays className="h-5 w-5 text-[#1ABC9C]" /> Terapkan Tanggungan Santri</h3><p className="mt-1 text-xs text-slate-600">Buat tagihan untuk santri aktif sesuai desil dan jenis pembayaran.</p></div><span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-sky-700">{activeTahunAjaran?.kodeTahunAjaran || 'Tanpa tahun aktif'}</span></div>
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-            <Field label="Jenis Pembayaran"><select value={generationPaymentId} onChange={event => { setGenerationPaymentId(event.target.value); setGenerationPreview(null); setGenerationFeedback(null); }} className="input"><option value="">Pilih jenis pembayaran</option>{paymentList.map(item => <option key={item.id} value={item.id}>{item.namaBiaya} {item.jenis === 'Syahriyah' ? '(sesuai desil)' : `- ${formatRp(item.nominal || 0)}`}</option>)}</select></Field>
+           <div className="flex items-start justify-between gap-3"><div><h3 className="flex items-center gap-2 font-extrabold text-[#1A5276]"><CalendarDays className="h-5 w-5 text-[#1ABC9C]" /> Terapkan Tanggungan Berkala</h3><p className="mt-1 text-xs text-slate-600">Buat tagihan bulanan atau periodik untuk santri aktif sesuai desil.</p></div><span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold text-sky-700">{activeTahunAjaran?.kodeTahunAjaran || 'Tanpa tahun aktif'}</span></div>
+           <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+             <Field label="Jenis Pembayaran"><select value={generationPaymentId} onChange={event => { setGenerationPaymentId(event.target.value); setGenerationPreview(null); setGenerationFeedback(null); }} className="input"><option value="">Pilih jenis pembayaran</option>{periodBasedPaymentList.map(item => <option key={item.id} value={item.id}>{item.namaBiaya} {item.jenis === 'Syahriyah' ? '(sesuai desil)' : `- ${formatRp(item.nominal || 0)}`}</option>)}</select></Field>
             <Field label="Periode Mulai"><select value={generationStart} onChange={event => { setGenerationStart(Number(event.target.value)); setGenerationPreview(null); }} className="input">{BULAN_KE_LABEL.map((label, index) => <option key={label} value={index + 1}>{label}</option>)}</select></Field>
             <Field label="Periode Selesai"><select value={generationEnd} onChange={event => { setGenerationEnd(Number(event.target.value)); setGenerationPreview(null); }} className="input">{BULAN_KE_LABEL.map((label, index) => <option key={label} value={index + 1}>{label}</option>)}</select></Field>
           </div>
-          {selectedGenerationPayment && selectedGenerationPayment.jenis !== 'Syahriyah' && <p className="mt-3 text-xs font-semibold text-amber-700">Jenis ini tidak berulang bulanan. Sistem membuat satu tanggungan pada periode mulai.</p>}
-          <div className="mt-4 flex flex-wrap items-center gap-2"><button type="button" onClick={handlePreviewGeneration} className="button-secondary inline-flex items-center gap-2"><Eye className="h-4 w-4" /> Lihat Preview</button>{generationPreview && <button type="button" onClick={handleGenerate} className="button-primary inline-flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Konfirmasi & Buat Tanggungan</button>}</div>
+           <div className="mt-4 flex flex-wrap items-center gap-2"><button type="button" onClick={handlePreviewGeneration} className="button-secondary inline-flex items-center gap-2"><Eye className="h-4 w-4" /> Lihat Preview</button>{generationPreview && <button type="button" onClick={handleGenerate} className="button-primary inline-flex items-center gap-2"><CheckCircle2 className="h-4 w-4" /> Konfirmasi & Buat Tanggungan</button>}</div>
           {generationFeedback && <div className={`mt-3 rounded-xl border p-3 text-sm font-bold ${generationFeedback.ok ? 'border-emerald-200 bg-emerald-50 text-emerald-800' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>{generationFeedback.message}</div>}
           {generationPreview && <div className="mt-4 grid grid-cols-2 gap-2 text-xs md:grid-cols-5"><div className="rounded-xl bg-white p-3"><span className="text-gray-500">Santri sesuai</span><strong className="mt-1 block text-lg text-[#1A5276]">{generationPreview.eligibleSantriCount}</strong></div><div className="rounded-xl bg-white p-3"><span className="text-gray-500">Periode</span><strong className="mt-1 block text-lg text-[#1A5276]">{generationPreview.periodeCount}</strong></div><div className="rounded-xl bg-white p-3"><span className="text-gray-500">Akan dibuat</span><strong className="mt-1 block text-lg text-emerald-700">{generationPreview.calonTagihanCount}</strong></div><div className="rounded-xl bg-white p-3"><span className="text-gray-500">Sudah ada</span><strong className="mt-1 block text-lg text-amber-700">{generationPreview.existingTagihanCount}</strong></div><div className="col-span-2 rounded-xl bg-[#1A5276] p-3 text-white md:col-span-1"><span className="text-sky-100">Total nominal baru</span><strong className="mt-1 block text-sm">{formatRp(generationPreview.totalNominal)}</strong></div></div>}
         </div>

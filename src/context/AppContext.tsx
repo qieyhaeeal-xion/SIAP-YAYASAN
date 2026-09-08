@@ -38,7 +38,8 @@ import {
   AuditAction,
   BULAN_KE_LABEL,
   bulanKeFromBulanTahun,
-  JenjangSekolah
+  JenjangSekolah,
+  POS_NON_SYAHRIAH
 } from '../types/sisantri';
 
 import {
@@ -210,7 +211,7 @@ interface AppContextType {
 
   // PPDB
   ppdbList: PendaftarPPDB[];
-  addPPDB: (item: Omit<PendaftarPPDB, 'id' | 'noPendaftaran' | 'statusSeleksi' | 'tanggalDaftar'>) => void;
+  addPPDB: (item: Omit<PendaftarPPDB, 'id' | 'noPendaftaran' | 'statusSeleksi' | 'tanggalDaftar'>) => PendaftarPPDB;
   updatePPDBStatus: (id: string, status: PendaftarPPDB['statusSeleksi']) => void;
   mutasiPPDBKeSantri: (ppdbId: string) => Santri | null;
 
@@ -699,6 +700,83 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const months = isRecurring ? Array.from({ length: bulanSelesai - bulanMulai + 1 }, (_, index) => bulanMulai + index) : [bulanMulai];
     return months.map(month => getPeriodInfo(tahunAjaran, month));
   };
+
+  const isAutomaticNonMonthlyPayment = (biaya: BiayaMaster): boolean =>
+    biaya.kategori === POS_NON_SYAHRIAH &&
+    biaya.jenis !== 'Syahriyah' &&
+    biaya.tipeFrekuensi !== 'Bulanan' &&
+    biaya.tipeFrekuensi !== 'Periodik' &&
+    biaya.wajib !== false;
+
+  const getAutomaticNonMonthlyPeriod = (biaya: BiayaMaster, tahunAjaran: TahunAjaran) => {
+    const isAnnual = biaya.tipeFrekuensi === 'Tahunan';
+    const label = isAnnual ? `Tahun Ajaran ${tahunAjaran.kodeTahunAjaran}` : 'Sekali Bayar';
+    return {
+      bulanTahun: label,
+      bulanPeriode: label,
+      tahunPeriode: getAcademicYearStart(tahunAjaran),
+      tanggalJatuhTempo: tahunAjaran.tanggalMulai
+    };
+  };
+
+  const ensureAutomaticNonMonthlyTagihans = () => {
+    const tahunAjaran = getTahunAjaranAktif();
+    if (!tahunAjaran) return;
+
+    const automaticPayments = biayaMasterList.filter(isAutomaticNonMonthlyPayment);
+    if (automaticPayments.length === 0) return;
+
+    setTagihanList(previous => {
+      const createdAt = Date.now();
+      let sequence = previous.length + 1;
+      const newTagihans: TagihanKeuangan[] = [];
+
+      for (const biaya of automaticPayments) {
+        const period = getAutomaticNonMonthlyPeriod(biaya, tahunAjaran);
+        const eligibleSantris = santriList.filter(santri =>
+          santri.status === 'Aktif' && isBiayaTargetMatch(santri, biaya)
+        );
+
+        for (const santri of eligibleSantris) {
+          const nominal = getApplicableNominal(santri, biaya);
+          if (nominal <= 0) continue;
+
+          const alreadyExists = previous.some(tagihan =>
+            tagihan.santriId === santri.id &&
+            tagihan.biayaMasterId === biaya.id &&
+            (biaya.tipeFrekuensi !== 'Tahunan' ||
+              (!tagihan.tahunAjaranId || tagihan.tahunAjaranId === tahunAjaran.id))
+          ) || newTagihans.some(tagihan =>
+            tagihan.santriId === santri.id && tagihan.biayaMasterId === biaya.id
+          );
+          if (alreadyExists) continue;
+
+          newTagihans.push({
+            id: `tgh-${createdAt}-${newTagihans.length}`,
+            santriId: santri.id,
+            biayaMasterId: biaya.id,
+            noTagihan: `TG-${new Date(createdAt).toISOString().slice(0, 10).replace(/-/g, '')}-${(sequence++).toString().padStart(4, '0')}`,
+            bulanTahun: period.bulanTahun,
+            bulanPeriode: period.bulanPeriode,
+            tahunPeriode: period.tahunPeriode,
+            unitId: getUnitKeyFromSantri(santri.id),
+            nominalTagihan: nominal,
+            nominalTerbayar: 0,
+            status: 'Belum Lunas',
+            tanggalJatuhTempo: period.tanggalJatuhTempo,
+            tahunAjaranId: tahunAjaran.id
+          });
+        }
+      }
+
+      return newTagihans.length > 0 ? [...newTagihans, ...previous] : previous;
+    });
+  };
+
+  // Keep mandatory one-time and annual payments usable even when they were created before auto-generation was added.
+  useEffect(() => {
+    ensureAutomaticNonMonthlyTagihans();
+  }, [biayaMasterList, santriList, tahunAjaranList]);
 
   const getTagihanPeriodKey = (tagihan: TagihanKeuangan, tahunAjaranId: string): string =>
     `${tagihan.tahunAjaranId || tahunAjaranId}:${tagihan.bulanKe ?? tagihan.bulanTahun ?? ''}`;
@@ -1280,6 +1358,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       tanggalDaftar: new Date().toISOString().split('T')[0]
     };
     setPpdbList(prev => [newItem, ...prev]);
+    return newItem;
   };
 
   const updatePPDBStatus = (id: string, status: PendaftarPPDB['statusSeleksi']) => {

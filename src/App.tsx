@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/layout/Header';
@@ -25,6 +25,7 @@ import { SettingsModule } from './components/settings/SettingsModule';
 
 import { ShieldAlert, Lock, ArrowLeft } from 'lucide-react';
 import { hasPermission, getFirstAllowedTab, ROLE_DETAILS } from './utils/rbac';
+import { getCurrentUser } from './services/authService';
 
 const FINANCE_ROUTE_BY_SUBTAB: Record<KeuanganSubTab, string> = {
   jenis: 'keuangan-jenis',
@@ -43,6 +44,34 @@ const LoginPage: React.FC = () => {
       onSuccessLogin={() => navigate('/app')}
     />
   );
+};
+
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isChecking, setIsChecking] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    getCurrentUser().then(user => {
+      if (!mounted) return;
+      setIsAuthenticated(Boolean(user));
+      setIsChecking(false);
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  if (isChecking) {
+    return (
+      <div className="min-h-screen bg-[#F4F6F7] flex items-center justify-center text-sm font-bold text-[#1A5276]" role="status">
+        Memeriksa sesi login...
+      </div>
+    );
+  }
+
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
 const AppLayout: React.FC<{ initialTab?: string }> = ({ initialTab = 'dashboard' }) => {
@@ -175,8 +204,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/app" element={<AppLayout />} />
-          <Route path="/app/:tab" element={<AppLayout />} />
+          <Route path="/app" element={<ProtectedRoute><AppLayout /></ProtectedRoute>} />
+          <Route path="/app/:tab" element={<ProtectedRoute><AppLayout /></ProtectedRoute>} />
           <Route path="/app/keuangan" element={<Navigate to="/app/keuangan-pemasukan" replace />} />
           <Route path="/app/payment-management" element={<Navigate to="/app/keuangan-pemasukan" replace />} />
           <Route path="/manage/payment" element={<Navigate to="/app/keuangan-pemasukan" replace />} />
